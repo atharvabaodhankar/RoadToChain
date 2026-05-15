@@ -1,101 +1,564 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowRight, Star, AlertTriangle } from "lucide-react";
+import { tracks } from "@/lib/curriculum";
+
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5, ease: "easeOut" as const },
+};
+
+// ─── Problem-First Learning Steps ──────────────────────────────────────────
+const learningSteps = [
+  {
+    num: "01",
+    title: "Problem First",
+    desc: "Every lesson starts with a real-world problem. Not a concept. Not a definition. A problem you might actually face.",
+  },
+  {
+    num: "02",
+    title: "Layman Explanation",
+    desc: "The analogy that makes it click — before you touch any code. If you can explain it in plain English, you understand it.",
+  },
+  {
+    num: "03",
+    title: "Technical Deep Dive",
+    desc: "The actual engineering: EVM internals, contract storage, circuit constraints, bundler validation. No handwaving.",
+  },
+  {
+    num: "04",
+    title: "Production Reality",
+    desc: "How real production apps handle this. What breaks at scale. What costs too much. What the tutorials skip.",
+  },
+  {
+    num: "05",
+    title: "Mistakes I Made",
+    desc: "First-person mistakes from shipping ZKredential, ChainCure, erc4337-kit. Not hidden — woven into every lesson.",
+  },
+  {
+    num: "06",
+    title: "Hero Project Integration",
+    desc: "Every concept feeds the track capstone project. You never wonder why you're learning something.",
+  },
+];
+
+// ─── Top 6 Mistakes ─────────────────────────────────────────────────────────
+const topMistakes = [
+  {
+    title: "I thought MetaMask was the blockchain",
+    desc: "Asked 'is MetaMask down?' when a transaction failed. MetaMask is just a key manager. The blockchain runs independently on thousands of nodes.",
+    track: "Track 0 → Module 4",
+  },
+  {
+    title: "Stored full proposal text on-chain",
+    desc: "Every contract call cost massive gas. Some hit the block limit randomly. Blockchain is not a general-purpose database. Learned IPFS the hard way.",
+    track: "Track 1 → Module 1",
+  },
+  {
+    title: "Followed a YouTube ethers.js v5 tutorial",
+    desc: "Spent 4 hours debugging. getDefaultProvider gone. Contract constructor changed. Signer API changed. Always check the package version first.",
+    track: "Track 2 → Module 1",
+  },
+  {
+    title: "Used SHA-256 inside a Circom circuit",
+    desc: "Constraint count exploded to 30,000+. Proof generation: 3 minutes. Switched to Poseidon. Constraints: 904. Proof time: 0.4 seconds. Nobody tells you this.",
+    track: "Track 5 → Module 2",
+  },
+  {
+    title: "Forgot nonces in signature verification",
+    desc: "Built a contract accepting signed messages for auth. Same signature could be replayed forever. Nonces are mandatory in any off-chain signing system.",
+    track: "Track 6 → Module 1",
+  },
+  {
+    title: "Lost a hackathon to an ERC-4337 encoding bug",
+    desc: "UserOperation gas fields wrong. paymasterAndData encoding incorrect. 3 days debugging. Built erc4337-kit afterwards so nobody else wastes this time.",
+    track: "Track 4 → Module 1",
+  },
+];
+
+// ─── Stack Pills ─────────────────────────────────────────────────────────────
+const stackItems = [
+  { label: "Next.js 15", color: "#fafafa" },
+  { label: "viem", color: "#3b82f6" },
+  { label: "wagmi", color: "#14b8a6" },
+  { label: "Privy", color: "#7c3aed" },
+  { label: "Hardhat", color: "#f59e0b" },
+  { label: "Pimlico", color: "#ec4899" },
+  { label: "ethers.js v6", color: "#3b82f6" },
+  { label: "The Graph", color: "#6d28d9" },
+  { label: "IPFS + Pinata", color: "#06b6d4" },
+  { label: "Polygon Amoy", color: "#7c3aed" },
+  { label: "Base Mainnet", color: "#3b82f6" },
+  { label: "OpenZeppelin", color: "#4ade80" },
+  { label: "Circom + snarkjs", color: "#ec4899" },
+  { label: "ERC-4337", color: "#f97316" },
+];
+
+// ─── Learning Path Nodes ──────────────────────────────────────────────────────
+const pathNodes = ["Learn", "Build", "Break", "Debug", "Improve", "Deploy"];
+
+export default function HomePage() {
+  const siteTagline = process.env.NEXT_PUBLIC_SITE_TAGLINE || "Web3 explained by someone who recently got it.";
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-bg text-text">
+      {/* ── Hero ────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-b border-border px-4 pb-24 pt-20 sm:px-6 lg:px-8">
+        {/* Violet glow background */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="h-[400px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <motion.div
+          className="relative mx-auto max-w-4xl text-center"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          {/* Badge */}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
+            <span className="font-mono text-xs font-medium text-accent tracking-wide">
+              Production-grade · Not hype
+            </span>
+          </div>
+
+          {/* H1 */}
+          <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+            Web3 explained by someone
+            <br />
+            <span className="text-[#a78bfa]">who recently got confused.</span>
+          </h1>
+
+          {/* Subtext */}
+          <p className="mx-auto mt-6 max-w-[520px] text-sm leading-relaxed text-muted">
+            {siteTagline} 8 tracks. 40+ lessons. 12 real shipped projects. Every mistake I made is woven into every lesson.
+          </p>
+
+          {/* CTAs */}
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/learn/track-0"
+              className="inline-flex items-center gap-2 rounded-[8px] bg-accent px-5 py-2.5 font-mono text-sm font-semibold text-white transition-all hover:bg-accent2 hover:shadow-lg hover:shadow-accent/20"
+            >
+              Start with Track 0 <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/curriculum"
+              className="inline-flex items-center gap-2 rounded-[8px] border border-border2 px-5 py-2.5 font-mono text-sm text-muted transition-all hover:border-border3 hover:bg-bg3 hover:text-text"
+            >
+              See Curriculum
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Violet glow line separator */}
+        <div className="mt-16 h-px w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+      </section>
+
+      {/* ── Problem-First Learning Flow ──────────────────────────── */}
+      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <motion.div
+            {...fadeUp}
+            viewport={{ once: true }}
+            whileInView={fadeUp.animate}
+            initial={fadeUp.initial}
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+              {"// how every lesson works"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+              Problem-first learning
+            </h2>
+            <p className="mt-2 text-sm text-muted max-w-lg">
+              Most Web3 tutorials start with concepts. We start with real problems. This is how engineers actually learn — from situations, not definitions.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 space-y-0">
+            {learningSteps.map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.07, ease: "easeOut" }}
+                className="group flex gap-6 border-b border-border p-5 transition-colors hover:bg-bg2"
+              >
+                <span className="font-mono text-base font-bold text-accent/40 group-hover:text-accent transition-colors">
+                  {step.num}
+                </span>
+                <div>
+                  <h3 className="font-sans text-sm font-semibold text-text">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-xs leading-relaxed text-muted">
+                    {step.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Tracks Overview ──────────────────────────────────────── */}
+      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            whileInView={fadeUp.animate}
+            initial={fadeUp.initial}
+            viewport={{ once: true }}
+            transition={fadeUp.transition}
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+              {"// curriculum"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+              8 tracks. One engineer. Zero hype.
+            </h2>
+          </motion.div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            {tracks.map((track, i) => {
+              const isLast = i === tracks.length - 1;
+              return (
+                <motion.div
+                  key={track.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.06, ease: "easeOut" }}
+                  whileHover={{ y: -2 }}
+                  className={`group relative flex flex-col gap-3 rounded-xl border border-border bg-bg2 p-5 transition-all duration-200 hover:border-border2 hover:bg-bg3 ${isLast ? "sm:col-span-2" : ""}`}
+                >
+                  {/* Accent Bar */}
+                  <div
+                    className="absolute top-5 bottom-5 left-0 w-[3px] rounded-r"
+                    style={{ backgroundColor: track.color }}
+                  />
+
+                  <div className="pl-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-semibold uppercase tracking-wider text-dim">
+                        {track.number}
+                      </span>
+                      {track.isSignature && (
+                        <span className="inline-flex items-center gap-1 rounded bg-accent/20 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-accent border border-accent/30">
+                          <Star className="h-2.5 w-2.5 fill-accent" /> Signature
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="mt-2 font-sans text-base font-semibold tracking-tight text-text">
+                      {track.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-muted line-clamp-2">
+                      {track.description}
+                    </p>
+
+                    {/* Tags */}
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {Array.from(new Set(track.modules.flatMap((m) => m.lessons.flatMap((l) => l.tags)))).slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded bg-bg4 px-1.5 py-0.5 font-mono text-[10px] text-muted border border-border"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3">
+                      <span className="font-mono text-[11px] text-dim">
+                        {track.moduleCount} modules · {track.lessonCount} lessons · {track.estimatedHours}h
+                      </span>
+                      <Link
+                        href={`/learn/${track.slug}`}
+                        className="inline-flex items-center gap-1 font-mono text-xs font-medium transition-colors hover:gap-1.5"
+                        style={{ color: track.color }}
+                      >
+                        Begin <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Code Block Section ────────────────────────────────────── */}
+      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <motion.div
+            whileInView={fadeUp.animate}
+            initial={fadeUp.initial}
+            viewport={{ once: true }}
+            transition={fadeUp.transition}
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+              {"// real code, real context"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+              Not syntax. Understanding.
+            </h2>
+          </motion.div>
+
+          <motion.div
+            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 24 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mt-8 overflow-hidden rounded-xl border border-border bg-[#111113]"
+          >
+            {/* Code Header */}
+            <div className="flex items-center justify-between border-b border-border bg-[#0d0d0e] px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+                <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+                <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+                <span className="ml-3 font-mono text-xs text-dim">SmartAccount.sol</span>
+              </div>
+              <span className="font-mono text-[10px] text-dim uppercase border border-border bg-bg4 px-2 py-0.5 rounded">T4 · ERC-4337</span>
+            </div>
+
+            {/* Code Block */}
+            <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
+              {/* BAD Pattern */}
+              <div className="p-4">
+                <div className="mb-3 flex items-center gap-1.5">
+                  <span className="text-red-400 text-sm">❌</span>
+                  <span className="font-mono text-xs text-red-400 font-semibold">Traditional MetaMask Pattern</span>
+                </div>
+                <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed text-[#d4d4d8]">
+                  <code>{`// User must have MetaMask installed
+// User must buy gas tokens first
+// User must switch networks manually
+// Every tx shows a scary popup
+
+const provider = new ethers.BrowserProvider(
+  window.ethereum  // undefined on mobile!
+);
+const signer = await provider.getSigner();
+// ↑ triggers MetaMask popup
+
+await contract
+  .connect(signer)
+  .vote(proposalId);
+// ↑ another popup
+// ↑ user must wait 12–30 seconds
+// ↑ if they don't have MATIC, it fails`}</code>
+                </pre>
+              </div>
+
+              {/* GOOD Pattern */}
+              <div className="p-4">
+                <div className="mb-3 flex items-center gap-1.5">
+                  <span className="text-green-400 text-sm">✅</span>
+                  <span className="font-mono text-xs text-green-400 font-semibold">Modern ERC-4337 + Privy Pattern</span>
+                </div>
+                <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed text-[#d4d4d8]">
+                  <code>{`// User logs in with Google — that's it.
+// Embedded wallet created silently.
+// Gas sponsored by your paymaster.
+// Zero popups.
+
+const { user } = usePrivy();
+// ↑ Google auth → wallet auto-created
+
+const userOp = await smartAccount
+  .sendTransaction({
+    to: contractAddress,
+    data: encodeFunctionData({
+      abi, functionName: 'vote',
+      args: [proposalId]
+    })
+  });
+// ↑ No MetaMask. No seed phrases.
+// ↑ No gas tokens. Works on mobile.
+// ↑ User never knows they have a wallet`}</code>
+                </pre>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Mistakes I Made ──────────────────────────────────────── */}
+      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            whileInView={fadeUp.animate}
+            initial={fadeUp.initial}
+            viewport={{ once: true }}
+            transition={fadeUp.transition}
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+              {"// mistakes i made"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+              The things nobody tells you
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Not in a separate section. Woven into every lesson as first-class content.
+            </p>
+          </motion.div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {topMistakes.map((m, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.07 }}
+                className="relative rounded-xl border border-border bg-bg2 p-5 transition-colors hover:bg-bg3"
+                style={{ borderLeft: "3px solid #f59e0b" }}
+              >
+                <div className="flex items-start gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                  <h3 className="font-sans text-sm font-semibold tracking-tight text-text leading-snug">
+                    {m.title}
+                  </h3>
+                </div>
+                <p className="text-xs leading-relaxed text-muted pl-6">
+                  {m.desc}
+                </p>
+                <div className="mt-3 pl-6">
+                  <span className="font-mono text-[10px] text-dim">{m.track}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/mistakes"
+              className="inline-flex items-center gap-1.5 font-mono text-xs text-muted transition-colors hover:text-text"
+            >
+              See all mistakes <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Learning Path ──────────────────────────────────────────── */}
+      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <motion.div
+            whileInView={fadeUp.animate}
+            initial={fadeUp.initial}
+            viewport={{ once: true }}
+            transition={fadeUp.transition}
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+              {"// the journey"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+              Learn → Build → Deploy
+            </h2>
+          </motion.div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-0">
+            {pathNodes.map((node, i) => (
+              <div key={node} className="flex items-center">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.35, delay: i * 0.1 }}
+                  className={`rounded-full px-4 py-2 font-mono text-xs font-semibold transition-all ${
+                    i === 0 || i === pathNodes.length - 1
+                      ? "bg-accent/20 text-accent border border-accent/40 shadow-sm shadow-accent/10"
+                      : "bg-bg2 border border-border text-muted"
+                  }`}
+                >
+                  {node}
+                </motion.div>
+                {i < pathNodes.length - 1 && (
+                  <div className="mx-2 h-px w-6 bg-border" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Stack Pills ────────────────────────────────────────────── */}
+      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <motion.div
+            whileInView={fadeUp.animate}
+            initial={fadeUp.initial}
+            viewport={{ once: true }}
+            transition={fadeUp.transition}
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
+              {"// tech stack"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+              Modern tools. Modern patterns.
+            </h2>
+          </motion.div>
+
+          <div className="mt-8 flex flex-wrap gap-2">
+            {stackItems.map((item, i) => (
+              <motion.span
+                key={item.label}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg2 px-3 py-1.5 font-mono text-xs text-muted hover:border-border2 hover:text-text transition-colors"
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                {item.label}
+              </motion.span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA Footer Section ──────────────────────────────────────── */}
+      <section className="relative px-4 py-24 sm:px-6 lg:px-8">
+        {/* Glow line on top */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
+
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="h-[300px] w-[500px] rounded-full bg-accent/5 blur-[100px]" />
+        </div>
+
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 24 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative mx-auto max-w-2xl text-center"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <h2 className="text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">
+            Start where it actually makes sense.
+          </h2>
+          <p className="mt-4 text-sm text-muted">
+            Track 0. No wallet needed. No setup. Just open and read.
+          </p>
+          <div className="mt-8">
+            <Link
+              href="/learn/track-0"
+              className="inline-flex items-center gap-2 rounded-[8px] bg-accent px-6 py-3 font-mono text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent2 hover:shadow-accent/30"
+            >
+              Begin Track 0 <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </motion.div>
+      </section>
     </div>
   );
 }
