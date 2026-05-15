@@ -1,21 +1,108 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-bg: #09090b;
+  --color-bg2: #111113;
+  --color-bg3: #18181b;
+  --color-bg4: #1c1c1f;
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-border2: rgba(255, 255, 255, 0.12);
+  --color-border3: rgba(255, 255, 255, 0.18);
+  --color-text: #fafafa;
+  --color-muted: #a1a1aa;
+  --color-dim: #52525b;
+  --color-accent: #7c3aed;
+  --color-accent2: #6d28d9;
+  --color-accent-glow: rgba(124, 58, 237, 0.15);
+
+  --color-track-0: #7c3aed;
+  --color-track-1: #3b82f6;
+  --color-track-2: #14b8a6;
+  --color-track-3: #22c55e;
+  --color-track-4: #f59e0b;
+  --color-track-5: #ec4899;
+  --color-track-6: #f97316;
+  --color-track-7: #06b6d4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base styles for the dark-first no-hype design system */
+:root {
+  background-color: #09090b;
+  color: #fafafa;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #09090b;
+  color: #fafafa;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* Custom transitions and premium glow effects */
+.accent-glow-violet {
+  box-shadow: 0 0 40px -10px rgba(124, 58, 237, 0.15);
+}
+
+.accent-glow-blue {
+  box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.15);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1c1c1f;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #27272a;
+}
+
+/* Typography styles matching curriculum bible layout */
+.prose {
+  --tw-prose-body: #a1a1aa;
+  --tw-prose-headings: #fafafa;
+  --tw-prose-lead: #52525b;
+  --tw-prose-links: #7c3aed;
+  --tw-prose-bold: #fafafa;
+  --tw-prose-counters: #52525b;
+  --tw-prose-bullets: #52525b;
+  --tw-prose-hr: rgba(255, 255, 255, 0.07);
+  --tw-prose-quotes: #fafafa;
+  --tw-prose-quote-borders: #7c3aed;
+  --tw-prose-captions: #52525b;
+  --tw-prose-code: #fafafa;
+  --tw-prose-pre-bg: #111113;
+  --tw-prose-th-borders: rgba(255, 255, 255, 0.12);
+  --tw-prose-td-borders: rgba(255, 255, 255, 0.07);
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* CSS pulse animation for hero badge dot */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+}
+
+.animate-pulse-dot {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
