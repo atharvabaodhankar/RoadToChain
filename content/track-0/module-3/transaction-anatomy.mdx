@@ -1,0 +1,110 @@
+---
+title: "Anatomy of a transaction"
+description: "EVM transaction payload, fields, signatures, gas fees, and network propagation."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 3
+moduleName: "Networks & Storage"
+lesson: 2
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["gas", "transactions", "interactive"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Anatomy rules for the Visual Transaction Simulator block templates."
+---
+
+# Anatomy of a Transaction
+
+When I wrote my first React app that interacted with a smart contract, I used to call `contract.methods.transfer().send()` and treat it like a magical API request. I had no idea what was actually going inside that payload, how MetaMask signed it, or why the blockchain knew it was mine.
+
+To truly understand how to build resilient systems, we need to peel back the magic and look at the raw binary payload of a transaction.
+
+---
+
+### 1. The Problem: How Do We Securely Request State Changes?
+
+In a database like Postgres, when you want to change data, you send a SQL query over a secured SSL connection to the server. The server verifies your session cookie or API token and executes the update.
+
+But on a public blockchain, there are no session cookies. The nodes processing your requests are run by strangers. Anyone can intercept your network requests. 
+
+We need a way to request state changes (like "transfer 5 tokens to Bob") such that:
+1. The sender is verified beyond doubt (Identity).
+2. The transaction cannot be modified en route (Integrity).
+3. The sender cannot deny sending it (Non-repudiation).
+4. Nodes get paid for the work they do (Metering).
+
+---
+
+### 2. Layman Explanation: The Sealed Wax Letter
+
+Imagine living in medieval times and needing to send a royal decree to a remote castle saying "Give Bob 100 gold coins from my vault."
+
+You can't just write it on a piece of paper and hand it to a random messenger; the messenger could alter the number to "1000," or Bob could write the letter himself and fake your name.
+
+To solve this, you write the letter and seal it with your **personal signet ring** pressed into hot red wax. 
+* Anyone who receives the letter can look at the wax seal and confirm it was pressed by your unique ring.
+* If anyone tries to open the envelope or change the text en route, the wax seal breaks.
+* The letter also includes a **sequence number** (e.g. "Decree #42"). If Bob receives another copy of the same letter next week, he'll see it has the same sequence number, realize it's a duplicate, and refuse to pay Bob twice.
+
+A blockchain transaction is that sealed wax letter.
+
+---
+
+### 3. Technical Explanation: The Fields inside a Transaction
+
+When you look at a raw transaction on Ethereum or Polygon, it's encoded using a format called **RLP (Recursive Length Prefix)**. When decoded, it is a simple key-value structure containing these exact fields:
+
+```typescript
+type Transaction = {
+  nonce: number;           // The sequence number to prevent replay attacks
+  gasLimit: bigint;        // Maximum gas computational units allowed for this tx
+  to: string | null;       // Destination address (or null if creating a contract)
+  value: bigint;           // Amount of native currency (Wei) to transfer
+  data: string;            // The execution payload (calls functions or deploys code)
+  v: number;               // Cryptographic signature recovery identifier
+  r: string;               // Cryptographic signature coordinate R
+  s: string;               // Cryptographic signature coordinate S
+  chainId: number;         // Network identifier (e.g. 137 for Polygon Mainnet)
+};
+```
+
+#### The Lifecycle of a Transaction:
+1. **Signing:** Your private key signs the hash of the transaction fields (excluding v, r, s) using the **ECDSA (Elliptic Curve Digital Signature Algorithm)**, outputting the `v`, `r`, and `s` values.
+2. **Propagation:** The transaction is broadcast to an RPC node, which validates the signature and puts it in the **Mempool** (the waiting room).
+3. **Execution:** A validator selects your transaction, charges you for the gas consumed, executes the `data` payload inside the EVM, and writes the state changes into a new block.
+
+<Diagram type="transaction-lifecycle" caption="A transaction moves from signed to broadcasted, queued in the mempool, processed by a validator, and permanently sealed on-chain." />
+
+---
+
+### 4. Real-World Usage: Understanding the 'data' field
+
+In production, when you interact with a smart contract, you aren't sending text. You are sending hexadecimal data. The first 4 bytes of the `data` field (e.g., `0xa9059cbb`) are the **Function Selector** (the hash of the function signature like `transfer(address,uint256)`). The remaining bytes contain the arguments padded to 32-byte slots. This is how the EVM knows exactly which function to execute.
+
+---
+
+<RealityCheck>
+  The `nonce` is the single biggest cause of stuck transactions for beginners. Nonces must be sequential. If you send Transaction A with nonce 1, and then Transaction B with nonce 3, Transaction B will sit in the mempool forever waiting for a Transaction with nonce 2. Always handle nonces sequentially!
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Hardcoded a gas limit of 21,000 for a contract call. That's only enough for simple native transfers. Contract calls execute complex opcodes and need more gas. The transaction reverted immediately with an out-of-gas error. Always let the library (like ethers or viem) estimate gas for you — don't hardcode it.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Look up a transaction on Etherscan or Polygonscan. View the 'Click to show more' details to see the raw input data. Can you locate the 4-byte function selector at the beginning of the input payload?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the transaction flow simulator, we will render raw transactions as visual envelopes moving from the client wallet to the mempool node. The fields we learned in this lesson will be mapped directly onto the SVG envelope overlays!
+</HeroProject>
