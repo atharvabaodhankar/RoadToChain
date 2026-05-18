@@ -35,11 +35,21 @@ const learningSteps = [
   },
   {
     num: "05",
+    title: "Reality Check",
+    desc: "Honest tradeoffs, mainnet deployment costs, limits of decentralized networks, and hard scalability truths.",
+  },
+  {
+    num: "06",
     title: "Mistakes I Made",
     desc: "First-person mistakes from shipping ZKredential, ChainCure, erc4337-kit. Not hidden — woven into every lesson.",
   },
   {
-    num: "06",
+    num: "07",
+    title: "Mini Challenge",
+    desc: "A small, hands-on, high-value practice challenge to consolidate knowledge and ensure you write working code.",
+  },
+  {
+    num: "08",
     title: "Hero Project Integration",
     desc: "Every concept feeds the track capstone project. You never wonder why you're learning something.",
   },
@@ -106,7 +116,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg text-text">
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-border px-4 pb-24 pt-20 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden border-b border-border px-4 pb-12 pt-20 sm:px-6 lg:px-8">
         {/* Violet glow background */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-[400px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
@@ -130,7 +140,7 @@ export default function HomePage() {
           <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.03em] sm:text-5xl lg:text-6xl">
             Web3 explained by someone
             <br />
-            <span className="text-[#a78bfa]">who recently got confused.</span>
+            <span className="text-[#a78bfa]">who recently got it.</span>
           </h1>
 
           {/* Subtext */}
@@ -156,11 +166,11 @@ export default function HomePage() {
         </motion.div>
 
         {/* Violet glow line separator */}
-        <div className="mt-16 h-px w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
       </section>
 
       {/* ── Problem-First Learning Flow ──────────────────────────── */}
-      <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
+      <section className="border-b border-border px-4 pt-12 pb-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <motion.div
             {...fadeUp}
@@ -187,7 +197,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07, ease: "easeOut" }}
-                className="group flex gap-6 border-b border-border p-5 transition-colors hover:bg-bg2"
+                className="group flex gap-6 border-b border-border p-3 sm:p-3.5 transition-colors hover:bg-bg2"
               >
                 <span className="font-mono text-base font-bold text-accent/40 group-hover:text-accent transition-colors">
                   {step.num}
@@ -418,7 +428,7 @@ const userOp = await smartAccount
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07 }}
                 className="relative rounded-xl border border-border bg-bg2 p-5 transition-colors hover:bg-bg3"
-                style={{ borderLeft: "3px solid #f59e0b" }}
+                style={{ borderLeft: "3px solid #f97316" }}
               >
                 <div className="flex items-start gap-2 mb-2">
                   <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
