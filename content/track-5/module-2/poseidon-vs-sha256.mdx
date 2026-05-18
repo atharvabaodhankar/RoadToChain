@@ -1,0 +1,180 @@
+---
+title: "Poseidon hashing vs SHA-256 in ZK circuits"
+description: "ZK-friendly hash functions. Why SHA-256 constraint counts explode inside SNARKs. Why Poseidon dropped our circuit from 30,000 to 904 constraints."
+track: 5
+trackName: "Zero Knowledge & Privacy Engineering"
+trackColor: "#ec4899"
+module: 2
+moduleName: "Circom & zkSNARKs"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 15
+tags: ["zk", "math", "circom", "poseidon", "mistake"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: "ZKredential — MIT Velora 1.0 hackathon top-15 finalist"
+heroProjectContribution: "The Poseidon hashing circuit used in the ZKredential credential verifier (904 constraints, Polygon Amoy deployed)."
+---
+
+# Poseidon Hashing vs SHA-256 in ZK Circuits
+
+When I started building ZKredential, I naively used SHA-256 for hashing the student credential data inside my Circom circuit. The constraint count ballooned to over 30,000. Proof generation took minutes. The system was completely unusable.
+
+I spent two days confused, thinking I was doing something fundamentally wrong with ZK proofs. I wasn't. I was just using the wrong hash function — one that was never designed for ZK circuits.
+
+---
+
+### 1. The Problem: Not All Hash Functions Are Circuit-Friendly
+
+In traditional software, SHA-256 is the industry standard for cryptographic hashing. It's fast on modern CPUs, well-audited, and available in every programming language.
+
+But inside a ZK circuit (like those written in Circom), **the computational cost of a hash function is not measured in CPU clock cycles — it's measured in R1CS constraints.** 
+
+SHA-256 is notoriously expensive to express as arithmetic constraints because it relies heavily on bitwise operations (AND, OR, XOR, bit shifts) — operations that are fast for CPUs but require enormous numbers of arithmetic constraints to represent in an R1CS system.
+
+Poseidon was specifically designed to minimize constraints in ZK-friendly prime fields. The difference is dramatic.
+
+---
+
+### 2. Layman Explanation: The Translator Problem
+
+Imagine you need to explain a complex cooking recipe to an alien species that only understands addition and multiplication — no other operations.
+
+A SHA-256 recipe says: "Take these bytes, XOR them together, rotate bits left by 7, AND with this mask..." Every single one of those operations needs to be translated into hundreds of additions and multiplications. The translation is enormous.
+
+A Poseidon recipe says: "Square these numbers, add them together, multiply by a constant..." Poseidon was designed *for* an alien that only understands addition and multiplication. Almost no translation needed.
+
+The "aliens" in this case are ZK proof systems, which only natively understand arithmetic over finite fields (addition and multiplication modulo a prime number).
+
+---
+
+### 3. Technical Explanation: R1CS Constraints and Field Arithmetic
+
+A Rank-1 Constraint System (R1CS) encodes computations as:
+
+```
+(a · w) × (b · w) = (c · w)
+```
+
+Where `w` is the witness vector and `a`, `b`, `c` are selector vectors. Every logical operation in your circuit must be expressible as a combination of these. 
+
+**SHA-256 in R1CS:**
+SHA-256 has 64 rounds, each involving multiple 32-bit rotations and XOR operations. Each bit operation translates to multiple constraints. The full SHA-256 compression function requires **~30,000+ R1CS constraints** in Circom implementations.
+
+**Poseidon Hash in R1CS:**
+Poseidon uses the `HADES` permutation design, specifically built for prime-field arithmetic:
+
+```
+x → x^α (S-box using field exponentiation)
+x → Mx (MDS matrix multiplication)
+```
+
+These are just multiplications and additions over a prime field — exactly what R1CS handles natively. The full Poseidon hash over 2 field elements requires only **~220-240 constraints** in Circom.
+
+<Diagram type="zk-constraints" caption="SHA-256 produces 30,000+ R1CS constraints in a ZK circuit, making it impractical. Poseidon's ZK-friendly design achieves the same hash security in just 904 constraints — the exact count used in ZKredential." />
+
+**Actual Circom comparison:**
+
+```circom
+// SHA-256 in Circom — ~30,000+ constraints
+// (via circomlib's Sha256 template)
+template CredentialHashSHA() {
+    signal input studentId;
+    signal input cgpa;
+    
+    component sha = Sha256(512);
+    // ... complex bit decomposition, 30k+ constraints
+    // Proof generation: ~15 seconds on a laptop
+}
+
+// Poseidon in Circom — ~900 constraints  
+// (via circomlib's Poseidon template)
+template CredentialHashPoseidon() {
+    signal input studentId;
+    signal input cgpa;
+    signal output hash;
+    
+    component poseidon = Poseidon(2);
+    poseidon.inputs[0] <== studentId;
+    poseidon.inputs[1] <== cgpa;
+    hash <== poseidon.out;
+    // Proof generation: ~0.4 seconds in browser
+}
+```
+
+**Why is the difference so large?**
+
+SHA-256 operates on 32-bit words using boolean logic. In a ZK circuit working over a 254-bit prime field (like BN128), you must **bit-decompose** every 32-bit word into individual bits, then implement AND/XOR/ROTR as arithmetic over those individual bits. One 32-bit XOR operation might need 32 constraints — one per bit.
+
+Poseidon operates natively over the same prime field used by the ZK proof system. No bit decomposition. No translation overhead. Direct field arithmetic maps 1:1 to R1CS constraints.
+
+---
+
+### 4. Real-World Usage: ZKredential's Actual Numbers
+
+In ZKredential (deployed on Polygon Amoy, top-15 at MIT's Velora 1.0 hackathon), the circuit proves that a student's CGPA meets a minimum threshold without revealing the actual CGPA:
+
+```circom
+// ZKredential's actual CredentialVerifier circuit
+template CredentialVerifier() {
+    // Private inputs (not revealed in proof)
+    signal input studentId;
+    signal input cgpa;          // e.g., 850 (representing 8.50 CGPA)
+    signal input degreeCode;
+    
+    // Public inputs (visible to verifier)
+    signal input minimumCgpa;   // e.g., 700 (7.00 CGPA required)
+    signal input certificateHash;
+    
+    // Poseidon hash of private inputs
+    component credHash = Poseidon(3);
+    credHash.inputs[0] <== studentId;
+    credHash.inputs[1] <== cgpa;
+    credHash.inputs[2] <== degreeCode;
+    
+    // Verify hash matches the on-chain certificate
+    credHash.out === certificateHash;
+    
+    // Threshold check: cgpa >= minimumCgpa
+    component gte = GreaterEqThan(16);
+    gte.in[0] <== cgpa;
+    gte.in[1] <== minimumCgpa;
+    gte.out === 1;
+}
+// Total: 904 constraints. Proof size: ~1KB. Verification gas: ~200k
+```
+
+With SHA-256, this circuit would have 30,000+ constraints. Proof generation would take minutes and require a server — ruling out browser-based verification entirely. With Poseidon, proof generation runs in a browser in under a second.
+
+---
+
+<RealityCheck>
+  Poseidon is ZK-friendly but it is NOT the same as SHA-256 in terms of external software compatibility. You cannot use Poseidon hashes interchangeably with SHA-256 hashes outside ZK systems. When designing a credential system, the Poseidon hash used inside the circuit must match the Poseidon implementation used on the Solidity verifier side — both from the same library (circomlib). Mixing implementations will produce different hash outputs and your proofs will always fail verification.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Used SHA-256 inside a Circom circuit on my first ZKredential attempt. The constraint count exploded to tens of thousands. Proof generation took 3-4 minutes on my laptop. The browser crashed trying to generate proofs client-side. Spent two days debugging, thinking my circuit logic was wrong. It wasn't. Switched every hash component to Poseidon(2) and the circuit went from 30,000+ constraints to 904. Proof time: 0.4 seconds in the browser. Nobody tells you this until you waste days on it.
+</MistakeCallout>
+
+---
+
+<KeyConfusion>
+  **"Is Poseidon secure enough? If SHA-256 needs 30,000 constraints but Poseidon only needs 900, is Poseidon weaker?"**
+
+  No. Security in cryptographic hash functions depends on mathematical hardness properties, not computational complexity. Poseidon achieves equivalent collision resistance and preimage resistance to SHA-256, but using arithmetic operations over prime fields instead of bitwise operations. Its security is well-analyzed in academic literature (Grassi et al., 2019). The constraint reduction comes from architectural efficiency, not reduced security.
+</KeyConfusion>
+
+---
+
+<LessonChallenge>
+  Install circomlib and try writing a simple circuit that hashes two inputs with Poseidon(2). Compile it with `circom circuit.circom --r1cs --wasm --sym`. The `.r1cs` file will contain the constraint count. Now try replacing Poseidon with the Sha256 template from circomlib and recompile. Compare the constraint counts.
+</LessonChallenge>
+
+---
+
+<HeroProject name="ZK Credential Verifier" track="5">
+  The ZKredential circuit uses Poseidon(3) to hash `studentId + cgpa + degreeCode` into a single `certificateHash`. This hash is what institutions publish on-chain when issuing credentials. When a student proves their CGPA threshold, the circuit verifies the Poseidon hash matches the on-chain certificate, proving the private inputs are correct without revealing them. This lesson is the exact reason ZKredential works in a browser at all.
+</HeroProject>
