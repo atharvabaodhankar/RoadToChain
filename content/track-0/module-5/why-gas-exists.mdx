@@ -1,0 +1,138 @@
+---
+title: "Why gas exists and how it's calculated"
+description: "EVM opcodes cost computation. Base fee + priority fee. EIP-1559 explained."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 5
+moduleName: "Gas & Transactions"
+lesson: 1
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["gas", "EVM", "transactions"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Gas simulation component for the Visual Blockchain Simulator gas meter widget."
+---
+
+# Why Gas Exists and How It's Calculated
+
+The first time I had a transaction fail with an "out of gas" error, I was furious. I didn't understand why I had to pay for something that *failed*. It felt like a scam.
+
+Then I understood the math, and it changed everything.
+
+---
+
+### 1. The Problem: Preventing Infinite Loops on a Shared Computer
+
+The Ethereum Virtual Machine (EVM) is a shared computer. When you call a smart contract function, *every single validator node on the network* executes that code to verify the result. Thousands of machines, all running your code.
+
+Now imagine someone deploys this Solidity contract:
+
+```solidity
+function infiniteLoop() public {
+    while(true) {
+        // do nothing, forever
+    }
+}
+```
+
+If there were no cost mechanism, anyone could call this function and freeze every validator node in the world indefinitely. The entire blockchain would halt.
+
+**Gas is the solution.** Every EVM computation costs gas. If you run out of gas, the EVM stops executing immediately. Validators can only be attacked by someone willing to pay for every single computational step.
+
+---
+
+### 2. Layman Explanation: The Taxi Meter
+
+Think of the EVM like a taxi. When you get in the cab, the meter starts ticking. Every mile (or fraction of a mile) costs money. 
+
+- The **gas limit** is like telling the taxi driver "I'll pay for at most 50 miles worth of fare." If the journey is only 20 miles, you only pay for 20.
+- The **gas price** is the cost per mile — and it fluctuates based on how many other people need taxis right now (network demand).
+- **Gas fee = Gas Used × Gas Price**
+
+The key insight: **if the taxi breaks down 30 miles in (your transaction fails), you still pay for those 30 miles.** The driver's time (validator's computation) was still consumed.
+
+---
+
+### 3. Technical Explanation: EVM Opcode Pricing
+
+Every EVM instruction has an explicit gas cost defined in the Ethereum Yellow Paper. These are not arbitrary:
+
+<Diagram type="gas-meter" caption="EVM opcodes carry different gas costs. Storage writes (SSTORE) cost ~6000x more than simple arithmetic (ADD) because storage is permanent and scarce." />
+
+| Opcode | Gas Cost | Why |
+|--------|----------|-----|
+| `ADD` | 3 gas | Simple arithmetic — extremely cheap |
+| `KECCAK256` | 30 + 6/word | Hash function — CPU intensive |
+| `SLOAD` | 2,100 gas | Reading on-chain storage — slow disk I/O |
+| `SSTORE` | 20,000 gas | Writing to permanent storage — very expensive |
+| `CALL` | 2,600+ gas | External function call — network overhead |
+
+**EIP-1559: The Post-London Gas Model**
+
+After the London hardfork, gas pricing changed dramatically:
+
+```
+Total Gas Fee = (baseFee + priorityFee) × gasUsed
+```
+
+- **`baseFee`**: Set by the protocol per block based on demand. **Burned** (permanently removed from supply). Goes up when blocks are greater than 50% full, drops when blocks are less than 50% full.
+- **`priorityFee`** (tip): Goes to the validator as their reward for including your transaction. This is how you "jump the queue" when the mempool is congested.
+
+```typescript
+// Example transaction with EIP-1559 pricing:
+const tx = {
+  maxFeePerGas: ethers.parseUnits("20", "gwei"),       // max you'll pay total
+  maxPriorityFeePerGas: ethers.parseUnits("2", "gwei"), // tip to validator
+  gasLimit: 200000n,                                     // max units of computation
+};
+// Actual fee paid = (baseFee + priorityFee) × gasUsed
+// If baseFee = 15 gwei and gasUsed = 120,000:
+// = (15 + 2) × 120,000 = 2,040,000 gwei = 0.00204 ETH
+```
+
+---
+
+### 4. Real-World Usage: Gas Optimization in Production
+
+In production contracts, gas optimization is often more important than code elegance. Key patterns:
+
+1. **Prefer `calldata` over `memory` for function parameters** (saves ~3x gas per byte)
+2. **Pack struct fields to fill 32-byte slots** (e.g., `uint128 + uint128` in one slot instead of two separate `uint256`)
+3. **Emit events instead of storing data** (events are 8x cheaper than storage)
+4. **Batch operations** using multicall patterns to amortize base transaction overhead
+
+---
+
+<RealityCheck>
+  On Polygon Mainnet, gas fees are typically fractions of a penny. But on Ethereum Mainnet during peak usage (like NFT mints), gas fees for a simple swap can exceed $50-100. Production apps need to consider which chain to deploy based on expected gas costs for user operations — this is why platforms like Uniswap and OpenSea deployed on Polygon and other L2s.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Hardcoded a gas limit of 21,000 for a contract interaction. 21,000 is the fixed gas cost for simple ETH transfers, not contract calls. Contract calls execute EVM code and need 100,000–500,000+ gas depending on complexity. The transaction reverted every time with an "intrinsic gas too low" error. Let ethers.js or viem estimate gas automatically — never hardcode gas limits for contract calls.
+</MistakeCallout>
+
+---
+
+<KeyConfusion>
+  **"If my transaction fails, why do I still pay gas?"** 
+
+  Because validators still executed your code. The EVM ran your function, hit a revert condition (like a failed require() check), and halted. That computation happened. It consumed real CPU cycles on thousands of machines. The gas compensates validators for that work, even if the state changes were rolled back.
+</KeyConfusion>
+
+---
+
+<LessonChallenge>
+  Look up any recent Ethereum transaction on Etherscan. Find the "Gas Used by Transaction" and "Gas Limit" fields. Calculate: (Gas Used / Gas Limit × 100) to see what percentage of the gas limit was actually consumed. Why might a developer set the limit much higher than what's needed?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  The Visual Blockchain Simulator includes a real-time gas meter widget. As you build and "submit" simulated transactions in the browser, the meter animates to show gas consumption for different operation types. This lesson's opcode table maps directly to the meter's display logic.
+</HeroProject>
