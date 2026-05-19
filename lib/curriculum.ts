@@ -48,8 +48,8 @@ export const tracks: Track[] = [
     difficulty: "beginner",
     prerequisites: [],
     estimatedHours: 6,
-    moduleCount: 5,
-    lessonCount: 20,
+    moduleCount: 4,
+    lessonCount: 14,
     heroProject: {
       name: "Visual Blockchain Simulator",
       description: "Students build a transaction flow simulator, block visualizer, node propagation animation, and gas simulation system — using vanilla JS + SVG."
