@@ -162,7 +162,12 @@ export default async function LessonPage({ params }: Props) {
           (les.slug === "trust-problem" ||
             les.slug === "transaction-anatomy" ||
             les.slug === "what-metamask-does" ||
-            les.slug === "why-gas-exists")) ||
+            les.slug === "why-gas-exists" ||
+            les.slug === "keys-and-addresses" ||
+            les.slug === "data-location" ||
+            les.slug === "rpc-explained" ||
+            les.slug === "seed-phrases-ux" ||
+            les.slug === "mainnet-vs-testnet")) ||
         (currentTrack.id === 4 && les.slug === "why-metamask-ux-fails") ||
         (currentTrack.id === 5 && les.slug === "poseidon-vs-sha256");
 
