@@ -118,7 +118,7 @@ export default function MistakesPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
               className="group relative rounded-xl border border-border bg-bg2 p-6 transition-all duration-200 hover:border-border2 hover:bg-bg3"
-              style={{ borderLeft: `4px solid ${severityColors[m.severity] || "#d4d4d8"}` }}
+              style={{ borderLeft: "3px solid #f97316" }}
             >
               {/* Metadata */}
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-4">
