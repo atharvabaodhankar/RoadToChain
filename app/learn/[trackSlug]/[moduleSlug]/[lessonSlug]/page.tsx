@@ -5,6 +5,7 @@ import { tracks } from "@/lib/curriculum";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Clock, Tag } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import rehypePrettyCode from "rehype-pretty-code";
 
 // Import custom MDX components
 import Diagram from "@/components/mdx/Diagram";
@@ -14,6 +15,7 @@ import HeroProject from "@/components/mdx/HeroProject";
 import LessonChallenge from "@/components/mdx/LessonChallenge";
 import KeyConfusion from "@/components/mdx/KeyConfusion";
 import CodeBlock from "@/components/mdx/CodeBlock";
+import ReadingProgressBar from "@/components/layout/ReadingProgressBar";
 
 interface Props {
   params: Promise<{
@@ -50,6 +52,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 import React from "react";
 
+// Helper to recursively extract text content from nested React nodes (spans, arrays)
+const extractTextContent = (node: React.ReactNode): string => {
+  if (!node) return "";
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractTextContent).join("");
+  if (React.isValidElement(node)) {
+    const props = node.props as { children?: React.ReactNode };
+    if (props && "children" in props) {
+      return extractTextContent(props.children);
+    }
+  }
+  return "";
+};
+
 // Map custom components for the MDX compiler
 const mdxComponents = {
   Diagram,
@@ -63,16 +80,33 @@ const mdxComponents = {
     // MDX v2 wraps code blocks in <pre><code className="language-xyz">...</code></pre>
     const codeEl = props.children;
     if (React.isValidElement(codeEl) && codeEl.type === "code") {
-      const codeProps = codeEl.props as { className?: string; children?: React.ReactNode };
+      const codeProps = codeEl.props as {
+        className?: string;
+        children?: React.ReactNode;
+        "data-language"?: string;
+      };
       const className = codeProps.className || "";
       const matches = className.match(/language-(.*)/);
-      const language = matches ? matches[1] : "";
-      
-      // Attempt to extract filename if comments exist in the code
-      const codeContent = codeProps.children || "";
-      let filename = "SmartAccount.sol";
-      if (typeof codeContent === "string") {
-        const fileMatch = codeContent.match(/\/\/\s*([a-zA-Z0-9_\-\.]+\.[a-zA-Z0-9]+)/);
+      const language = matches ? matches[1] : (codeProps["data-language"] || "");
+
+      // Extract raw code string recursively
+      const rawCode = extractTextContent(codeProps.children);
+
+      // Language-aware default filenames
+      let defaultFilename = "SmartAccount.sol";
+      if (language === "typescript" || language === "ts" || language === "tsx") {
+        defaultFilename = "types.ts";
+      } else if (language === "javascript" || language === "js") {
+        defaultFilename = "index.js";
+      } else if (language === "circom") {
+        defaultFilename = "circuit.circom";
+      } else if (language === "bash" || language === "sh" || language === "shell") {
+        defaultFilename = "terminal";
+      }
+
+      let filename = defaultFilename;
+      if (rawCode) {
+        const fileMatch = rawCode.match(/\/\/\s*([a-zA-Z0-9_\-\.]+\.[a-zA-Z0-9]+)/);
         if (fileMatch) {
           filename = fileMatch[1];
         }
@@ -82,7 +116,7 @@ const mdxComponents = {
         <CodeBlock
           filename={filename}
           language={language}
-          code={typeof codeContent === "string" ? codeContent : ""}
+          code={rawCode}
         >
           {codeProps.children}
         </CodeBlock>
@@ -149,6 +183,7 @@ export default async function LessonPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg text-text pb-24">
+      <ReadingProgressBar />
       {/* ── Sub-navigation Header ─────────────────────────────── */}
       <div className="border-b border-border bg-bg2 px-4 py-3 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
@@ -206,7 +241,17 @@ export default async function LessonPage({ params }: Props) {
       {/* ── Main Content Area ──────────────────────────────────── */}
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-p:leading-relaxed prose-p:text-text2 prose-a:text-[#a78bfa] prose-strong:text-text prose-code:font-mono prose-code:text-[#f472b6] prose-code:bg-bg2 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:border prose-code:border-border/60">
-          <MDXRemote source={data.content} components={mdxComponents} />
+          <MDXRemote
+            source={data.content}
+            components={mdxComponents}
+            options={{
+              mdxOptions: {
+                rehypePlugins: [
+                  [rehypePrettyCode, { theme: "github-dark", keepBackground: true }]
+                ]
+              }
+            }}
+          />
         </div>
       </main>
 
