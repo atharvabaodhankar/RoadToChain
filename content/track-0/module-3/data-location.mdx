@@ -1,0 +1,170 @@
+---
+title: "Where does blockchain data actually live?"
+description: "The 3-layer hybrid architecture. Frontend, backend, and blockchain — what runs where, and why beginners think the blockchain does everything."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 3
+moduleName: "Networks & Storage"
+lesson: 1
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["nodes", "storage", "architecture"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Architecture decision map for the Visual Blockchain Simulator — which components run client-side, which need a server."
+---
+
+# Where Does Blockchain Data Actually Live?
+
+For the first two months of learning Web3, I had a completely wrong mental model. I thought building a dApp meant: React frontend → smart contract → done. No backend. No server. The blockchain handles everything.
+
+Then I tried to build a real application — a voting system — and hit a wall that shattered that illusion: **the blockchain doesn't run your app. It verifies specific state transitions.** Everything else still needs traditional infrastructure.
+
+---
+
+### 1. The Problem: Where Is Processing Actually Happening?
+
+When a user clicks "Vote" in a Web3 application, the beginner mental model looks like this:
+
+```
+User clicks button → Transaction goes to blockchain → Done!
+```
+
+The actual production architecture looks like this:
+
+```
+User clicks button
+  → Frontend validates input
+  → Frontend calls backend API for business logic checks
+  → Backend queries database for user eligibility
+  → Backend queries The Graph for on-chain vote counts
+  → Frontend constructs transaction parameters
+  → Wallet signs transaction locally
+  → Signed transaction sent to RPC provider (Infura/Alchemy)
+  → RPC broadcasts to P2P network
+  → Validator executes smart contract function
+  → Smart contract emits event
+  → The Graph indexes the event
+  → Backend webhook receives event notification
+  → Frontend polls for updated state
+  → UI re-renders with new vote count
+```
+
+That's **14 steps**, and only **one** of them (the validator executing the smart contract) actually happens on the blockchain.
+
+---
+
+### 2. Layman Explanation: The Notary Office
+
+Think of the blockchain as a **public notary office.** A notary doesn't run your business. A notary doesn't store your files. A notary doesn't process your orders. A notary does exactly one thing: **stamps documents to certify they are authentic and records them permanently.**
+
+Your actual business still needs:
+- A **storefront** (frontend) where customers interact
+- A **back office** (backend) where orders are processed, inventory is checked, and emails are sent
+- A **filing cabinet** (database) where customer records and order history live
+- The **notary** (blockchain) where critical documents are stamped and recorded for public, tamper-proof verification
+
+Most Web3 tutorials skip layers 2 and 3 entirely, giving beginners the false impression that the blockchain replaces your entire backend. It doesn't. It replaces the **trust layer** — the specific parts where you need tamper-proof, censorship-resistant, publicly verifiable state.
+
+---
+
+### 3. Technical Explanation: The 3-Layer Architecture
+
+<Diagram type="hybrid-architecture" caption="A production dApp has three layers. 99% of your code runs on the frontend and backend. The blockchain handles only the critical 1% requiring trustless verification." />
+
+**Layer 1: Frontend (React / Next.js)**
+- Renders UI components
+- Manages wallet connection state (wagmi, Privy)
+- Constructs transaction parameters
+- Displays data fetched from backend and blockchain
+- Listens for on-chain events via WebSocket subscriptions
+- *Runs entirely in the user's browser*
+
+**Layer 2: Backend (Node.js / Express / API Routes)**
+- Business logic validation (is this user eligible to vote?)
+- Traditional database queries (Postgres, MongoDB)
+- Indexing blockchain events via The Graph subgraphs
+- IPFS pinning for off-chain metadata
+- Authentication (JWT tokens, OAuth sessions)
+- Rate limiting, caching, analytics
+- *Runs on your server (Vercel, Railway, AWS)*
+
+**Layer 3: Blockchain (Ethereum / Polygon)**
+- Smart contract state (token balances, vote counts, ownership records)
+- Transaction execution and verification
+- Event emission for indexing
+- Immutable record-keeping
+- *Runs on thousands of validator nodes worldwide*
+
+```typescript
+// Example: A "Vote" button handler in a real production dApp
+async function handleVote(proposalId: number) {
+  // LAYER 1 (Frontend): Validate inputs
+  if (!proposalId) throw new Error("Invalid proposal");
+
+  // LAYER 2 (Backend): Check eligibility via API
+  const res = await fetch(`/api/eligibility?user=${address}`);
+  const { eligible, reason } = await res.json();
+  if (!eligible) throw new Error(reason);
+
+  // LAYER 3 (Blockchain): Send the on-chain transaction
+  const tx = await contract.vote(proposalId);
+  await tx.wait(); // Wait for block confirmation
+
+  // LAYER 2 (Backend): Notify backend to update cache
+  await fetch("/api/votes/refresh", { method: "POST" });
+}
+```
+
+---
+
+### 4. Real-World Usage: What Goes On-Chain vs Off-Chain
+
+In production, the decision of what to put on-chain is driven by **cost and necessity**:
+
+| Data | On-Chain? | Why |
+|------|-----------|-----|
+| Token balances | ✅ Yes | Must be trustlessly verifiable |
+| Vote records | ✅ Yes | Must be tamper-proof |
+| User profiles | ❌ No | Too expensive, no trust requirement |
+| Images/media | ❌ No | Too large (use IPFS, store CID on-chain) |
+| Search indexes | ❌ No | Too slow (use The Graph) |
+| Notifications | ❌ No | Not a state transition |
+| Analytics | ❌ No | No consensus needed |
+
+**The rule of thumb:** If it doesn't need trustless verification between untrusted parties, it doesn't belong on-chain. A Postgres database is faster, cheaper, and easier.
+
+---
+
+<RealityCheck>
+  In production dApps like Uniswap, OpenSea, and Aave, the frontend is a React app hosted on Vercel. The backend includes API servers, databases, The Graph subgraphs, and caching layers. The blockchain handles only token swaps, NFT transfers, and lending pool state. If you removed the "Web3" part, 90% of the codebase would look like any other full-stack JavaScript application.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Built my first voting dApp with zero backend. Stored proposal descriptions on-chain (gas nightmare). Had the frontend directly query the blockchain for every page load (slow, rate-limited). Learned the hard way that production Web3 needs the same infrastructure as Web2 — databases, APIs, caching — plus a thin blockchain layer for the trust-critical operations.
+</MistakeCallout>
+
+---
+
+<KeyConfusion>
+  **"If I still need a backend, what's the point of blockchain?"**
+
+  The backend handles processing. The blockchain handles *trust*. Without blockchain, users must trust that your backend is honest (not manipulating vote counts, not inflating token balances). With blockchain, the critical state transitions are publicly verifiable by anyone. The backend optimizes; the blockchain guarantees.
+</KeyConfusion>
+
+---
+
+<LessonChallenge>
+  Pick any popular dApp (Uniswap, OpenSea, or Aave). Open their website and use browser DevTools (Network tab) to observe the API calls being made. How many requests go to traditional API endpoints vs. blockchain RPC endpoints? You'll be surprised how much of the data comes from traditional servers.
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  The Visual Blockchain Simulator itself is a hybrid-architecture app: the simulation UI runs entirely on the client (Layer 1), no backend is needed for this project (Layer 2 not required), and the blockchain layer is simulated with local state. This lesson explains why that architecture decision was made.
+</HeroProject>
