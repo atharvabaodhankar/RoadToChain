@@ -82,13 +82,17 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
       
       {/* ── GLOBAL ATMOSPHERE SYSTEM (Morphing Backgrounds) ──────────────── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Dynamic radial gradient centered around scroll progress */}
-        <div 
-          className="absolute inset-0 transition-all duration-1000 ease-out opacity-25"
-          style={{
-            background: `radial-gradient(circle at 60% 40%, ${trackColors[activeTrackId]} 0%, transparent 65%)`
-          }}
-        />
+        {/* Dynamic radial gradients cross-fading smoothly */}
+        {trackColors.map((color, idx) => (
+          <div 
+            key={idx}
+            className="absolute inset-0 transition-opacity duration-[1200ms] ease-in-out"
+            style={{
+              background: `radial-gradient(circle at 60% 40%, ${color} 0%, transparent 65%)`,
+              opacity: activeTrackId === idx ? 0.25 : 0
+            }}
+          />
+        ))}
         
         {/* Tech Grid Pattern */}
         <div className="absolute inset-0 bg-grid-engineering opacity-70" />
@@ -105,8 +109,14 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-accent animate-pulse-dot">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-bg2/80 px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-muted">
+              <span 
+                className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" 
+                style={{ 
+                  boxShadow: "0 0 8px var(--color-accent)",
+                  animationDuration: "3s"
+                }} 
+              />
               Interactive visual curriculum
             </div>
             
