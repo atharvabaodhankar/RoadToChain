@@ -1,0 +1,174 @@
+---
+title: "RPC explained — your app's phone line to the blockchain"
+description: "ABI as translator, RPC as phone line, EVM as execution environment. The three invisible layers between your code and the blockchain."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 3
+moduleName: "Networks & Storage"
+lesson: 4
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["rpc", "infrastructure", "abi", "evm"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "RPC call visualization panel for the Visual Blockchain Simulator network layer."
+---
+
+# RPC Explained — Your App's Phone Line to the Blockchain
+
+When I first wrote `const provider = new ethers.JsonRpcProvider("https://polygon-rpc.com")`, I had no idea what was happening. I knew it "connected to the blockchain." But connected how? Through what? And when I called `contract.vote(42)`, how did the number `42` get translated into something the blockchain understood?
+
+There are three invisible layers between your JavaScript code and the blockchain: the **ABI**, the **RPC**, and the **EVM**. Understanding them transforms you from someone who copies code to someone who debugs production systems.
+
+---
+
+### 1. The Problem: How Does Your Code Talk to a Decentralized Network?
+
+In Web2, your frontend talks to your backend via HTTP REST calls or GraphQL. The backend is a server with a known IP address running your code.
+
+In Web3, the "backend" is a decentralized network of thousands of nodes. You can't just call `fetch("https://ethereum.com/api/vote")`. There's no single server. There's no REST API designed for your specific contract.
+
+So how does `contract.vote(42)` in your React app become an actual state change on the blockchain?
+
+Three translations happen:
+
+1. **ABI** translates your human-readable function call into binary data
+2. **RPC** transmits that binary data to a blockchain node
+3. **EVM** executes the binary data and updates state
+
+---
+
+### 2. Layman Explanation: The Restaurant, The Phone, The Kitchen
+
+Think of ordering food from a restaurant kitchen you can't see:
+
+- **ABI = The Menu.** It tells you what dishes (functions) exist, what ingredients (arguments) each requires, and the exact format to place your order. Without the menu, you'd be shouting random food names into the void.
+
+- **RPC = The Phone Line.** It's how your order gets from you to the kitchen. You don't walk into the kitchen yourself — you call in. The phone line is a standard protocol (JSON-RPC 2.0) that both sides understand.
+
+- **EVM = The Kitchen.** The actual place where your order is cooked (executed). It has specific equipment (opcodes), limited counter space (stack), ingredient storage (state), and a timer that charges you per second of cooking time (gas).
+
+You never see the kitchen. You only interact with the menu and the phone. But understanding all three is what separates a chef from someone who just orders takeout.
+
+---
+
+### 3. Technical Explanation
+
+#### Part A: ABI — The Translator
+
+<Diagram type="abi-translator" caption="The ABI encodes your human-readable function call into the exact hexadecimal format the EVM expects. Think of it as a translator between JavaScript and bytecode." />
+
+The ABI (Application Binary Interface) is a JSON file that describes every function in your smart contract:
+
+```typescript
+// Your Solidity contract:
+// function vote(uint256 proposalId) public { ... }
+
+// The ABI describes it as:
+const abi = [{
+  "name": "vote",
+  "type": "function",
+  "inputs": [{ "name": "proposalId", "type": "uint256" }],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+}];
+
+// When you call contract.vote(42), ethers.js uses the ABI to encode:
+// Function selector: keccak256("vote(uint256)").slice(0,4) = 0x0121b93f
+// Argument: 42 padded to 32 bytes = 0x000000000000000000000000000000000000000000000000000000000000002a
+// Final calldata: 0x0121b93f000000000000000000000000000000000000000000000000000000000000002a
+```
+
+The first 4 bytes are the **function selector** — a hash of the function signature. The remaining bytes are the ABI-encoded arguments, each padded to 32-byte slots.
+
+#### Part B: RPC — The Phone Line
+
+<Diagram type="rpc-pipeline" caption="Your app calls an RPC endpoint (Infura, Alchemy, QuickNode), which forwards the request to a full node, which propagates it to the P2P network." />
+
+RPC (Remote Procedure Call) is a standardized protocol. Every Ethereum node speaks JSON-RPC 2.0:
+
+```typescript
+// What ethers.js actually sends over HTTP:
+const rpcRequest = {
+  jsonrpc: "2.0",
+  method: "eth_sendTransaction",
+  params: [{
+    from: "0xYourAddress...",
+    to: "0xContractAddress...",
+    data: "0x0121b93f000000000000000000000000000000000000000000000000000000000000002a",
+    gas: "0x30d40"  // 200,000 in hex
+  }],
+  id: 1
+};
+
+// Key RPC methods you'll use constantly:
+// eth_call          → Read data from contract (FREE, no gas)
+// eth_sendTransaction → Write data (costs gas)
+// eth_getBalance    → Check an address's balance
+// eth_blockNumber   → Get the latest block number
+// eth_getTransactionReceipt → Check if a tx was mined
+```
+
+You never run a full node yourself. Services like **Infura** and **Alchemy** run nodes for you and expose them as RPC endpoints. Your app just needs the URL.
+
+#### Part C: EVM — The Kitchen
+
+<Diagram type="evm-execution" caption="The EVM is a stack-based virtual machine with 1024 stack slots, volatile memory, permanent storage, and a gas meter that ticks down with every operation." />
+
+The Ethereum Virtual Machine executes your contract's bytecode. It's a simple stack machine:
+
+- **Stack:** A 1024-element deep stack of 256-bit values. Opcodes push and pop values.
+- **Memory:** A byte-addressable volatile area. Cleared after each call.
+- **Storage:** Permanent key-value store. This is where `mapping`s and state variables live. Writing here costs 20,000 gas.
+- **Gas Meter:** Ticks down with every opcode executed. When it hits zero, execution reverts.
+
+Every validator node in the world runs the same EVM code with the same inputs and must arrive at exactly the same output. This deterministic execution is what makes consensus possible.
+
+---
+
+### 4. Real-World Usage: Debugging with This Mental Model
+
+When a transaction fails in production, this 3-layer model tells you exactly where to look:
+
+| Symptom | Layer | Likely Cause |
+|---------|-------|-------------|
+| "Invalid function" error | ABI | Wrong ABI version or mismatched contract |
+| "Network error" or timeout | RPC | RPC endpoint down, rate limited, or wrong URL |
+| "Out of gas" revert | EVM | Gas limit too low for the computation |
+| "Execution reverted" | EVM | require() check failed in the contract |
+| Wrong return data | ABI | ABI doesn't match deployed contract version |
+
+---
+
+<RealityCheck>
+  Free-tier RPC providers (Infura, Alchemy) have rate limits: typically 10-25 requests per second. In production, you need a paid plan or your own dedicated node. Many dApps also use WebSocket connections (wss://) instead of HTTP for real-time event subscriptions, which counts differently against rate limits.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Called a view function (read-only) using eth_sendTransaction instead of eth_call. Paid gas for a read operation that should have been free. The ethers.js library handles this automatically — contract.balanceOf() uses eth_call, contract.transfer() uses eth_sendTransaction — but when using raw RPC calls or viem, you need to know the difference.
+</MistakeCallout>
+
+---
+
+<KeyConfusion>
+  **"If RPC endpoints are run by companies like Infura, doesn't that make it centralized?"**
+
+  Technically, yes — your app's connection point is centralized. If Infura goes down, your app can't reach the blockchain (this actually happened in 2020). Production apps should use multiple RPC providers as fallbacks, or run their own nodes. The blockchain itself remains decentralized; only your access point is centralized.
+</KeyConfusion>
+
+---
+
+<LessonChallenge>
+  Open a terminal and run a raw RPC call using curl: `curl -X POST https://ethereum-rpc.publicnode.com -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'`. The response is the latest Ethereum block number in hexadecimal. Convert it to decimal. You just talked directly to the Ethereum network without any library.
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  The Visual Blockchain Simulator includes an RPC Call Visualizer panel that shows the JSON-RPC request/response cycle in real-time as you interact with simulated contracts. The ABI encoding step is animated to show exactly how human-readable function calls transform into hex calldata.
+</HeroProject>
