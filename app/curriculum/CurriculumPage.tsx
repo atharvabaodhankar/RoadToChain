@@ -322,37 +322,33 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
         </div>
       </section>
 
-      {/* ── FLOATING TRACK STATUS INDICATOR ───────────────────────────────── */}
-      <div className="fixed bottom-6 left-6 z-40 hidden md:block">
-        <div className="flex flex-col gap-1.5 bg-bg2/80 backdrop-blur-lg border border-border p-3.5 rounded-xl">
-          <div className="font-mono text-[8px] text-dim uppercase tracking-widest">
-            {"// TARGET CODES"}
-          </div>
-          {tracks.map((track) => (
-            <button
-              key={track.id}
-              onClick={() => scrollToTrack(track.id)}
-              className="flex items-center gap-2 text-left group"
-            >
-              <div 
-                className="w-2 h-2 rounded-full transition-all duration-300"
-                style={{
-                  backgroundColor: activeTrackId === track.id ? trackColors[track.id] : "#27272a",
-                  boxShadow: activeTrackId === track.id ? `0 0 10px ${trackColors[track.id]}` : "none",
-                  transform: activeTrackId === track.id ? "scale(1.2)" : "scale(1)"
-                }}
-              />
-              <span 
-                className="font-mono text-[10px] tracking-tight transition-colors group-hover:text-text"
-                style={{
-                  color: activeTrackId === track.id ? "#fafafa" : "#52525b"
-                }}
-              >
-                T{track.id} &middot; {trackNames[track.id]}
-              </span>
-            </button>
-          ))}
-        </div>
+      {/* ── VERTICAL TRACK NAVIGATOR (Right Side Dots) ───────────────────── */}
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3.5 bg-bg2/40 hover:bg-bg2/70 border border-border px-2 py-4.5 rounded-full backdrop-blur-md transition-all duration-300">
+        {tracks.map((track) => (
+          <button
+            key={track.id}
+            onClick={() => scrollToTrack(track.id)}
+            className="group relative flex items-center justify-center w-6 h-6 rounded-full cursor-pointer focus:outline-none"
+            aria-label={`Scroll to Track ${track.id}`}
+          >
+            {/* The Dot */}
+            <div 
+              className="w-1.5 h-1.5 rounded-full transition-all duration-300 group-hover:scale-[1.4]"
+              style={{
+                backgroundColor: activeTrackId === track.id ? trackColors[track.id] : "rgba(255, 255, 255, 0.25)",
+                boxShadow: activeTrackId === track.id ? `0 0 8px ${trackColors[track.id]}` : "none",
+                transform: activeTrackId === track.id ? "scale(1.3)" : "scale(1)"
+              }}
+            />
+            
+            {/* Tooltip on Hover */}
+            <div className="absolute right-8 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-lg bg-bg border border-border text-[9px] font-mono text-text whitespace-nowrap opacity-0 translate-x-1 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 shadow-xl backdrop-blur-md">
+              <span className="font-bold" style={{ color: trackColors[track.id] }}>T{track.id}</span>
+              <span className="text-dim"> &middot; </span>
+              <span className="text-muted">{trackNames[track.id]}</span>
+            </div>
+          </button>
+        ))}
       </div>
 
       {/* ── TRACKS SCROLL STORYTELLING SECTIONS ───────────────────────────── */}
