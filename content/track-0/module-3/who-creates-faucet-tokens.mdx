@@ -1,0 +1,98 @@
+---
+title: "Who creates faucet tokens and where do they come from?"
+description: "Faucets as infrastructure gateways. How testnet coins are minted and distributed."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 3
+moduleName: "Networks & Storage"
+lesson: 4
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["networks", "faucets", "security"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Understanding the infrastructure layer and how developers access free resources safely."
+---
+
+# Who Creates Faucet Tokens and Where Do They Come From?
+
+When I wanted to deploy my first smart contract on the Sepolia testnet, I visited a "faucet website," typed in my public address, completed a CAPTCHA, and clicked "Send." Within 30 seconds, `0.5 Sepolia ETH` arrived in my wallet.
+
+I was amazed, but also skeptical: *Who on earth built this website? Who is giving away this testnet ETH? Where did the faucet itself get these coins? Is there a central testnet authority minting them?*
+
+Let’s peer behind the scenes of **blockchain faucets** and understand how testnet assets are created and secured.
+
+---
+
+### 1. The Genesis: Who Mints Testnet Coins?
+
+On the Ethereum Mainnet, the supply of ETH is controlled strictly by consensus rules: blocks are verified by stakers, and a small amount of new ETH is minted as consensus rewards. 
+
+On Testnets (like Sepolia):
+1. **The Genesis Block:** When core developers launch a new testnet, they write a special file called the `genesis.json`. This file configures the starting state of the blockchain.
+2. **Pre-Allocation:** In the `genesis.json`, developers write code to mint massive amounts of testnet ETH (e.g. 10 billion coins) and pre-allocate them to a few specific, controlled addresses.
+3. **The Faucets:** These pre-allocated addresses are owned by major infrastructure companies (like Alchemy, QuickNode, or the Ethereum Foundation) who build **faucet websites** to distribute these pre-allocated coins in tiny drops to the public.
+
+---
+
+### 2. The Faucet Architecture: Node API Automation
+
+A faucet is simply a standard Web2 website connected to a standard wallet backend.
+
+```
+[ User Address input ] ──1. Post HTTP Request──> [ Faucet Backend Server ]
+                                                           │
+                                                  2. Run Bot Protections
+                                                     (CAPTCHA, Gitcoin Score)
+                                                           │
+                                                           ▼
+[ Sepolia Network ] <──4. Send signed Tx hex─── [ Sign Transaction using ]
+                                                [ Faucet Private Key     ]
+```
+
+1. **User input:** You type your public address `0x71C...397` into the faucet page.
+2. **Backend Validation:** The server runs bot checks (CAPTCHA, checking if your Gitcoin Passport score is high enough, or requiring a Google login) to make sure you aren't a script trying to drain the faucet.
+3. **Automated Transaction:** If validated, the faucet backend loads its own pre-funded wallet, creates a standard transfer transaction: `TO: user_address, VALUE: 0.5 Sepolia ETH`, signs it with its faucet private key, and broadcasts it to the network.
+
+---
+
+### 3. Layman Explanation: The Public Fountain
+
+Imagine a public park (the Sepolia network). The park has a giant, massive water storage tank installed underground by the city developers during the park's construction (the Genesis Pre-allocation).
+
+If the tank had an open, unmetered pipe:
+* A greedy company would show up with a giant tanker truck, pump all the water out in 5 minutes, and leave the tank dry.
+* Regular children playing in the park would have zero water to drink.
+
+To prevent this, the park developers install a **drinking fountain with a button (the Faucet)**. 
+* When you press the button, a tiny stream of water runs for exactly 5 seconds (0.5 ETH) so you can take a drink.
+* The button has a delay timer (rate limits) preventing you from holding it down or tapping it 100 times in a row.
+
+The water comes from the underground storage tank, which was filled by the city developers for free specifically to let park visitors practice using the facilities.
+
+---
+
+### 4. Why Faucets Require Gitcoin Passports or API Keys
+
+You might ask: *If testnet ETH is worthless, why are faucets so stingy? Why do they force me to connect Google or verify my phone number just to get 0.2 ETH?*
+
+The answer is **Bot Prevention**.
+
+Even though testnet coins have zero monetary value, **spammers and botnets try to drain faucets constantly**. 
+* They want to hoard massive balances of testnet ETH to run spam scripts, execute distributed denial-of-service (DDoS) attacks on testnets, or resell the tokens on sketchy secondary markets to lazy developers.
+* If bots drain the faucet balances, the testnet runs out of easily accessible tokens, making it impossible for real new developers to build and learn.
+
+By enforcing strict identity walls, faucets ensure that the free genesis testnet supply is reserved for actual human builders.
+
+---
+
+<Diagram type="faucet-model" caption="Faucet servers hold pre-allocated testnet wallets created at network genesis, using strict bot protection filters to automate mini-grant transfers to active human developers." />
+
+---
+
+<LessonChallenge>
+  Visit a popular testnet faucet (like the Alchemy Sepolia Faucet). Take note of the identity verifications required (e.g. having a minimum balance on Mainnet, logging in, or solving CAPTCHAs). Why is this verification essential to preserving the free sandbox ecosystem?
+</LessonChallenge>
