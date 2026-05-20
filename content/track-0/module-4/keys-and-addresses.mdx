@@ -1,0 +1,156 @@
+---
+title: "Private keys, public keys, addresses"
+description: "Asymmetric cryptography for humans. Your private key IS your identity. Coins live on-chain, not inside your wallet app."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 4
+moduleName: "Wallets & Identity"
+lesson: 1
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["cryptography", "keys", "identity"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Key derivation visualization panel and signing animation for the Visual Blockchain Simulator."
+---
+
+# Private Keys, Public Keys, Addresses
+
+Here's the single biggest misconception I had for months: **I thought my ETH was inside MetaMask.** Like coins in a digital piggy bank, sitting on my hard drive. I even avoided uninstalling MetaMask because I was afraid I'd "lose my money."
+
+I was completely wrong. My ETH was never in MetaMask. It was never on my computer. It existed — and still exists — as a number in a massive global spreadsheet running on thousands of machines around the world.
+
+MetaMask just holds **the key** that lets me write to that spreadsheet.
+
+---
+
+### 1. The Problem: Identity Without a Server
+
+In Web2, identity is simple: you create an account (email + password), the server stores it in a database, and when you log in, the server checks your credentials. Your identity exists because the server says it does.
+
+On a public blockchain, **there is no server.** There's no account creation form. There's no "forgot my password" flow. Nobody runs a user database.
+
+So how does the blockchain know who you are?
+
+**Answer: Mathematics.** Your identity on the blockchain is a mathematical relationship between three things: a private key, a public key, and an address.
+
+---
+
+### 2. Layman Explanation: The Signature That Can't Be Forged
+
+Imagine you're a medieval king, and you need to send sealed orders to distant generals. You have a personal signet ring — carved with a completely unique pattern that no one else can replicate.
+
+- Your **private key** is the ring itself — the physical object you guard with your life
+- Your **public key** is the wax impression the ring leaves — anyone can examine it to verify it came from your ring
+- Your **address** is your name plate outside the castle — a short label that identifies you publicly
+
+When you seal a document:
+1. You press your ring (private key) into hot wax on the letter
+2. Anyone who receives the letter can compare the wax pattern (public key) against your known seal
+3. If it matches, they know: "This order genuinely came from the king"
+
+**The crucial property:** Someone can verify your seal without ever seeing your ring. They cannot forge new seals from the wax impression. The ring → impression direction is one-way.
+
+This is exactly how blockchain cryptography works.
+
+---
+
+### 3. Technical Explanation: The Derivation Chain
+
+<Diagram type="key-derivation" caption="Private key → public key → address. Each arrow is a one-way mathematical function. You can never reverse the direction." />
+
+Here's the exact pipeline that creates your blockchain identity:
+
+**Step 1: Generate a Private Key**
+
+Your private key is just a random 256-bit number. That's it. A very large random number.
+
+```typescript
+// A private key is literally a random 256-bit integer
+// Example (DO NOT USE — this is for illustration only):
+const privateKey = "0x4c0883a69102937d6231471b5dbb6204fe51296170827936ea5e0b39a6d47f7c";
+// This is 64 hex characters = 256 bits of entropy
+// There are more possible private keys than atoms in the observable universe
+```
+
+**Step 2: Derive the Public Key (secp256k1)**
+
+The private key is multiplied by a special point on an elliptic curve (secp256k1 — the same curve Bitcoin uses). This produces a 512-bit public key. This operation is mathematically one-way: you cannot compute the private key from the public key.
+
+**Step 3: Derive the Address (Keccak-256)**
+
+Take the public key, hash it with Keccak-256, and take the last 20 bytes. Prefix with `0x`. That's your Ethereum address.
+
+```typescript
+// The full derivation in ethers.js:
+import { Wallet } from "ethers";
+
+const wallet = Wallet.createRandom();
+console.log("Private key:", wallet.privateKey);   // 0x4c0883a6...
+console.log("Public key:",  wallet.publicKey);     // 0x04ab83c9...
+console.log("Address:",     wallet.address);       // 0x71C7656E...
+
+// The address IS your identity on the blockchain
+// It's derived deterministically from your private key
+// Same private key → always same address
+```
+
+---
+
+### 4. The Key Insight: Where Your Coins Actually Live
+
+<Diagram type="signing-flow" caption="When you sign a transaction, your private key never leaves your device. Only the mathematical signature is broadcast." />
+
+Your coins are **not inside any wallet app.** They exist as entries in the Ethereum global state — a mapping of addresses to balances:
+
+```typescript
+// Conceptual representation of Ethereum state
+// This "database" runs on ~7,000+ nodes worldwide
+const ethereumState = {
+  "0x71C7656E...": { balance: 1500000000000000000n }, // 1.5 ETH
+  "0xBobAddr...":  { balance: 800000000000000000n },  // 0.8 ETH
+  // ... millions of entries
+};
+
+// MetaMask doesn't store this. It READS it via an RPC call:
+// eth_getBalance("0x71C7656E...") → "0x14D1120D7B160000"
+```
+
+When you "send ETH," you're not moving a file from your computer. You're signing a mathematical proof that says "I own the private key for address 0x71C7..., and I authorize subtracting 0.1 ETH from my entry and adding it to Bob's entry." Validators verify your signature, update the global state, and seal it into a block.
+
+MetaMask just holds the key. The money was never there.
+
+---
+
+<RealityCheck>
+  If you lose your private key (or seed phrase), no one can help you. There is no "forgot password" email. There is no customer support phone number. There is no central authority that stores a backup. The private key IS the identity. If it's gone, the ETH at that address is permanently inaccessible — it still exists on the blockchain, but no one can ever sign transactions for it again. This is the fundamental tradeoff of self-custody.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Thought my ETH was "in" MetaMask. Considered uninstalling MetaMask to "move" my crypto to a different wallet. Eventually learned that reinstalling MetaMask with the same seed phrase restores full access — because the coins were never in MetaMask. They were always on-chain. The seed phrase just regenerates the same private key, which derives the same address, which points to the same on-chain balance.
+</MistakeCallout>
+
+---
+
+<KeyConfusion>
+  **"If my address is public, can someone steal my ETH by knowing it?"**
+
+  No. Your address is derived from your public key, which is derived from your private key. Each derivation is a one-way function. Knowing your address tells someone nothing about your private key. They can see your balance (it's public), but they cannot sign transactions for your account. Only the private key holder can do that.
+</KeyConfusion>
+
+---
+
+<LessonChallenge>
+  Open etherscan.io and look up Vitalik Buterin's public address (0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045). You can see his entire balance and transaction history — it's all public. Now think: why can't anyone just take his ETH, if the balance is visible to everyone?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  The Visual Blockchain Simulator includes an animated key derivation panel that steps through: entropy → private key → elliptic curve multiplication → public key → Keccak hash → address. This lesson's mental model drives the entire signing animation component.
+</HeroProject>
