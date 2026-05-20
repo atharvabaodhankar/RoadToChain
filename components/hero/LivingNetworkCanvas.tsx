@@ -194,7 +194,7 @@ export default function LivingNetworkCanvas() {
         const targetY = height * targetRatioY;
 
         // Apply background drift physics (extremely subtle to maintain calm engineered restraint)
-        const driftScale = 3.5 * (1 - p);
+        const driftScale = 1.2 * (1 - p);
         const driftX = Math.sin(time * 0.008 + node.driftOffset) * driftScale;
         const driftY = Math.cos(time * 0.008 + node.driftOffset * 1.3) * driftScale;
 
@@ -399,7 +399,7 @@ export default function LivingNetworkCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-60"
+      className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-45"
       style={{ mixBlendMode: "screen" }}
     />
   );

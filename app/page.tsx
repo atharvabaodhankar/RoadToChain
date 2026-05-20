@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Star, AlertTriangle } from "lucide-react";
 import { tracks } from "@/lib/curriculum";
@@ -150,6 +150,11 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const { scrollY: motionScrollY } = useScroll();
+  const bgY = useTransform(motionScrollY, [0, 500], [0, 70]);
+  const leftY = useTransform(motionScrollY, [0, 500], [0, 25]);
+  const rightY = useTransform(motionScrollY, [0, 500], [0, -30]);
+
   const phase = scrollY < 120 ? 1 : scrollY < 320 ? 2 : 3;
 
   // Render responsive logs for the telemetry console
@@ -160,22 +165,24 @@ export default function HomePage() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden border-b border-border px-4 pb-16 pt-28 sm:px-6 lg:px-8 bg-bg">
         {/* Immersive high-performance physics background canvas */}
-        <LivingNetworkCanvas />
+        <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none z-0">
+          <LivingNetworkCanvas />
+        </motion.div>
 
         {/* Ambient dark computational void background glows */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-0">
+        <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 flex items-center justify-center z-0">
           <div className="h-[500px] w-[800px] rounded-full bg-accent/5 blur-[140px] opacity-70" />
-        </div>
+        </motion.div>
 
         <div className="relative mx-auto max-w-7xl w-full z-10">
           {/* Asymmetric 12-column grid container */}
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center min-h-[75vh]">
             
             {/* LEFT COLUMN: Editorial Typography & Human Layer (col-span-7) */}
-            <div className="lg:col-span-7 relative z-10 flex flex-col justify-center text-left">
+            <motion.div style={{ y: leftY }} className="lg:col-span-7 relative z-10 flex flex-col justify-center text-left">
               
               {/* Monospace Interactive State Badge */}
-              <div className="mb-8 inline-flex self-start items-center gap-2.5 rounded-full border border-border/80 bg-bg2/90 px-3.5 py-2 font-mono text-[10px] sm:text-[11px] hover:border-border2 transition-all">
+              <div className="mb-8 inline-flex self-start items-center gap-2.5 rounded-full border border-border/40 bg-bg2/50 px-3.5 py-2 font-mono text-[10px] sm:text-[11px] opacity-40 hover:opacity-100 hover:border-border/80 transition-all duration-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
                 <span className="text-dim">ATMOSPHERE_STATUS:</span>
                 <span className={`font-semibold transition-colors duration-300 ${
@@ -187,38 +194,20 @@ export default function HomePage() {
 
               {/* Offset Cinematic Headline Block */}
               <div className="relative">
-                {/* Floating monospaced human annotations fading out on scroll understanding progression */}
+                {/* Repositioned & interactive handwritten comments floating on left boundaries */}
                 <motion.div
-                  animate={{ 
-                    opacity: phase === 1 ? 0.75 : phase === 2 ? 0.25 : 0.04,
-                    y: phase === 1 ? [0, -4, 0] : 0,
-                  }}
+                  animate={{ y: phase === 1 ? [0, -4, 0] : 0 }}
                   transition={{ duration: 5.2, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
-                  className="absolute -top-12 left-4 font-mono text-[11px] text-amber-500/60 font-semibold hidden md:block select-none pointer-events-none"
+                  className="absolute -top-14 left-4 font-mono text-[10px] sm:text-[11px] text-amber-500 font-semibold hidden md:block select-none cursor-pointer opacity-[0.15] hover:opacity-90 hover:text-amber-400 transition-all duration-300"
                   style={{ transform: "rotate(-3deg)" }}
                 >
                   {"// \"this confused me for weeks\""}
                 </motion.div>
 
                 <motion.div
-                  animate={{ 
-                    opacity: phase === 1 ? 0.8 : phase === 2 ? 0.3 : 0.04,
-                    y: phase === 1 ? [0, 4, 0] : 0,
-                  }}
-                  transition={{ duration: 4.5, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
-                  className="absolute top-28 right-4 lg:-right-4 font-mono text-[11px] text-red-400/60 font-semibold hidden md:block select-none pointer-events-none"
-                  style={{ transform: "rotate(2deg)" }}
-                >
-                  {"// \"why tf do we need MetaMask?\""}
-                </motion.div>
-
-                <motion.div
-                  animate={{ 
-                    opacity: phase === 1 ? 0.75 : phase === 2 ? 0.22 : 0.04,
-                    y: phase === 1 ? [0, -3, 0] : 0,
-                  }}
+                  animate={{ y: phase === 1 ? [0, -3, 0] : 0 }}
                   transition={{ duration: 5.8, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
-                  className="absolute -bottom-10 left-24 font-mono text-[11px] text-purple-400/60 font-semibold hidden md:block select-none pointer-events-none"
+                  className="absolute -bottom-14 left-32 font-mono text-[10px] sm:text-[11px] text-purple-400 font-semibold hidden md:block select-none cursor-pointer opacity-[0.15] hover:opacity-90 hover:text-purple-300 transition-all duration-300"
                   style={{ transform: "rotate(-1.5deg)" }}
                 >
                   {"// \"why does failed tx still cost money 😭\""}
@@ -268,19 +257,29 @@ export default function HomePage() {
               </div>
 
               {/* Monospace details telemetry footer */}
-              <div className="mt-12 font-mono text-[10px] text-dim flex flex-wrap gap-x-6 gap-y-2 border-t border-border/40 pt-5">
+              <div className="mt-12 font-mono text-[10px] text-dim flex flex-wrap gap-x-6 gap-y-2 border-t border-border/40 pt-5 opacity-[0.20] hover:opacity-[0.60] transition-opacity duration-300">
                 <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> PEERS_ONLINE: 40_LIVE</span>
                 <span>LATENCY: 42ms</span>
                 <span>GAS_EST: 18_GWEI</span>
                 <span>RECON: ACTIVE</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* RIGHT COLUMN: Living Systems Telemetry Panel (col-span-5) */}
-            <div className="lg:col-span-5 relative z-10 w-full flex items-center justify-center">
+            <motion.div style={{ y: rightY }} className="lg:col-span-5 relative z-10 w-full flex items-center justify-center">
               
+              {/* Comment 2 orbiting the console panel */}
+              <motion.div
+                animate={{ y: phase === 1 ? [0, 4, 0] : 0 }}
+                transition={{ duration: 4.5, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
+                className="absolute -top-10 -left-12 font-mono text-[10px] sm:text-[11px] text-red-400 font-semibold hidden lg:block select-none cursor-pointer opacity-[0.15] hover:opacity-90 hover:text-red-300 transition-all duration-300 z-20"
+                style={{ transform: "rotate(2deg)" }}
+              >
+                {"// \"why tf do we need MetaMask?\""}
+              </motion.div>
+
               {/* Glassmorphic systems dashboard wrapper */}
-              <div className="w-full max-w-md rounded-2xl border border-border/80 bg-[#070708]/90 backdrop-blur-lg p-5 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-border2 hover:shadow-accent-glow group">
+              <div className="w-full max-w-md rounded-2xl border border-border/40 bg-[#070708]/95 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-border/80 hover:shadow-accent-glow group">
                 
                 {/* Background grid texture inside component */}
                 <div className="absolute inset-0 bg-grid-engineering opacity-25 pointer-events-none" />
@@ -403,22 +402,30 @@ export default function HomePage() {
                 </div>
 
                 {/* Subsystem 2: Scroll-reactive transaction terminal */}
-                <div className="h-36 w-full rounded bg-[#070708] border border-border p-3.5 font-mono text-[10px] leading-relaxed text-zinc-400 overflow-hidden flex flex-col justify-end relative z-10">
-                  <div className="space-y-1.5">
-                    {activeLogs.map((log, index) => (
-                      <div key={index} className="flex gap-2.5 items-start animate-fade-in">
-                        <span className={`shrink-0 ${
-                          log.type === "warn" ? "text-red-400" : log.type === "sync" ? "text-indigo-400 animate-pulse" : "text-emerald-400 font-bold"
-                        }`}>
-                          {log.icon}
-                        </span>
-                        <span className="text-zinc-300 select-all font-mono break-all">{log.text}</span>
-                      </div>
-                    ))}
+                <div className="h-40 w-full rounded bg-[#030304]/80 border border-border/50 p-4 font-mono text-[10px] leading-relaxed text-zinc-400 overflow-hidden flex flex-col justify-end relative z-10">
+                  <div className="space-y-2">
+                    {activeLogs.map((log, index) => {
+                      const opacityClass = 
+                        index === 0 ? "opacity-[0.15]" :
+                        index === 1 ? "opacity-[0.30]" :
+                        index === 2 ? "opacity-[0.50]" :
+                        index === 3 ? "opacity-[0.70]" :
+                        "opacity-[0.90]";
+                      return (
+                        <div key={index} className={`flex gap-2.5 items-start animate-fade-in transition-all duration-500 ${opacityClass}`}>
+                          <span className={`shrink-0 ${
+                            log.type === "warn" ? "text-red-400/90" : log.type === "sync" ? "text-indigo-400/90 animate-pulse" : "text-emerald-400 font-bold"
+                          }`}>
+                            {log.icon}
+                          </span>
+                          <span className="text-zinc-200 select-all font-mono break-all">{log.text}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
             
           </div>
         </div>
