@@ -1,0 +1,120 @@
+---
+title: "Wallets don't store coins — the biggest mental hurdle"
+description: "Coins live on the global ledger. Your wallet is just a bundle of signing credentials."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 4
+moduleName: "Wallets & Identity"
+lesson: 2
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["wallets", "security", "interactive"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Correct architectural mental model of identity-based state interactions."
+---
+
+# Wallets Don't Store Coins: The Biggest Mental Hurdle
+
+Let's start with a mental experiment. 
+
+Imagine you wake up tomorrow morning, open your laptop, and **your MetaMask browser extension is completely gone.** Deleted. Vanished. 
+
+Your heart stops. You had $1,000 worth of ETH in that account. 
+
+Panic-stricken, you open Chrome, download MetaMask again, click "Import Wallet," and carefully type in your 12-word seed phrase. 
+
+You press enter. A loading spinner spins for three seconds. And then—
+
+**BOOM.** 
+
+Your full balance of $1,000 is sitting right there, safe and sound. 
+
+How did that happen? If MetaMask was deleted from your hard drive, why didn't your money vanish with it? 
+
+Because **your coins never lived inside MetaMask in the first place.**
+
+---
+
+### 1. The Core Realization: Coins Never Move
+
+In the physical world, your leather wallet holds cash. If you lose your wallet, the cash is gone. If someone steals your wallet, they have your physical money.
+
+But in the blockchain world, a wallet contains **exactly zero coins**.
+
+Ethereum, Bitcoin, and all other public blockchains are simply **shared global databases**. There is a massive spreadsheet running across thousands of validator nodes globally. This spreadsheet maps public addresses (accounts) to balances:
+
+| Account (Public Address) | Balance |
+| :--- | :--- |
+| `0x71C...397` | 1.42 ETH |
+| `0x3b8...a6c` | 25.00 ETH |
+| `0x14b...f5a` | 0.00 ETH |
+
+When someone sends you 1 ETH, absolutely nothing is downloaded to your browser or phone. Instead, validators update the global spreadsheet: they subtract 1 ETH from the sender's row and add 1 to your row. 
+
+Your wallet is not a vault holding coins. **Your wallet is a key manager holding the cryptographic signing credentials (private keys) that authorize updates to your row in the database.**
+
+---
+
+### 2. Layman Explanation: The Mailbox Analogy
+
+Imagine a giant wall of glass mailboxes in a public square. 
+
+Each mailbox has:
+1. **A public slot:** Anyone can drop a letter in. Everyone can look through the glass and see how many letters are inside. This is your **Public Address**.
+2. **A private key:** Only the owner of the mailbox has the physical key to open the door and take letters out or send new ones. This key is your **Private Key**.
+
+Your "wallet" is simply the physical metal key you hold in your hand. 
+* If you lose your key, the mail doesn't disappear from the mailbox. The mail remains safely inside the glass box in the public square. But *you can never open it again*.
+* If someone steals your key, they can open the mailbox and take everything out.
+
+---
+
+### 3. Technical Breakdown: Verification vs. Storage
+
+From a system design perspective, a wallet is a wrapper around an **Asymmetric Cryptographic Keypair**. 
+
+```
++--------------------------------------------------------+
+|                      YOUR WALLET                       |
+|                                                        |
+|  [ Private Key ] (Keep Secret!)                        |
+|        │                                               |
+|        ▼ (One-way Elliptic Curve Math)                 |
+|  [ Public Key ]                                        |
+|        │                                               |
+|        ▼ (Hash Function)                               |
+|  [ Public Address ] -> Shared on the Blockchain        |
++--------------------------------------------------------+
+```
+
+When you click "Send" in a wallet app:
+1. The wallet creates a transaction payload specifying: `FROM: my_address, TO: recipient_address, VALUE: 1 ETH`.
+2. The wallet signs this payload using your **Private Key** to generate a signature hex string.
+3. The signed transaction is broadcasted to the P2P network.
+4. Validators receive the raw payload and signature, run the verification math against your public key to prove you authorized it, and update the global state database.
+
+At no point did any coins enter or leave your browser's memory.
+
+<Diagram type="wallet-model" caption="Coins live inside state slots stored across all distributed nodes. Wallets only store the cryptographic private key used to sign database state transition requests." />
+
+---
+
+<RealityCheck>
+  "Hardware wallets" like Ledger or Trezor do not store coins either. They are simply specialized offline computers designed to keep your private key isolated from your internet-connected computer so that malware cannot swipe your key during a transaction signing phase.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  bro, I thought this too 😭. I suggested blockchain for a simple school attendance system in year 1. I thought deletion of the database would require recreating the tokens on clients. A Google Sheet would have worked better, cost nothing, and been faster. Blockchain adds cost and complexity — only use it when trust between untrusted parties is the actual problem.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Explain the mailbox analogy to a non-technical friend. Make sure to emphasize the difference between their public address (what they share) and their seed phrase (what they must protect).
+</LessonChallenge>
