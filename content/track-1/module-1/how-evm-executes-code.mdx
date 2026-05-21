@@ -1,0 +1,125 @@
+---
+title: "How the EVM executes code — the virtual stack machine"
+description: "Deep dive into the Ethereum Virtual Machine: stack depth, memory allocations, persistent storage slots, and instruction execution cycles."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 15
+tags: ["EVM", "bytecode", "execution"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core internal knowledge required for low-level assembly (Yul) and storage packing gas optimization."
+---
+
+# How the EVM Executes Code: The Virtual Stack Machine
+
+Let's address the low-level developer nightmare:
+
+You write a gorgeous Solidity contract. You add a few tracking metrics. You hit compile. 
+
+**`CompilerError: Stack too deep. Try compiling with type adjustments.`**
+
+You stare at the screen in pure rage: *My local variables are just a mapping, three uints, and two addresses! Why is the compiler complaining about 'depth' when I have 32GB of RAM on my machine?*
+
+bro, I thought this too 😭. 
+
+I treated the smart contract like code running on standard Web2 hardware with limitless resources, completely unaware of the **Ethereum Virtual Machine (EVM)**—a highly sandboxed, globally distributed virtual stack machine designed with extreme resource constraints.
+
+Let’s trace exactly what happens inside a validator's CPU when your contract executes.
+
+---
+
+### 1. The Core Architecture: Three Storage Regions
+
+Unlike standard computer processors that have access to a single shared heap memory, the EVM operates with **three distinct memory regions**, each with its own gas costing models and lifecycles:
+
+```
++-------------------------------------------------------------+
+|                        EVM EXECUTION                        |
+|                                                             |
+|  [ STACK ] (1024 depth, 32-byte words) - Free, ultra-fast   |
+|     ▲                                                       |
+|     ├── [ MEMORY ] (Volatile byte-array) - Cheap, ephemeral |
+|     ▼                                                       |
+|  [ STORAGE ] (Persistent Key-Value Slots) - Expensive, permanent |
++-------------------------------------------------------------+
+```
+
+#### 1. The Stack (Fast & Ephemeral)
+* **What it is:** A standard Last-In-First-Out (LIFO) stack.
+* **Size:** Maximum depth of 1024 elements. Each element is exactly 32 bytes (256 bits).
+* **Cost:** Virtually free.
+* **Constraints:** You can only access the top 16 elements. If you declare more than 16 local variables inside a Solidity function, you hit the brick wall: `Stack too deep`.
+
+#### 2. Memory (Ephemeral Byte Array)
+* **What it is:** A linear, volatile, byte-addressable array.
+* **Lifecycle:** Cleared completely at the end of every transaction execution frame.
+* **Cost:** Cheap, but scales quadratically. The more memory you allocate in a single call, the exponentially more expensive it becomes.
+
+#### 3. Storage (Persistent State)
+* **What it is:** A massive key-value store mapping 32-byte keys to 32-byte values.
+* **Lifecycle:** Permanent. Stored on the hard drives of every validator node worldwide.
+* **Cost:** **Extremely expensive.** Writing to a new storage slot costs 20,000 gas ($), as it represents a permanent expansion of the global blockchain state.
+
+---
+
+### 2. Layman Explanation: The Office Desk Analogy
+
+Imagine your EVM contract execution is a temporary worker hired to process a single order at a desk in an office:
+1. **The Stack is the worker's hands.** They can only hold a few sheets of paper at once (top 16). They can write calculations down, swap them, or throw them away instantly.
+2. **Memory is a scratchpad on the desk.** It’s clean when the worker sits down. They can write long paragraphs, draft schemas, and map variables. But when they finish the order and leave, the desk is wiped completely clean for the next worker.
+3. **Storage is a heavy steel filing cabinet in the corner.** Opening a drawer and permanently filing a folder takes massive time and effort (costs gas). But that folder will stay inside the cabinet forever, and any future worker hired next month can open the drawer, read it, and update it.
+
+---
+
+### 3. The Instruction Cycle (Opcodes)
+
+When compiled, Solidity becomes a string of instructions called **Opcodes** (Operations). Each Opcode is exactly 1 byte.
+
+For example, a simple addition `3 + 5` in EVM bytecode:
+1. `PUSH1 0x03` $\rightarrow$ Pushes value `3` onto the top of the stack.
+2. `PUSH1 0x05` $\rightarrow$ Pushes value `5` onto the top of the stack.
+3. `ADD` $\rightarrow$ Pops the top two values (`5` and `3`), adds them, and pushes the result (`8`) back onto the stack.
+
+Every single Opcode has a fixed gas cost based on the computational resources it requires from a validator's CPU:
+* `ADD`: 3 gas
+* `MSTORE` (write to memory): 3 gas
+* `SSTORE` (write to persistent storage): 20,000 gas (if setting a new value) or 5,000 gas (if updating).
+
+<Diagram type="evm-opcodes" caption="The EVM executes bytecode sequentially using opcodes, popping inputs from the stack, reading/writing to memory, and executing SSTORE to commit permanent states to the global state database." />
+
+---
+
+### 4. Real-World Gas Optimization: Storage Packing
+
+Because writing to a storage slot costs 20,000 gas, and each slot is exactly 32 bytes, Solidity compiles variables sequentially into slots.
+
+If you declare variables inefficiently:
+```solidity
+// Inefficient storage packing (allocates 3 slots = 60,000+ gas to initialize)
+uint128 public a; // 16 bytes (Slot 0)
+uint256 public b; // 32 bytes (Slot 1 - uint256 takes whole slot!)
+uint128 public c; // 16 bytes (Slot 2)
+```
+
+If you group them by size:
+```solidity
+// Optimized packing (allocates 2 slots = saves 20,000+ gas!)
+uint128 public a; // 16 bytes (Slot 0)
+uint128 public c; // 16 bytes (Slot 0 - Packed together!)
+uint256 public b; // 32 bytes (Slot 1)
+```
+
+By understanding how the EVM lays out storage slots, you can save your users substantial mainnet transaction gas fees with simple ordering adjustments.
+
+---
+
+<LessonChallenge>
+  Look up an EVM opcode reference chart (like `evm.codes`). Locate the `SSTORE` and `SLOAD` operations. Compare their base gas costs to basic arithmetic operations like `ADD` or `MUL` to understand why blockchain state storage is the ultimate premium resource.
+</LessonChallenge>
