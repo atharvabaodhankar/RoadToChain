@@ -179,6 +179,26 @@ export const tracks: Track[] = [
             estimatedMinutes: 12
           },
           {
+            slug: "why-sepolia-eth-is-worthless",
+            title: "Why Sepolia ETH is worthless — testnet economics",
+            description: "Testnet coins have no economic value. Understanding why they are strictly for testing.",
+            tags: ["networks", "testnet", "economics"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 8
+          },
+          {
+            slug: "who-creates-faucet-tokens",
+            title: "Who creates faucet tokens and where do they come from?",
+            description: "Faucets as infrastructure gateways. How testnet coins are minted and distributed.",
+            tags: ["networks", "faucets", "security"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
             slug: "transaction-anatomy",
             title: "Anatomy of a transaction",
             description: "EVM transaction payload, fields, signatures, gas fees, and network propagation.",
@@ -189,8 +209,8 @@ export const tracks: Track[] = [
             estimatedMinutes: 12
           },
           {
-            slug: "rpc-explained",
-            title: "RPC explained — your app's phone line to the blockchain",
+            slug: "what-rpc-actually-does",
+            title: "What RPC actually does — your app's phone line to the blockchain",
             description: "JSON-RPC spec. eth_call, eth_blockNumber. Why you need Alchemy or QuickNode.",
             tags: ["rpc", "infrastructure", "interactive"],
             hasDiagram: true,
@@ -227,9 +247,19 @@ export const tracks: Track[] = [
             estimatedMinutes: 10
           },
           {
+            slug: "wallets-dont-store-coins",
+            title: "Wallets don't store coins — the biggest mental hurdle",
+            description: "Coins live on the global ledger. Your wallet is just a bundle of signing credentials.",
+            tags: ["wallets", "security", "interactive"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 12
+          },
+          {
             slug: "what-metamask-does",
             title: "What MetaMask actually does — and doesn't do",
-            description: "It's a key manager, not a wallet. Coins live on-chain, not in MetaMask. UX challenges.",
+            description: "It's a key manager, not a vault. Coins live on-chain, not in MetaMask. UX challenges.",
             tags: ["wallets", "ux", "mistake"],
             hasDiagram: true,
             hasMistake: true,
@@ -247,9 +277,9 @@ export const tracks: Track[] = [
             estimatedMinutes: 11
           },
           {
-            slug: "signing-transactions",
-            title: "Signing a transaction — prove identity without revealing key",
-            description: "ECDSA signatures. Sign a message, verify on-chain. Why signing !== sending.",
+            slug: "how-signing-actually-works",
+            title: "How signing actually works — cryptographic verification",
+            description: "ECDSA signatures. Private keys sign, public keys verify. Why signing does not move gas.",
             tags: ["signatures", "cryptography"],
             hasDiagram: true,
             hasMistake: false,
@@ -354,6 +384,16 @@ export const tracks: Track[] = [
             estimatedMinutes: 14
           },
           {
+            slug: "how-evm-executes-code",
+            title: "How the EVM executes code — the virtual stack machine",
+            description: "Deep dive into the Ethereum Virtual Machine: stack depth, memory allocations, persistent storage slots, and instruction execution cycles.",
+            tags: ["EVM", "bytecode", "execution"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 15
+          },
+          {
             slug: "mappings-vs-arrays",
             title: "Mappings vs arrays — when to use which",
             description: "O(1) lookup vs iteration cost. Loop boundaries on mappings.",
@@ -362,6 +402,16 @@ export const tracks: Track[] = [
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 12
+          },
+          {
+            slug: "how-i-broke-my-first-voting-system",
+            title: "How I broke my first voting system — a gas disaster",
+            description: "A flagship case study in Solidity anti-patterns: on-chain string storage, array traversals, and hitting the Block Gas Limit.",
+            tags: ["architecture", "security", "gas", "mistake"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 16
           },
           {
             slug: "events-logging",
@@ -420,9 +470,9 @@ export const tracks: Track[] = [
         description: "Compiling, bytecode, ABI, and network verification.",
         lessons: [
           {
-            slug: "what-is-deployment",
-            title: "What deployment actually means",
-            description: "Bytecode compilation, creation tx, and immutability.",
+            slug: "what-deployment-actually-means",
+            title: "What deployment actually means — validator execution",
+            description: "Bytecode compilation, constructor execution, contract address creation, and validators storing contract state.",
             tags: ["bytecode", "deployment", "diagram"],
             hasDiagram: true,
             hasMistake: false,
@@ -430,9 +480,9 @@ export const tracks: Track[] = [
             estimatedMinutes: 12
           },
           {
-            slug: "abi-specification",
-            title: "ABI — the contract's API specification",
-            description: "JSON interface, selectors, and frontend bindings.",
+            slug: "abi-as-translator",
+            title: "ABI as translator — mapping frontend to bytecode payloads",
+            description: "JSON interfaces, function selectors, encoding args, and translating frontend calls to raw hex payloads.",
             tags: ["abi", "frontend"],
             hasDiagram: false,
             hasMistake: false,
@@ -758,6 +808,16 @@ export const tracks: Track[] = [
             estimatedMinutes: 13
           },
           {
+            slug: "blockchain-is-not-your-database",
+            title: "Blockchain is NOT your database — hybrid design rules",
+            description: "Crucial system design architectures: ProofChain, Firebase caching, IPFS hashing, event indexing, and resolving query issues.",
+            tags: ["system-design", "architecture", "database"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 15
+          },
+          {
             slug: "onchain-boundaries",
             title: "What goes on-chain vs off-chain",
             description: "Proofs vs data. Gas optimization boundaries.",
@@ -899,6 +959,16 @@ export const tracks: Track[] = [
             hasMistake: true,
             hasProject: false,
             estimatedMinutes: 12
+          },
+          {
+            slug: "why-web3-mobile-onboarding-sucks",
+            title: "Why Web3 mobile onboarding sucks — and the Privy solution",
+            description: "In-app browser issues, deep linking wallet failures, and how embedded wallets + social logins provide the ultimate mobile onboarding flow.",
+            tags: ["ux", "mobile", "wallets", "mistake"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 14
           },
           {
             slug: "erc4337-abstractions",
