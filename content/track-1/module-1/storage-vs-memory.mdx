@@ -1,0 +1,104 @@
+---
+title: "Storage vs Memory"
+description: "Storage, memory, and calldata. Why copying arrays behaves differently and costs different gas."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 2
+difficulty: "intermediate"
+estimatedMinutes: 12
+tags: ["storage", "memory", "calldata"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core data location rules required to prevent state mutation bugs and array gas waste."
+---
+
+# Storage vs Memory: Blueprint vs Concrete Floor
+
+Let's look at a weird Solidity bug that leaves almost every beginner pulling their hair out:
+
+You write a function to update an item in a list of users. You fetch the user, modify their status field to `true`, and exit. But when you check the blockchain state later, **absolutely nothing changed.** The user's status is still set to `false`.
+
+I genuinely made this mistake early on. I spent hours debugging my frontend, thinking MetaMask was sending junk arguments, before I realized the compiler was silently warning me about a fundamental concept: **Data Locations**.
+
+Solidity has three locations where data is loaded: `storage`, `memory`, and `calldata`. Understanding them is critical to making your state changes persist.
+
+---
+
+### 1. The Metaphor: The Blueprint and the Stone Wall
+
+To make this instantly clear, imagine you are a general contractor:
+* **Storage (The Stone Wall):** Declaring a variable as `storage` is like working directly on the physical stone wall of your building. If you pick up a chisel and carve a window into the stone wall, that window exists permanently.
+* **Memory (The Paper Blueprint):** Declaring a variable as `memory` is like photocopying the blueprint of the stone wall onto a sheet of paper, taking it to your desk, and drawing a window on the paper with a pencil. You can draw all you want, but *the actual physical stone wall does not change* unless you go back and chisel the changes into the stone.
+* **Calldata (The Closed Delivery Envelope):** Declaring a variable as `calldata` is like receiving a sealed cargo list envelope from a delivery truck. You can look at the items list inside through the window, but you are not allowed to edit, write on, or alter the paper list at all. It is strictly read-only.
+
+---
+
+<RealityCheck>
+  Whenever you assign a state variable array or struct to a local `memory` variable, Solidity performs a **complete deep copy** of all the elements from the blockchain's hard drive to the validator's RAM memory slots. This deep copy wastes a massive amount of gas. If you only want to read or update a state variable in place, always reference it as a `storage` pointer to save gas!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: The Mutation Bug
+
+Let's look at the exact Solidity code that triggers the status update bug:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract UserRegistry {
+    struct User {
+        string username;
+        bool isActive;
+    }
+
+    User[] public users;
+
+    function addUser(string memory _name) public {
+        users.push(User(_name, false));
+    }
+
+    // ❌ BROKEN: The status change does NOT persist!
+    function deactivateUserMemory(uint256 _index) public {
+        User memory tempUser = users[_index]; // Copies users[_index] to temporary memory
+        tempUser.isActive = false; // Only updates the temporary local copy!
+    }
+
+    // ✅ CORRECT: The status change is written permanently
+    function deactivateUserStorage(uint256 _index) public {
+        User storage pointerUser = users[_index]; // Creates a pointer to slot location
+        pointerUser.isActive = false; // Directly modifies the state!
+    }
+}
+```
+
+* **`memory` Copy:** In `deactivateUserMemory`, the assignment `User memory tempUser = users[_index]` copies the data. Modifying `tempUser.isActive` changes the scratchpad, which is shredded when the function returns.
+* **`storage` Pointer:** In `deactivateUserStorage`, the assignment `User storage pointerUser = users[_index]` does *not* copy data. It creates a memory address reference (pointer) to the persistent blockchain state slot, modifying the stone wall directly.
+
+---
+
+<MistakeCallout>
+  A common beginner mistake is using `memory` as function arguments for large read-only lists. If a function only reads incoming parameters (like a list of addresses in a whitelist check), always declare them as `calldata`. It skips the memory copy step completely, saving users up to 30% in gas fees!
+</MistakeCallout>
+
+---
+
+### 3. Summary of Data Locations
+
+| Location | Persistent? | Editable? | Gas Cost |
+| :--- | :--- | :--- | :--- |
+| **`storage`** | Yes (Blockchain) | Yes | **Extremely High** (Writes to Node Hard Drives) |
+| **`memory`** | No (Wiped on Return) | Yes | **Low** (Reads/Writes to Validator RAM) |
+| **`calldata`** | No (Wiped on Return) | No (Read-Only) | **Cheapest** (Direct transaction payload reference) |
+
+---
+
+<LessonChallenge>
+  Deploy the `UserRegistry` contract in Remix. Add a user. Call `deactivateUserMemory` on index 0, then read the user back. Notice that `isActive` remains true. Now call `deactivateUserStorage` on index 0 and verify that it updates correctly!
+</LessonChallenge>
