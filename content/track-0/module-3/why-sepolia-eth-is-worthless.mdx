@@ -21,13 +21,13 @@ heroProjectContribution: "Prerequisite for understanding mainnet deployment cost
 
 I will be completely honest with you. 
 
-When I first requested Sepolia testnet ETH from a public faucet, typed in my address, and saw `0.5 ETH` land in my MetaMask wallet, my first thought was:
+When I first requested Sepolia testnet ETH from a public faucet, watched it land in my MetaMask wallet, and saw a balance of `0.5 ETH`, my very first thought was:
 
 *"Wait... if Sepolia ETH is free, and 1 ETH is worth $3,000... **why doesn't everyone just do this and become instantly rich?**"*
 
-bro, I thought this too 😭. 
+I made this exact mistake.
 
-I literally spent an hour trying to find a swap bridge or looking up if I could sell my testnet Sepolia ETH on Uniswap for real USDT, thinking I had discovered the ultimate blockchain hack.
+I literally spent an hour searching for cross-chain bridges or looking up if I could sell my testnet Sepolia ETH on Uniswap for real USDT, thinking I had discovered the ultimate cryptographic loop.
 
 Then the hard reality hit me: **Sepolia ETH is completely, 100% worthless.** 
 
@@ -62,7 +62,13 @@ Because there is infinite free supply and zero real-world demand, the market pri
 
 ---
 
-### 3. Layman Explanation: Monopoly Money vs. Real Dollars
+<RealityCheck>
+  Many scammers exploit beginner confusion by listing "Sepolia ETH" for sale on sketchy secondary forums or attempting to swap Sepolia tokens in exchange for real mainnet assets. Testnet tokens have absolutely no economic value, cannot be bridged, and any transaction trading mainnet value for testnet tokens is a scam.
+</RealityCheck>
+
+---
+
+### 3. The Metaphor: Monopoly Money vs. Real Dollars
 
 Imagine you want to practice playing high-stakes Texas Hold'em poker.
 
@@ -75,15 +81,15 @@ To practice, you buy a box of **Monopoly board game money**.
 * They have numbers on them: "$100", "$500".
 * You can bet them, raise, lose them, and count your paper winnings.
 
-But when you finish playing, you can't walk into a real grocery store and buy milk with your Monopoly cash. The cashier will laugh at you. The grocery store only accepts real dollars verified by the central banking ledger. 
+But when you finish playing, you can't walk into a real grocery store and buy milk with your Monopoly cash. The cashier only accepts real dollars verified by the central banking ledger. 
 
 Sepolia ETH is Monopoly money for blockchain developers. Mainnet ETH is real capital.
 
 ---
 
-<RealityCheck>
-  Occasionally, you will see sketchy websites or actors offering to "buy" your testnet Sepolia ETH for real cash, or scammers trying to send you Sepolia tokens in exchange for real items. This is a scam. Testnet tokens cannot be bridged to Mainnet, and they have no economic backing.
-</RealityCheck>
+<MistakeCallout>
+  I once wasted hours trying to figure out why my Uniswap SDK swaps were failing on a testnet, only to realize I was trying to query mainnet liquidity pairs against testnet addresses. Always ensure your contract address registries and provider nodes are aligned to the same testnet environment!
+</MistakeCallout>
 
 ---
 

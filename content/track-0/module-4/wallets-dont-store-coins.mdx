@@ -19,9 +19,9 @@ heroProjectContribution: "Correct architectural mental model of identity-based s
 
 # Wallets Don't Store Coins: The Biggest Mental Hurdle
 
-Let's start with a mental experiment. 
+Let's start with a simple experiment.
 
-Imagine you wake up tomorrow morning, open your laptop, and **your MetaMask browser extension is completely gone.** Deleted. Vanished. 
+Imagine you wake up tomorrow morning, open your browser, and **your MetaMask extension is completely gone.** Deleted. Vanished. 
 
 Your heart stops. You had $1,000 worth of ETH in that account. 
 
@@ -59,17 +59,21 @@ Your wallet is not a vault holding coins. **Your wallet is a key manager holding
 
 ---
 
-### 2. Layman Explanation: The Mailbox Analogy
+### 2. The Metaphor: The Glass Mailbox
 
-Imagine a giant wall of glass mailboxes in a public square. 
+To understand how this operates, imagine a giant wall of glass mailboxes in a public square:
+* **The Mailbox Slot (Public Address):** Anyone can walk up and drop a letter in. Everyone can look through the glass box and see exactly how many letters are inside. You can share this slot with anyone globally.
+* **The Mailbox Door (Private Key):** The box has a unique mechanical lock. Only you hold the physical metal key (the Private Key) that opens the box. 
 
-Each mailbox has:
-1. **A public slot:** Anyone can drop a letter in. Everyone can look through the glass and see how many letters are inside. This is your **Public Address**.
-2. **A private key:** Only the owner of the mailbox has the physical key to open the door and take letters out or send new ones. This key is your **Private Key**.
+Your "wallet" is simply **the physical metal key you hold in your hand.**
+* If you lose your key, the letters do not disappear from the glass box. They are still sitting in the public square. But *you can never open the door again.*
+* If someone steals your key, they don't have to steal the physical mailbox. They just walk up, open the door, and take your letters.
 
-Your "wallet" is simply the physical metal key you hold in your hand. 
-* If you lose your key, the mail doesn't disappear from the mailbox. The mail remains safely inside the glass box in the public square. But *you can never open it again*.
-* If someone steals your key, they can open the mailbox and take everything out.
+---
+
+<RealityCheck>
+  Many beginners believe that hardware wallets (like Ledger or Trezor) "store" their crypto offline. In reality, Ledger contains zero coins. It is simply a highly secure, isolated metal key designed to keep your private key offline, signing transaction payloads inside the hardware so that malware on your computer can never swipe the key during execution.
+</RealityCheck>
 
 ---
 
@@ -93,7 +97,7 @@ From a system design perspective, a wallet is a wrapper around an **Asymmetric C
 
 When you click "Send" in a wallet app:
 1. The wallet creates a transaction payload specifying: `FROM: my_address, TO: recipient_address, VALUE: 1 ETH`.
-2. The wallet signs this payload using your **Private Key** to generate a signature hex string.
+2. The wallet signs this payload using your **Private Key** (opening the mailbox door) to generate a signature hex string.
 3. The signed transaction is broadcasted to the P2P network.
 4. Validators receive the raw payload and signature, run the verification math against your public key to prove you authorized it, and update the global state database.
 
@@ -103,14 +107,8 @@ At no point did any coins enter or leave your browser's memory.
 
 ---
 
-<RealityCheck>
-  "Hardware wallets" like Ledger or Trezor do not store coins either. They are simply specialized offline computers designed to keep your private key isolated from your internet-connected computer so that malware cannot swipe your key during a transaction signing phase.
-</RealityCheck>
-
----
-
 <MistakeCallout>
-  bro, I thought this too 😭. I suggested blockchain for a simple school attendance system in year 1. I thought deletion of the database would require recreating the tokens on clients. A Google Sheet would have worked better, cost nothing, and been faster. Blockchain adds cost and complexity — only use it when trust between untrusted parties is the actual problem.
+  I once deleted MetaMask in a panic because I thought it was buggy, thinking I had lost all my testnet tokens forever. It wasn't until I imported my seed phrase on a different browser that I realized the state is on the chain, not the application memory. Always keep your seed phrase backed up offline!
 </MistakeCallout>
 
 ---
