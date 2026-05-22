@@ -1,3 +1,22 @@
+---
+title: "How the EVM executes code — the virtual stack machine"
+description: "Deep dive into the Ethereum Virtual Machine: stack depth, memory allocations, persistent storage slots, and instruction execution cycles."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 15
+tags: ["EVM", "bytecode", "execution"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core internal knowledge required for low-level assembly (Yul) and storage packing gas optimization."
+---
+
 # How the EVM Executes Code: The Virtual Stack Machine
 
 Let's address a low-level compiler warning that leaves most smart contract developers completely baffled:
@@ -111,5 +130,4 @@ uint256 public b; // 32 bytes (Slot 1)
 
 <LessonChallenge>
   Look at the `evm.codes` interactive website. Locate the gas cost for `SLOAD` (reading a storage slot) versus `MLOAD` (reading a memory byte). Calculate how many memory reads you can perform for the cost of a single storage read.
-</LessonChallenge>orage read.
 </LessonChallenge>

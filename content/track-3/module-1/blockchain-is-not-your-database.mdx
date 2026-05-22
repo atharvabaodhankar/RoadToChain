@@ -21,15 +21,39 @@ heroProjectContribution: "Core architectural pattern utilized in the capstone Pr
 
 When I designed my first Web3 dApp, I treated the smart contract like a standard PostgreSQL database. I thought: *Great! I'll store the user's profile pictures, their full posts, and their string usernames directly inside a Solidity struct! Everything is decentralized, safe, and immutable!*
 
-My app worked in local testing. But when I tried to deploy it on a live network, two massive brick walls hit me:
+My app worked beautifully in local testing. But when I tried to deploy it on a live network, two massive brick walls hit me:
 1. **Gas fees exploded.** Storing a simple 10KB profile picture on-chain would cost over $500 in gas fees on mainnet.
 2. **Querying was virtually impossible.** I couldn't run queries like `SELECT * FROM posts WHERE title LIKE '%web3%' ORDER BY date DESC` because smart contracts don't support indexes or search filters.
 
-This is the ultimate system design realization: **Blockchain is not a database. Blockchain is a trust primitive. You must use hybrid architectures.**
+I genuinely made this mistake early on. This is the ultimate system design realization: **Blockchain is not a database. Blockchain is a trust primitive. You must use hybrid architectures.**
 
 ---
 
-### 1. The Solution: The Hybrid Web3 Stack
+### 1. The Metaphor: The Safe Deposit Box
+
+Imagine you run a global shipping logistics company. 
+
+If you try to store all your heavy shipping containers, delivery trucks, and giant employee paper records inside a **bank safe deposit box (the Blockchain)**:
+* You will run out of space in seconds.
+* The vault storage fees will bankrupt you.
+* To check if a specific package is loaded, you have to drive to the bank, open the box, and manually shuffle through papers.
+
+Instead, the correct hybrid approach is:
+1. You keep the heavy cargo and trucks in your **off-site warehouse (IPFS)**.
+2. You write the shipping logs, employee profiles, and routing tables on your **office computer (Firebase/PostgreSQL)** for fast search.
+3. You take the **cryptographic seal hash (SHA-256 fingerprint)** of the shipping manifest, print it on a small slip of paper, and put *only* that slip of paper inside the **bank safe deposit box (the Blockchain)**.
+
+If anyone tries to alter the cargo in your warehouse or change the logs on your office computer, the signature hashes won't match the slip of paper in the bank vault. You get 100% security at virtually zero cost.
+
+---
+
+<RealityCheck>
+  "Fully decentralized" doesn't mean storing everything on-chain. Storing strings, descriptions, or large structs in Solidity is a production anti-pattern. If a state doesn't need mathematical consensus or double-spend protection, it belongs in standard databases or decentralized storage like IPFS.
+</RealityCheck>
+
+---
+
+### 2. The Solution: The Hybrid Web3 Stack
 
 Production Web3 systems separate concerns across three distinct layers:
 
@@ -51,21 +75,9 @@ Production Web3 systems separate concerns across three distinct layers:
 
 ---
 
-### 2. Layman Explanation: The Safe Deposit Box
-
-Imagine you run a secure shipping logistics company. 
-
-If you try to store all your shipping boxes, physical trucks, and giant employee paper records inside a **bank safe deposit box (the Blockchain)**:
-* You will run out of space in seconds.
-* The bank fees will bankrupted you.
-* To check if a package is loaded, you have to drive to the bank, open the box, and shuffle through papers.
-
-Instead, the correct way is:
-1. You keep the heavy trucks and cargo in your **off-site warehouse (IPFS)**.
-2. You write the shipping logs, employee profiles, and routing tables on your **office computer (Firebase database)** for fast search.
-3. You take the **cryptographic seal hash (SHA-256 fingerprint)** of the shipping manifest, print it on a small slip of paper, and put *only* that slip of paper inside the **bank safe deposit box (the Blockchain)**.
-
-If anyone tries to alter the cargo in your warehouse or change the logs on your office computer, the signature hashes won't match the slip of paper in the bank vault. You get 100% security at virtually zero cost.
+<MistakeCallout>
+  In my first dApp, I stored the user's name as a `string` inside a mapping. Every name change cost users $8 in gas on Polygon during congestion. I refactored it: the username is now stored in a Firestore database, and only the cryptographically signed hash of the user's identity is verified on-chain. Gas fees dropped by 99%.
+</MistakeCallout>
 
 ---
 
@@ -74,26 +86,26 @@ If anyone tries to alter the cargo in your warehouse or change the logs on your 
 In our capstone project, **ProofChain** (a document proof-of-existence registry), we enforce the hybrid system design strictly:
 
 ```
-[ User Uploads PDF Document (10MB) ]
-               │
-               ▼ (Browser-side hashing)
-1. Calculate SHA-256 hash -> "0x8fa3f8..."
-               │
-               ├──────────────────────────────────────────────┐
-               ▼ (Upload File)                                ▼ (Submit Proof Transaction)
-2. Send PDF to IPFS Gateway                     3. Call smart contract:
-               │                                   `registerProof(0x8fa3f8...)`
-               ▼                                              │
-4. IPFS Returns CID -> "QmXyZ..."                              │
-               │                                              ▼
-               │                                4. Validators write proof hash
-               │                                   to state slot: 20k gas!
-               ▼                                              │
-5. Write metadata JSON to DB                                  ▼
-   { "cid": "QmXyZ", "hash": "0x8fa3f8" }        5. Emit ProofRegistered(hash) Event!
-               │                                              │
-               ▼                                              ▼
-[ Next.js frontend fetches DB metadata ] <───6. Subgraph indexes Event for instant query
+            [ User Uploads PDF Document (10MB) ]
+                           │
+                           ▼ (Browser-side hashing)
+             1. Calculate SHA-256 Hash -> "0x8fa3f8..."
+                           │
+             ┌─────────────┴────────────────────────────────┐
+             ▼ (Upload File)                                ▼ (Submit Proof Tx)
+ 2. Send PDF to IPFS Gateway                     3. Call Smart Contract:
+             │                                      `registerProof(0x8fa3f8...)`
+             ▼                                              │
+ 4. IPFS Returns CID -> "QmXyZ..."                          │
+             │                                              ▼
+             │                                4. Validators Write Proof Hash
+             │                                   to State Slot (20k Gas!)
+             ▼                                              │
+ 5. Write Metadata JSON to DB                               ▼
+    { "cid": "QmXyZ", "hash": "0x8fa3f8" }        5. Emit ProofRegistered Event!
+             │                                              │
+             ▼                                              ▼
+ [ Next.js frontend fetches DB metadata ] <───6. Subgraph indexes Event for query
 ```
 
 By hashing the PDF inside the browser *before* broadcasting, the document size could be 10MB or 10GB—it doesn't matter. The transaction payload size remains exactly 32 bytes (the SHA-256 hash). The gas cost is flat, ultra-cheap, and takes seconds to execute!
@@ -101,14 +113,8 @@ By hashing the PDF inside the browser *before* broadcasting, the document size c
 ---
 
 <RealityCheck>
-  "Fully decentralized" doesn't mean storing everything on-chain. Storing strings, descriptions, or large structs in Solidity is a production anti-pattern. If a state doesn't need mathematical consensus or double-spend protection, it belongs in standard databases or decentralized storage like IPFS.
+  Many production Web3 systems use standard relational databases for caching. If you are building a decentralized social app, reading profiles from the blockchain directly on every page load would completely crash your user experience. You must read from a synced SQL cache and only fallback to the node during disputes.
 </RealityCheck>
-
----
-
-<MistakeCallout>
-  In my first dApp, I stored the user's name as a `string` inside a mapping. Every name change cost users $8 in gas on Polygon during congestion. I refactored it: the username is now stored in a Firestore database, and only the cryptographically signed hash of the user's identity is verified on-chain. Gas fees dropped by 99%.
-</MistakeCallout>
 
 ---
 
