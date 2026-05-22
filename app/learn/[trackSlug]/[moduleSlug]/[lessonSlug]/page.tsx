@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Clock, Tag } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import fs from "fs";
+import path from "path";
 
 // Import custom MDX components
 import Diagram from "@/components/mdx/Diagram";
@@ -156,20 +158,9 @@ export default async function LessonPage({ params }: Props) {
   for (const mod of currentTrack.modules) {
     const mSlug = `module-${mod.number.split(".")[1]}`;
     for (const les of mod.lessons) {
-      // Only include if MDX file exists in our static list of implemented lessons
-      const isImplemented =
-        (currentTrack.id === 0 &&
-          (les.slug === "trust-problem" ||
-            les.slug === "transaction-anatomy" ||
-            les.slug === "what-metamask-does" ||
-            les.slug === "why-gas-exists" ||
-            les.slug === "keys-and-addresses" ||
-            les.slug === "data-location" ||
-            les.slug === "rpc-explained" ||
-            les.slug === "seed-phrases-ux" ||
-            les.slug === "mainnet-vs-testnet")) ||
-        (currentTrack.id === 4 && les.slug === "why-metamask-ux-fails") ||
-        (currentTrack.id === 5 && les.slug === "poseidon-vs-sha256");
+      // Dynamic filesystem check to see if the lesson is implemented
+      const filePath = path.join(process.cwd(), "content", currentTrack.slug, mSlug, `${les.slug}.mdx`);
+      const isImplemented = fs.existsSync(filePath);
 
       if (isImplemented) {
         allTrackLessons.push({
