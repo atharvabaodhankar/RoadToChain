@@ -1,0 +1,118 @@
+---
+title: "Structs and Data Modeling"
+description: "Modeling users, custom nested struct arrays, and on-chain database schemas."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 4
+difficulty: "intermediate"
+estimatedMinutes: 14
+tags: ["structs", "data-modeling", "gas"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core data layout design required for scalable on-chain user registries and voting models."
+---
+
+# Structs and Data Modeling: The Packaged Backpack
+
+Let's address a classic Web2 developer habit:
+
+When designing a user database schema in MongoDB or PostgreSQL, we are highly generous with fields. We create nesting structures, add full dynamic sub-lists (`posts: Array<Post>`), write long text strings for user Bios, and store timestamps freely. In Web2, data storage is essentially free.
+
+I genuinely carried this exact habit into Solidity early on. I designed a `User` struct that looked like this:
+
+```solidity
+// ❌ HIGH-GAS DISASTER SCHEMA
+struct User {
+    string name;
+    string bio;
+    uint256 registeredAt;
+    address wallet;
+    uint256[] friendIds;
+}
+```
+
+My code worked in local sandboxes. But under production load, a simple register call cost users $12 in gas. The dynamic bio strings, on-chain lists, and unpacked integers were hemorrhaging gas on every write.
+
+To build production-grade Solidity contracts, you must learn to pack your custom **Structs** with strict, mathematical restraint.
+
+---
+
+### 1. The Metaphor: The Airline Carry-On Backpack
+
+Imagine you are packing a single carry-on backpack for a long budget airline flight:
+* The airline enforces a strict box size rule: the bag must fit inside an exact 32-liter metal box (our **32-byte Storage Slot**).
+* If you throw loose, unpacked clothes inside the bag, it bulges instantly, and the airline gate agent forces you to pay a massive $100 penalty fee (costs an extra 20,000 gas slot).
+* Instead, you buy packing cubes, roll your shirts tightly, squeeze the air out, and group small items together. By packing compactly, you fit the exact same amount of cargo into a bag half the size, paying zero fees.
+
+Declaring variables inside a Solidity struct is exactly like packing this bag. By ordering variables by size, the compiler automatically compresses them to squeeze into as few storage slots as possible.
+
+---
+
+<RealityCheck>
+  Solidty compiles struct variables sequentially. If you place a large 32-byte variable (like `uint256`) between two smaller variables (like `uint128` or `uint64`), you block the compiler from compressing them. Always group smaller integer types sequentially by size inside your structs!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: Struct Packing and Arrays
+
+Let's compare an unpacked struct with an optimized, packed struct:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract ProfileRegistry {
+    // ❌ UNOPTIMIZED: Rents 3 separate storage slots (60,000+ gas)
+    struct BadUser {
+        uint128 registrationId; // 16 bytes (Slot 0)
+        uint256 lastLogin;       // 32 bytes (Slot 1 - uint256 takes the entire slot!)
+        uint128 score;           // 16 bytes (Slot 2)
+    }
+
+    // ✅ PACKED: Grouped by size. Rents only 2 slots (Saves 20,000 gas!)
+    struct PackedUser {
+        uint128 registrationId; // 16 bytes (Slot 0 - Packed!)
+        uint128 score;           // 16 bytes (Slot 0 - Packed!)
+        uint256 lastLogin;       // 32 bytes (Slot 1)
+    }
+
+    PackedUser[] public users;
+
+    function register(uint128 _regId, uint128 _score) public {
+        users.push(PackedUser({
+            registrationId: _regId,
+            score: _score,
+            lastLogin: block.timestamp
+        }));
+    }
+}
+```
+
+* **Unpacked Structs:** In `BadUser`, the compiler allocates Slot 0 to the first variable. It sees `lastLogin` requires a full 32 bytes, which cannot fit in the remaining 16 bytes of Slot 0, so it pads Slot 0 and starts a new slot. Then `score` is forced into Slot 2.
+* **Packed Structs:** In `PackedUser`, the compiler packs `registrationId` and `score` into a single 32-byte slot (Slot 0), leaving `lastLogin` to occupy its own clean Slot 1.
+
+---
+
+<MistakeCallout>
+  **The Nested Array Trap:** Never store dynamic arrays (like `uint256[]`) inside a struct that is pushed to a state array. When you load a struct containing a dynamic array, the EVM must calculate dynamic offsets, causing your gas costs to skyrocket. Instead, store those references in a flat, separate `mapping(address => uint256[])` lookup.
+</MistakeCallout>
+
+---
+
+### 3. Core Rules of Smart Contract Data Modeling
+
+1. **Keep Strings Off-chain:** Never store user-generated text, names, bios, or descriptions inside state structs. Store them in a Web2 database or IPFS and only store their 32-byte hash or CID identifier on-chain.
+2. **Order by Size:** Always declare your struct variables in sequential order of size, from largest to smallest, or smallest to largest.
+3. **Use smaller uints cautiously:** Inside memory, smaller uints (like `uint8` or `uint16`) are actually padded to 32 bytes and can cost *more* gas due to conversions. Only use them inside state structs where packing actually saves persistent storage slots!
+
+---
+
+<LessonChallenge>
+  Deploy the `ProfileRegistry` in Remix. Register a user and look at the transaction gas cost. Refactor the struct to add a `bool` variable (which takes 1 byte). Try placing it in different positions within the struct—which placement keeps the gas cost the lowest?
+</LessonChallenge>
