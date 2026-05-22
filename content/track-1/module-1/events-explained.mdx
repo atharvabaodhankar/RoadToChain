@@ -1,0 +1,104 @@
+---
+title: "Events Explained"
+description: "Why smart contracts emit events instead of storing searchable parameters in blockchain state."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 5
+difficulty: "beginner"
+estimatedMinutes: 11
+tags: ["events", "logs", "indexing"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core logging primitive required for tracking real-time events and feeding off-chain caches."
+---
+
+# Events Explained: The Public Megaphone
+
+Let's address the most common architectural confusion every Web3 frontend developer hits:
+
+You want to display a history of all payments made to your contract on a React dashboard. In Web2, you would simply query `SELECT * FROM payments WHERE user_address = '0x71C...'`. 
+
+But in Solidity, you realize you can't search through historical transactions, and storing a list of all payment structs inside a state array costs users immense gas fees. You ask yourself in frustration: 
+
+*"If all transaction data is already written to the blockchain, why do I need to explicitly define and emit **Events**? Can't my frontend just read the history?"*
+
+I genuinely struggled with this too. The breakthrough is realizing that **blockchain nodes are optimized to store current state, not query historical transaction details.** Events are the solution.
+
+---
+
+### 1. The Metaphor: The Megaphone and the Bank Vault
+
+Imagine a busy central bank:
+* **Storage (The Vault Ledger):** Changing a state variable is like walking into the vault and carving a new number onto the vault door. It is highly secure and durable, but the bank staff charges a massive fee (gas) to verify it, and you can only fit a few lines of text on the vault door.
+* **Events (The Megaphone Broadcast):** Emitting an event is like standing in the lobby of the bank, picking up a megaphone, and shouting: *"Alice just deposited $10!"*
+  * It costs **virtually nothing** to shout. The bank guards don't charge you for checking it.
+  * Off-chain observers (like your frontend web application or indexing servers) are sitting in the lobby with clipboards, writing down everything you shout into their local journals (databases) for instant searching.
+  * **The Catch:** The people inside the bank vault (your smart contract's actual code) are wearing heavy earmuffs. **A smart contract cannot hear its own emitted events** or read historical logs during execution!
+
+---
+
+<RealityCheck>
+  Emitting an event costs up to 100x less gas than writing to a state variable. Standard event emission (the `LOG` opcode) costs a flat 375 gas, plus 8 gas per byte of log data. By contrast, writing a single variable to storage (SSTORE) costs up to 20,000 gas. In production systems, you should emit events for history tracking and keep state variables strictly minimal!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: Log Structures & Indexed Parameters
+
+Let's look at how events are implemented in Solidity:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract DonationRegistry {
+    // 1. EVENT DEFINITION: We flag key fields as "indexed" for fast searching
+    event DonationReceived(
+        address indexed donor, 
+        uint256 amount, 
+        uint256 indexed timestamp
+    );
+
+    uint256 public totalDonations;
+
+    function donate() public payable {
+        require(msg.value > 0, "Must send value");
+        
+        totalDonations += msg.value; // Minimal state update
+
+        // 2. EMISSION: Broadcasts the payload off-chain
+        emit DonationReceived(msg.sender, msg.value, block.timestamp);
+    }
+}
+```
+
+* **Indexed Parameters (`topics`):** By marking parameters as `indexed` (up to 3 per event), the EVM stores them in a specialized search index header called **Topics**. This allows frontends and indexers (like The Graph) to filter transactions matching specific values (e.g., *"Find all events where `donor` is Alice"*) instantly, without downloading block headers.
+* **Non-indexed Parameters:** Placed in the `data` portion of the log. They are packed together, highly compressed, and cheap to store, but they cannot be filtered directly in queries.
+
+---
+
+<MistakeCallout>
+  **The Silent Storage Trap:** A common anti-pattern is pushing transaction details (like logs, timestamps, or receipts) to on-chain state arrays just to display them on a website dashboard. Always push those records to off-chain event logs instead. Pushing them to state arrays drains users' wallets on gas for zero functional benefit.
+</MistakeCallout>
+
+---
+
+### 3. Summary of State vs. Events
+
+| Feature | State Variables | Event Logs |
+| :--- | :--- | :--- |
+| **Readable by Contracts?** | **Yes** (during transaction) | **No** (Strictly off-chain) |
+| **Searchable by Frontends?** | No (only individual lookups) | **Yes** (via indexed topics / subgraphs) |
+| **Gas Cost** | **Extremely Expensive** | **Ultra Cheap** |
+| **Lifecycle** | Permanent state memory | Appended to transaction receipts |
+
+---
+
+<LessonChallenge>
+  Think about how an NFT marketplace (like OpenSea) displays a chronological list of bid updates, sales history, and price trends. Where does that history come from? Does the smart contract store all those bids in a massive array, or does it emit events that are indexable off-chain?
+</LessonChallenge>
