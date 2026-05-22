@@ -1,0 +1,107 @@
+---
+title: "Arrays and Mappings"
+description: "Understanding O(1) lookup mappings versus dynamic iteration arrays."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 3
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["arrays", "mappings", "iteration"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core data structures required to prevent out-of-gas lookup bugs in database registries."
+---
+
+# Arrays and Mappings: Locker Rooms and Checklists
+
+Let's trace a classic Web2 database problem:
+
+Imagine you are building a registry of authorized accounts. In PostgreSQL, you would create a `users` table and check if a user is authorized by running `SELECT EXISTS(SELECT 1 FROM users WHERE wallet_address = '0x71C...')`. Behind the scenes, the database queries an index, or shuffles through rows.
+
+When developers learn Solidity, they try to do this by creating a dynamic array `address[] public authorizedUsers;` and checking access by writing a `for` loop that iterates over the entire array list:
+
+```solidity
+// ❌ HIGH-RISK ANTI-PATTERN: Loops scale gas linearly!
+for (uint i = 0; i < authorizedUsers.length; i++) {
+    if (authorizedUsers[i] == msg.sender) return true;
+}
+```
+
+I genuinely thought this was the only way to manage lists. But as the array scales, this simple access check will consume more gas than the block limit allows, permanently freezing your contract!
+
+To build secure, scalable smart contracts, you must master the differences between **Arrays** and **Mappings**.
+
+---
+
+### 1. The Metaphor: The Clipboard Checklist and the Locker Wall
+
+Think of these two structures as completely different physical storage systems:
+* **Arrays (The Clipboard Checklist):** Imagine a long sheet of paper on a clipboard hanging on the wall. Every time you add a user, you write their name at the bottom of the list. If you want to check if a specific person is on the list, you must take the clipboard, start at line 1, and read line-by-line until you find the name or hit the bottom. If the checklist has 10,000 names, your eyes will fall out before you reach the end.
+* **Mappings (The Locker Wall):** Imagine a giant wall of security lockers. Every locker has a label that matches the hash of a wallet address. If you want to check if someone is authorized, you don't look through lists. You go directly to the locker door marked with their address. You put your hand on it—if the locker is unlocked (returns `true`), they are authorized. It takes **exactly one second**, whether there are 5 lockers or 5 million lockers on the wall.
+
+---
+
+<RealityCheck>
+  Mappings in Solidity have **exactly O(1) constant-time lookup complexity**. The EVM hashes the key (`msg.sender`) using Keccak256 math to find the exact, unique storage slot coordinate where the value lives. The size of your mapping has zero impact on transaction gas costs!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: Mappings vs Arrays
+
+Let's compare the two code styles directly:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract AccessControlRegistry {
+    // 1. ARRAY: Ordered list. Great for counting and index list retrieval.
+    address[] public userList;
+
+    // 2. MAPPING: Unordered hash map. Great for instant access checking.
+    mapping(address => bool) public isAuthorized;
+
+    function registerUser() public {
+        require(!isAuthorized[msg.sender], "Already registered"); // O(1) Check!
+        
+        isAuthorized[msg.sender] = true; // Sets slot to true instantly
+        userList.push(msg.sender); // Appends to list for historical tracking
+    }
+    
+    function getUserCount() public view returns (uint256) {
+        return userList.length; // Arrays know their size!
+    }
+}
+```
+
+* **Arrays:** Can be resized, support dynamic iteration, and preserve order. However, searching them takes O(N) linear time and is extremely expensive in gas if iterated on-chain.
+* **Mappings:** Act like global hash maps. They take any key type and link it to a value. However, **mappings have no concept of size, length, or iteration**. You cannot loop over a mapping, and you cannot ask a mapping to list all its keys.
+
+---
+
+<MistakeCallout>
+  **The Loop Disaster Trap:** Never write a write transaction that loops over an array whose size can be inflated by users. This is a critical security vulnerability. If an attacker fills your array with 1,000 dummy entries, your loop will run out of gas, permanently blocking legitimate users from executing the function. This is the exact mistake analyzed in [How I Broke My First Voting System](file:///c:/Users/baodh/OneDrive/Desktop/Projects/LearnBlockchain/content/track-1/module-4/how-i-broke-my-first-voting-system.mdx).
+</MistakeCallout>
+
+---
+
+### 3. Summary of Core Differences
+
+| Feature | Dynamic Array (`type[]`) | Mapping (`mapping(key => val)`) |
+| :--- | :--- | :--- |
+| **Lookup Cost** | O(N) (Linear search required) | **O(1) (Instant)** |
+| **Can Loop/Iterate?** | **Yes** | No |
+| **Has `length` field?** | **Yes** | No |
+| **Key/Index Type** | strictly sequential `uint256` | almost any type (address, bytes32, etc.) |
+
+---
+
+<LessonChallenge>
+  Think about how you would design a system that needs *both* instant access authorization checks and the ability to list all registered users. Hint: look at the hybrid setup inside the `AccessControlRegistry` code above. How do they complement each other?
+</LessonChallenge>
