@@ -1,0 +1,119 @@
+---
+title: "Role-Based Access Control"
+description: "Multi-admin governance, role registries, and OpenZeppelin AccessControl patterns."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 2
+moduleName: "Ownership & Smart Contract Control"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 12
+tags: ["access-control", "roles", "openzeppelin"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core decentralized governance architecture required for multi-admin smart contract registries."
+---
+
+# Role-Based Access Control: The Corporate Badge Levels
+
+Let's address the classic production architecture bottleneck:
+
+You have successfully deployed your smart contract using the `Ownable` pattern. The contract works, and your account is the sole designated `owner`. 
+
+But as your project scales, your operations team says: *"Hey, our automated service script needs to mint reward tokens periodically, and our compliance officer needs to pause transactions during audits. We can't share your single deployer private key! If that key leaks, our entire network gets destroyed!"*
+
+I genuinely faced this exact architectural crisis. I realized that **the single-owner model is a high-risk security vulnerability for production systems.**
+
+You must transition from single ownership to granular **Role-Based Access Control (RBAC)**.
+
+---
+
+### 1. The Metaphor: The Corporate Security Badges
+
+Imagine a secure headquarters of a modern technological corporation:
+* **The Master Office (Single Owner):** A building with only one massive master key. Whoever holds that key has access to the server rooms, can print company stock, pause elevator flows, and fire the CEO. If the owner drops that key in a coffee shop, the company is doomed.
+* **Granular Badges (RBAC):** Instead of a single key, you build an electronic badge scanner system:
+  * **The Minters (Yellow Badge):** Sweeping this badge opens the printing press room door. They cannot pause elevator flows or edit other employees' badges.
+  * **The Compliance Officers (Blue Badge):** Sweeping this badge triggers a lock on all doors during audits (pauses transactions). They cannot access the printing press.
+  * **The HR Administrator (Master Admin):** They cannot print stock or pause doors themselves. Their only power is to program, issue, and revoke electronic badges for others.
+
+This separation of concerns makes your operations highly secure, scalable, and resistant to single-source target compromises.
+
+---
+
+<RealityCheck>
+  Production protocols (like Uniswap, MakerDAO, or ChainCure) rarely use single-owner structures. They deploy structured access control layers where separate service bots, hot wallets, and corporate treasuries are granted strictly scoped roles, with the master admin role bound to a multi-signature timelock.
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: OpenZeppelin AccessControl
+
+In Solidity, roles are represented as unique `bytes32` cryptographic hashes. This is the standard implementation using OpenZeppelin's library:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract TokenRegistry is AccessControl {
+    // 1. ROLE DEFINITIONS: We calculate role hashes once as constants
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant AUDITOR_ROLE = keccak256("AUDITOR_ROLE");
+
+    uint256 public supply;
+    bool public isPaused;
+
+    error AccessDenied(bytes32 role, address account);
+
+    constructor() {
+        // 2. SETUP: Grant the deployer the master admin control badge
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    // Modifier using the standard RBAC check
+    modifier onlyRole(bytes32 _role) {
+        if (!hasRole(_role, msg.sender)) {
+            revert AccessDenied(_role, msg.sender);
+        }
+        _;
+    }
+
+    // Protected: Only addresses holding the Minter yellow badge can call!
+    function mint(address _to, uint256 _amount) public onlyRole(MINTER_ROLE) {
+        supply += _amount;
+    }
+
+    // Protected: Only addresses holding the Auditor blue badge can call!
+    function togglePause() public onlyRole(AUDITOR_ROLE) {
+        isPaused = !isPaused;
+    }
+}
+```
+
+* **`DEFAULT_ADMIN_ROLE`:** The master HR administrator role built-in to AccessControl. Addresses holding this role are the only ones allowed to call `grantRole()` and `revokeRole()`.
+* **`MINTER_ROLE` / `AUDITOR_ROLE`:** Explicitly scoped hashes. They grant isolated access without admin privileges.
+
+---
+
+<MistakeCallout>
+  **The Admin Key Leak Hazard:** A common production mistake is granting your hot-wallet transaction scripts the master `DEFAULT_ADMIN_ROLE` because it makes development easier. If that script server gets hacked, the attacker gains the power to revoke *your* access, grant themselves total control, and lock you out permanently. Keep admin permissions locked behind secure cold storage wallets!
+</MistakeCallout>
+
+---
+
+### 3. Core Principles of Production Governance
+
+1. **Principle of Least Privilege:** Never grant an account more access than it mathematically needs to perform its job.
+2. **Double Admin Guard:** Always keep at least two independent cold-storage admin keys registered, or bind the `DEFAULT_ADMIN_ROLE` to a multi-sig vault to prevent locking yourself out if a single key is lost.
+3. **Use Constant Hashes:** Keep role definitions as `constant` states to save gas on deployment and lookup.
+
+---
+
+<LessonChallenge>
+  Deploy the `TokenRegistry` in Remix. Verify that you (the deployer) cannot call `mint` or `togglePause` immediately, because although you are the Admin, you do not hold those specific roles. Call `grantRole` to give yourself `MINTER_ROLE` and verify that the mint function now executes successfully!
+</LessonChallenge>
