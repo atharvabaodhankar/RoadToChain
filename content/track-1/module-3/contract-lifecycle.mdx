@@ -1,0 +1,107 @@
+---
+title: "Contract Lifecycle"
+description: "Tracing a contract from local Solidity compile to permanent validator replication."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 3
+moduleName: "Deployment & Blockchain State"
+lesson: 5
+difficulty: "intermediate"
+estimatedMinutes: 10
+tags: ["lifecycle", "compilation", "state"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core process path understanding required for building continuous integration pipelines."
+---
+
+# Contract Lifecycle: The Space Rocket Launch
+
+Let's trace the physical transition of your code:
+
+You are sitting in your dark office, typing character keys inside Visual Studio Code. You hit save, run your deploy script, watch a hex hash print in your terminal, and five seconds later, a user in Tokyo opens their browser and interacts with your app.
+
+How did your local keystrokes transform into a globally synchronized digital system?
+
+I genuinely thought of this as a simple upload early on. The reality is that **a smart contract's lifecycle is a high-gravity process, much like building and launching a space rocket.** Once it clears the atmosphere, it enters a state of zero gravity where its course is completely locked.
+
+---
+
+### 1. The Metaphor: The Rocket Assembly and Orbit
+
+Let's map the steps of your code to the lifecycle of a space exploration mission:
+* **1. Design and Assembly (Solidity):** You build the rocket boosters and cabin blueprints inside your hangar (writing Solidity code in VS Code). 
+* **2. The Metal Mold Casting (Compilation):** The blueprints are translated into raw, physical metal molds (**Bytecode**) and a translation blueprint (**ABI**) for the mission control team on Earth.
+* **3. The Null Cargo Payload (The Transaction):** You package the metal molds into a cargo box. The box has no destination coordinates (`to: null`) and is marked: *"Deploy Cargo"* (deployment transaction).
+* **4. Mempool Ignition (Propagation):** You load the box on the launchpad. The booster fires (broadcasting the transaction to the P2P mempool), and the cargo rises through the network clouds.
+* **5. Orbit Instantiation (Constructor Execution):** A validator node catches the cargo, spins up a sterile engine sandbox (the EVM execution stack), runs the setting code once (**the constructor**), and drops the runtime hull (runtime bytecode) into a designated parking orbit coordinate (**the contract address**).
+* **6. Frozen Passivity (Orbit Lifecycle):** The rocket engine shuts off. The contract floats in the void, completely silent and passive. It uses zero electricity and consumes no CPU. Only when a visitor walks up and calls a function does the satellite momentarily wake up, execute instructions, update its internal state telemetry log, and go back to sleep.
+
+---
+
+<RealityCheck>
+  A contract's bytecode is 100% frozen in orbit. If your rocket launch has a tiny calculation error in the engine code (a logic vulnerability), you cannot send a repair crew. It will remain in orbit, executing its faulty code exactly as built, until it crashes or gets drained.
+</RealityCheck>
+
+---
+
+### 2. The Step-by-Step Lifecycle Pipeline
+
+Here is the exact structural sequence of code transitions:
+
+```
+    [ Write Solidity ] (Local .sol file)
+           │
+           ▼
+    [ Compile via solc ] (Produces JSON ABI & Opcodes Hex String)
+           │
+           ▼
+   [ Sign Deploy Transaction ] (to: null, data: initCode + constructorArgs)
+           │
+           ▼
+    [ Broadcast P2P ] (Mempool propagation to all node players)
+           │
+           ▼
+   [ Block Extraction ] (Validator selects transaction, charges Gas Fee)
+           │
+           ▼
+  [ Sandbox Constructor ] (InitCode executes once, sets initial state slots)
+           │
+           ▼
+  [ Address Coordinate ] (Deterministic Address generated: CREATE/CREATE2)
+           │
+           ▼
+  [ Permanent Storage ] (Runtime code chiseled permanently in Node states)
+```
+
+1. **Local Assembly:** You write code.
+2. **Solc Compilation:** The compiler translates Solidity to EVM-understandable bytecode.
+3. **The Cargo Box:** You broadcast a signed transaction payload.
+4. **Validation Sandbox:** The constructor executes on the validator's sandbox EVM.
+5. **Freeze State:** The constructor is peeled off, and the remaining runtime bytecode is stored inside the contract's permanent address coordinate.
+
+---
+
+<MistakeCallout>
+  **The Uninitialized State Trap:** A common beginner mistake is writing code in the constructor that initializes variables that are only needed temporarily during deployment, or failing to verify variables that the contract depends on. If your constructor sets an invalid registry address state, that state is chiseled in concrete. You will have to pay full gas fees to burn that contract and launch a completely new one!
+</MistakeCallout>
+
+---
+
+### 3. Summary of Execution Phase Transitions
+
+| Stage | Data Form | Active/Passive? | Cost |
+| :--- | :--- | :--- | :--- |
+| **1. Development** | human-readable `.sol` text | Passive (Editor) | Free |
+| **2. Compilation** | Bytecode Hex & JSON ABI | Passive (Local Compiler) | Free |
+| **3. Propagation** | Signed transaction in mempool | Active (Network routing) | Free (for networks, paid on extraction) |
+| **4. Instantiation** | EVM sandbox constructor run | Active (Validator execution) | **Deployment Gas** (Highest fee) |
+| **5. Runtime** | Opcodes chiseled in state slot | Passive (State replica) | Zero when idle, flat gas on call |
+
+---
+
+<LessonChallenge>
+  Trace the logic: If a smart contract's constructor is chiseled *once* during the instantiation phase, why is the constructor code *never* stored inside the final runtime bytecode at the contract's address? Hint: check the difference between "Init/Creation Code" and "Runtime Code".
+</LessonChallenge>
