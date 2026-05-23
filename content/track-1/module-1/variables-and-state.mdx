@@ -1,0 +1,92 @@
+---
+title: "Variables and State"
+description: "State variables, local variables, visibility, and smart contract storage behaviors."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 1
+moduleName: "Solidity Fundamentals"
+lesson: 1
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["variables", "state", "visibility"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core syntax foundations for storing state variables and managing contract memory."
+---
+
+# Variables and State: The Public Ledger Room
+
+When I wrote my first smart contract, I declared a simple integer `uint256 public score = 100;` and treated it like a standard static variable in Java or C++. I thought: *Awesome, this variable is stored in the local memory of whoever is running my app, just like in Web2.*
+
+I genuinely made this mistake early on. I was shocked when I realized that every time I updated that tiny score variable on a live network, it cost me real transaction fees (gas) and replicated the change across thousands of validator computers around the world.
+
+In smart contracts, variables are not just values in RAM. They are **persistent modifications to a shared global state**.
+
+---
+
+### 1. The Metaphor: The Bank Lobby Ledger
+
+To understand how variables behave, imagine a traditional bank lobby:
+* **State Variables (The Stone Ledger):** There is a massive, heavy book bound in iron sitting on a pedestal in the center of the lobby. When you declare `uint256 public balance;` in Solidity, you are carving a new line in this stone ledger. Anyone can walk in and read it. If you want to change it, a security guard must verify your credentials (your private key signature) and you must pay a fee to cover the ink and stone-carver's labor.
+* **Local Variables (The Chef's Receipt):** Inside functions, you declare temporary variables like `uint256 tempResult = 5;`. This is like scribbling a temporary calculation on a small piece of scrap paper at the counter. You use it to do some quick math, and the second you step out of the bank lobby, the guard shreds it. It is completely free to write on, and disappears immediately.
+
+---
+
+<RealityCheck>
+  Declaring a state variable as `private` in Solidity does NOT keep the data secret. The `private` keyword only prevents *other smart contracts* from reading the variable. Because the blockchain ledger is public, any node operator or external user can inspect the raw storage bytes of your contract address and read your private variables instantly. Never store sensitive passwords, API keys, or unencrypted data inside any contract variable!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: State vs Local Variables
+
+Let's look at how this maps directly to Solidity code:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract ScoreRegistry {
+    // 1. STATE VARIABLE: Written to permanent validator storage
+    uint256 public highScore; 
+    address public recordHolder;
+
+    function updateScore(uint256 _newScore) public {
+        // 2. LOCAL VARIABLE: Temporary, free scratchpad memory
+        uint256 threshold = 10; 
+        
+        if (_newScore > highScore && _newScore > threshold) {
+            highScore = _newScore; // Writes permanent state!
+            recordHolder = msg.sender; // Writes permanent state!
+        }
+    }
+}
+```
+
+* **State Variables:** Declared directly inside the `contract` body but outside any functions. They reside permanently inside the contract's designated storage slots on the blockchain.
+* **Local Variables:** Declared inside a `function` body. They exist only during the execution runtime of that function and are wiped clean immediately upon return.
+
+---
+
+<MistakeCallout>
+  A classic beginner trap is declaring variables as state variables when they only need to be temporary calculations inside a function. Because writing to state (SSTORE) costs up to 20,000 gas per slot, this mistake can easily make your transactions cost 100x more than necessary. Keep your state clean, and use local variables for calculations!
+</MistakeCallout>
+
+---
+
+### 3. Visibility Specifiers: Access Controls
+
+Solidty has four visibility keywords for variables and functions:
+1. `public`: Anyone (external users, frontends, and other contracts) can read the variable. The compiler automatically creates a free "getter" function for it.
+2. `private`: Only functions inside this exact contract can read or write to the variable.
+3. `internal`: The default specifier. Only this contract and any contracts that *inherit* from it (child contracts) can access it.
+4. `external`: (Functions only) Can only be called from outside the contract by users or other contracts.
+
+---
+
+<LessonChallenge>
+  Deploy the `ScoreRegistry` contract above on a local remix network. Call `updateScore` with `15` and check the updated value of `highScore`. Look at the gas cost of the transaction in the console—how much did it cost to initialize the variables versus updating them later?
+</LessonChallenge>
