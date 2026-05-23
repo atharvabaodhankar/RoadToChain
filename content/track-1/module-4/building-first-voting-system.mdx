@@ -1,0 +1,118 @@
+---
+title: "Building First Voting System"
+description: "Designing a naive Solidity voting engine using simple arrays and state allocations."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 4
+moduleName: "Evolutionary Voting System"
+lesson: 1
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["architecture", "voting", "project"]
+hasDiagram: false
+hasMistake: false
+hasProject: true
+realProjectSource: "Evolutionary Voting System"
+heroProjectContribution: "Initial implementation of the naive voting contract that sets up our evolutionary case study."
+---
+
+# Building First Voting System: The Cardboard Shelf
+
+Let's start with a classic feeling of builder success:
+
+You are sitting in Remix. You want to build a decentralized voting system. You think: *Solidity struct is easy! I'll store candidates as a struct with a string name and a uint256 vote count, and put them inside a candidate array. Then I'll iterate through them when someone wants to see the winner. Simple, clear, and perfectly readable!*
+
+I genuinely felt like a genius when I wrote this exact architecture early on. My test suite with 3 candidates and 5 votes completed in milliseconds, consuming virtually zero mock gas. 
+
+The hard reality is that **writing code that compiles is easy; writing code that remains secure and runnable under production scale is the actual challenge.**
+
+---
+
+### 1. The Metaphor: The Cardboard Bookshelf
+
+To understand why this simple design represents an architectural hazard, imagine building a bookshelf:
+* **The Shelf (Naive Struct Array):** You buy a light, cheap corrugated cardboard bookshelf. You place 5 paperbacks on it. It holds them beautifully, looks neat in your room, and cost you almost nothing to set up.
+* **The Production Weight (Scale):** A giant delivery truck backs up to your house and unloads a complete 30-volume heavy leather encyclopedia. You stack the volumes on the cardboard shelf.
+* **The Collapse:** With a loud rip, the cardboard bends, tears, and the entire shelf collapses into a heap of rubble. 
+
+In Solidity, dynamic arrays and heavy on-chain strings are that cardboard shelf. They hold light local test data beautifully, but buckle and collapse under real-world load.
+
+---
+
+<RealityCheck>
+  A clean, green local test suite (like Hardhat or Foundry running on a local hardhat node) is **not a production validation**. Local nodes run with infinite gas ceilings and zero network latency. If you validate your contracts strictly based on "it worked in local testing," you are setting yourself up for live network disaster!
+</RealityCheck>
+
+---
+
+### 2. The Naive Code: The Ticking Time Bomb
+
+Let's look at the exact code of our naive, first-version voting system. This code compiles cleanly and works perfectly for a small test group:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+// ❌ THE INITIAL NAIVE IMPLEMENTATION — FOR EDUCATIONAL MISTAKE STUDIES ONLY!
+contract NaiveVoting {
+    struct Candidate {
+        string name; // Gas hazard: storing strings on-chain
+        uint256 voteCount;
+    }
+
+    Candidate[] public candidates;
+    mapping(address => bool) public hasVoted;
+    address[] public voterRegistry; // Loop hazard: tracking voter list on-chain
+
+    function addCandidate(string memory _name) public {
+        candidates.push(Candidate({
+            name: _name,
+            voteCount: 0
+        }));
+    }
+
+    function vote(uint256 _candidateIndex) public {
+        require(!hasVoted[msg.sender], "Already voted");
+        require(_candidateIndex < candidates.length, "Invalid candidate");
+
+        hasVoted[msg.sender] = true;
+        candidates[_candidateIndex].voteCount += 1;
+        voterRegistry.push(msg.sender); // Appends address to register
+    }
+
+    // ❌ DANGER: Dynamic loop that traverses the array to count totals
+    function tallyTotalVotes() public view returns (uint256) {
+        uint256 total = 0;
+        for (uint256 i = 0; i < voterRegistry.length; i++) {
+            total++;
+        }
+        return total;
+    }
+}
+```
+
+Can you trace why this code compiles but represents a major hazard?
+1. **`string name`:** Storing candidate names directly inside state arrays requires dynamic memory expansion opcodes, draining users' gas.
+2. **`voterRegistry.push`:** Appending to a dynamic list scales state writes sequentially.
+3. **`tallyTotalVotes` Loop:** The `for` loop iterates O(N) over `voterRegistry`. When 1,000 users have voted, this check will hit the block gas limit, permanently freezing the total count query!
+
+---
+
+<MistakeCallout>
+  **The View Loop Trap:** Many beginners assume that since `tallyTotalVotes` is a `view` function, the loop has no gas cost. While external client calls are free, if another *write* transaction inside your system ever calls `tallyTotalVotes` internally during state updates, it will charge the full loop execution gas fee, bricking the transaction!
+</MistakeCallout>
+
+---
+
+### 3. Summary of Naive Hazards
+
+* **O(N) Scaling:** The cost to execute queries scales linearly with the number of participants.
+* **On-Chain Text Storing:** Wastes precious storage slots.
+* **Unbounded State Mutations:** Increases gas overhead on every transaction.
+
+---
+
+<LessonChallenge>
+  Deploy the `NaiveVoting` contract in Remix. Add 2 candidates. Call `vote` once and look at the transaction gas cost. In next lesson, we will see what happens when the voter list grows to hundreds of active participants and why the system completely collapses!
+</LessonChallenge>
