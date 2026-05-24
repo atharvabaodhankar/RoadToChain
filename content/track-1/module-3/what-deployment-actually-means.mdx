@@ -30,11 +30,11 @@ I expected a server panel, CPU logs, and a RAM monitor. But it doesn't work that
 
 ---
 
-### 1. The Confusion: The Day I Searched for the Ethereum CPU Monitor
+### 1. The Story: Searching for the Ethereum CPU Monitor
 
-When I deployed my first contract, I sat there waiting for the dashboard. I was looking for the Vercel-style deployment screen. I wanted to see the server health graph. 
+When I deployed my first contract, I sat there waiting for the dashboard. I was looking for the Vercel-style deployment screen. I wanted to see the server health graph, CPU utilization, and RAM logs. 
 
-Instead, all I got was a 66-character hex hash: `0x89ab...7c3d`.
+Instead, all I got was a 66-character hex hash: `0x89ab...7c3d` and a final coordinate.
 
 "Okay," I thought, "where do I go to see if the server is healthy? How do I reboot the machine if it hits an infinite loop? Who pays for the idle CPU time when no one is using the contract?"
 
@@ -44,21 +44,16 @@ This confusion stems from a fundamental misunderstanding of the ledger state mac
 
 ### 2. The Metaphor: The Stone Monument in the Gallery
 
+To clear the confusion, let's use a physical analogy (keeping it to exactly 20% of our scope):
+
 If Web2 deployment is like hiring a live employee who sits at a desk and runs a live code loop, Web3 deployment is like **sculpting a stone monument and placing it inside a public gallery**.
 
 Let's map this transition:
-
 * **Sketching the Blueprint:** Writing your Solidity code.
 * **Casting the Iron Mold:** Compiling it to **Bytecode** (the physical shape of the monument) and printing a translation pamphlet (**ABI**) so visitors who speak different languages (like JavaScript/TypeScript) know how to interact with it.
 * **Delivering to the Gallery:** Packaging the mold into a cargo box with a blank recipient address (a `to: null` transaction).
 * **Pouring the Concrete:** The network's validators receive the cargo box, execute the mold's setup code once (**the constructor**), pour the cement, peel the mold away, and generate a permanent coordinate (**the contract address**).
 * **Reading the Stone:** The monument is completely passive. It never runs a loop or monitors webhooks. When users call a function, they walk up to the stone coordinate, read the rules, run the math locally on their own clipboard (local execution), and write down their state update.
-
----
-
-<RealityCheck>
-  Most production contracts rarely use direct immutable deployments. Teams use proxy patterns for upgrades. Once your runtime bytecode is written to the global ledger state, you cannot modify a single variable type or patch a logic vulnerability. The code is frozen forever.
-</RealityCheck>
 
 ---
 
@@ -82,25 +77,18 @@ Blockchain State Updated
 
 > [!TIP]
 > **FRONTEND INTERACTIVE TRIGGER:**
-> Notice how the deployment process is entirely transactional. When your frontend displays a deployment status tracker, it is tracking the progression of this exact pipeline, waiting for the validators to process the constructor execution and return the address.
+> Notice how the deployment process is entirely transactional. When your frontend displays a deployment status tracker, it is tracking the progression of this exact pipeline, waiting for the validators to process the constructor execution and return the address. Make sure your SVG nodes highlight sequentially as the transactions propagate.
 
 ---
 
-<MistakeCallout>
-  **The Address Illusion:**
-  In my early days, I assumed that if I deployed a contract, I could simply redeploy a fix to the same address if I found a bug. I was shocked to find out that redeploying simply creates a completely new address with a clean slate. The old, buggy contract remains online, wide open to exploit, unless you build upgradability from day one using proxy patterns.
-</MistakeCallout>
+### 4. Technical Explanation: Bytecode Sandbox & Address Math
 
----
+Now, let's dive into the technical details (making up 80% of our focus) of how the EVM handles this process under the hood.
 
-### 4. Technical Explanation: The Destination-less Container
-
+#### 1. The Destination-less Container
 How does the network know you want to create a new contract instead of sending coins to someone?
 
-The secret lies in the **recipient field** of your transaction.
-
-#### The Null Transaction
-When you deploy a contract, you sign a transaction where the `to` field is completely empty (`to: null` or `to: 0x0`). 
+The secret lies in the **recipient field** of your transaction. When you deploy a contract, you sign a transaction where the `to` field is completely empty (`to: null` or `to: 0x0`). 
 
 ```json
 {
@@ -110,11 +98,9 @@ When you deploy a contract, you sign a transaction where the `to` field is compl
 }
 ```
 
-When a validator node pulls this transaction from the mempool and sees that there is no recipient, it immediately shifts gears. It says: *"Aha! This isn't a payment. This is a creation request. I need to spin up a factory sandbox."*
+When a validator node pulls this transaction from the mempool and sees that there is no recipient, it shifts gears. It spins up a temporary execution stack, loads the transaction data, and executes the constructor parameters inside a temporary sandbox.
 
-The payload in the `data` field is your **Creation Bytecode (initCode)**. This contains two things:
-1. The logic of your **constructor** (setup routines).
-2. The raw **Runtime Bytecode** (the actual logic of your contract).
+The payload in the `data` field is your **Creation Bytecode (initCode)**. This contains the logic of your **constructor** (setup routines) and the raw **Runtime Bytecode** (the actual logic of your contract).
 
 ---
 
@@ -125,11 +111,10 @@ The payload in the `data` field is your **Creation Bytecode (initCode)**. This c
 
 ---
 
-### 5. Technical Explanation: The Math Behind the Coordinate Machine
-
+#### 2. The Deterministic Address Math
 When the concrete is poured, the monument's spot in the gallery is not selected at random. The contract address is calculated using strict, deterministic math.
 
-#### Standard Coordinate Path (CREATE)
+##### Standard Coordinate Path (CREATE)
 By default, the EVM calculates the address using your public account address and your transaction history count (your nonce):
 
 ```
@@ -138,9 +123,9 @@ Contract Address = Hash(Sender Address, Sender Nonce)[12:]
 
 Because your transactions are strictly sequential, your 4th deployment will *always* generate the exact same coordinate. 
 
-* **The Story:** I once tried to deploy a contract to the exact same address on both Goerli testnet and Ethereum mainnet. I spent hours synchronizing my deploy transactions. But because I had sent one accidental transfer on Goerli in between, my nonces got out of sync. My contracts ended up at completely different coordinates, breaking our multi-chain frontend configurations!
+* **The Nonce Drift Story:** I once tried to deploy a contract to the exact same address on both Goerli testnet and Ethereum mainnet. I spent hours synchronizing my deploy transactions. But because I had sent one accidental transfer on Goerli in between, my nonces got out of sync. My contracts ended up at completely different coordinates, breaking our multi-chain frontend configurations!
 
-#### The Predictable Blueprint (CREATE2)
+##### The Predictable Blueprint (CREATE2)
 Advanced developers bypass the nonce entirely, calculating the address based on a custom `salt` parameter and the bytecode itself:
 
 ```
@@ -158,21 +143,20 @@ This is incredibly powerful: it allows you to calculate and know your contract's
 
 ---
 
-### 6. The Reality: Why We Don't Need an Active CPU
-
+#### 3. Why We Don't Need an Active CPU
 Let's return to the CPU question: *"Who pays for the idle CPU time when no one is using the contract?"*
 
 The answer is: **No one, because idle contracts don't consume CPU.**
 
-When a smart contract is idle, it is nothing more than cold bytes stored on thousands of hard drives across the globe. It is passive state.
-
-Only when a user sends a transaction calling a contract function does a validator's CPU wake up:
-1. The validator loads the frozen runtime bytecode from their local SSD.
-2. The validator executes the opcodes, uses the user's gas to pay for the math calculations, and updates the local database.
-3. The validator broadcasts the updated database state to the rest of the network.
-4. The CPU goes back to sleep.
+When a smart contract is idle, it is nothing more than cold bytes stored on thousands of hard drives across the globe. It is passive state. Only when a user sends a transaction calling a contract function does a validator's CPU wake up, execute the opcodes using the user's gas, and update the local database. 
 
 The user pays for every single opcode execution. The contract itself is a perpetual motion machine that costs nothing to maintain while waiting for a trigger.
+
+---
+
+<RealityCheck>
+  Most production contracts rarely use direct immutable deployments. Teams use proxy patterns for upgrades. Once your runtime bytecode is written to the global ledger state, you cannot modify a single variable type or patch a logic vulnerability. The code is frozen forever.
+</RealityCheck>
 
 ---
 

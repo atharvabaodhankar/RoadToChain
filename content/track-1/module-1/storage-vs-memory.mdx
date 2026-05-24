@@ -4,13 +4,14 @@ description: "Storage, memory, and calldata. Why copying arrays behaves differen
 track: 1
 trackName: "Solidity & Smart Contract Engineering"
 trackColor: "#3b82f6"
+label: "Lesson 2"
 module: 1
 moduleName: "Solidity Fundamentals"
 lesson: 2
 difficulty: "intermediate"
 estimatedMinutes: 12
-tags: ["storage", "memory", "calldata"]
-hasDiagram: false
+tags: ["storage", "memory", "calldata", "diagram"]
+hasDiagram: true
 hasMistake: true
 hasProject: false
 realProjectSource: ""
@@ -21,20 +22,86 @@ heroProjectContribution: "Core data location rules required to prevent state mut
 
 Let's look at a weird Solidity bug that leaves almost every beginner pulling their hair out:
 
-You write a function to update an item in a list of users. You fetch the user, modify their status field to `true`, and exit. But when you check the blockchain state later, **absolutely nothing changed.** The user's status is still set to `false`.
+**You write a function to update an item in a list of users. You fetch the user, modify their status field to `true`, and exit. But when you check the blockchain state later, absolutely nothing changed. The user's status is still set to `false`.**
 
 I genuinely made this mistake early on. I spent hours debugging my frontend, thinking MetaMask was sending junk arguments, before I realized the compiler was silently warning me about a fundamental concept: **Data Locations**.
 
-Solidity has three locations where data is loaded: `storage`, `memory`, and `calldata`. Understanding them is critical to making your state changes persist.
+---
+
+### 1. The Story: The Phantom Username Editor
+
+In my first Solidity project, I built a user registry. Users could register and later edit their display usernames.
+
+```solidity
+function updateUsername(uint256 _index, string memory _newName) public {
+    User memory tempUser = users[_index];
+    tempUser.username = _newName; 
+    // Transaction succeeds, gas is burned... but username never updates on-chain!
+}
+```
+
+When I tested it, I registered as "Alice", clicked edit, typed "Bob", and submitted the transaction. It confirmed. But when my React frontend reloaded, it still read "Alice". I checked Etherscan: the transaction went through successfully. I looked at my code, re-read the Solidity docs, and felt completely lost. Why was my state refusing to write?
 
 ---
 
-### 1. The Metaphor: The Blueprint and the Stone Wall
+### 2. The Metaphor: The Blueprint and the Stone Wall
 
-To make this instantly clear, imagine you are a general contractor:
-* **Storage (The Stone Wall):** Declaring a variable as `storage` is like working directly on the physical stone wall of your building. If you pick up a chisel and carve a window into the stone wall, that window exists permanently.
-* **Memory (The Paper Blueprint):** Declaring a variable as `memory` is like photocopying the blueprint of the stone wall onto a sheet of paper, taking it to your desk, and drawing a window on the paper with a pencil. You can draw all you want, but *the actual physical stone wall does not change* unless you go back and chisel the changes into the stone.
-* **Calldata (The Closed Delivery Envelope):** Declaring a variable as `calldata` is like receiving a sealed cargo list envelope from a delivery truck. You can look at the items list inside through the window, but you are not allowed to edit, write on, or alter the paper list at all. It is strictly read-only.
+To make this instantly clear, let's look at a construction analogy (tightly restricted to the essentials):
+
+* **`storage` (The Stone Wall):** Working directly on the physical stone wall of your building. If you pick up a chisel and carve a window into the stone wall, that window exists permanently.
+* **`memory` (The Paper Blueprint):** Photocopying the blueprint of the stone wall onto a sheet of paper. Drawing a window on the paper blueprint with a pencil does not change the physical stone wall.
+* **`calldata` (The Sealed Cargo List):** A sealed delivery manifest received from a cargo truck. You can read the list of items through the glass, but you cannot edit or alter the paper. It is strictly read-only.
+
+---
+
+### 3. The Visual State Routing Diagram
+
+Our frontend can intercept and render the exact state data flow. Notice how declaring a variable as `memory` breaks the connection to permanent storage, routing changes to a temporary sandbox instead:
+
+```
+                  +-----------------------------------------------+
+                  |              EVM STATE STORAGE                |
+                  |             (Node SSD - Stone Wall)           |
+                  |  users[0] = { name: "Alice", isActive: true }  |
+                  +-----------------------------------------------+
+                          │                               │
+              (storage pointer)                     (memory copy)
+                          │                               │
+                          ▼                               ▼
+              User storage pointerUser;            User memory tempUser;
+            [ Points to persistent slot ]       [ Copies struct to RAM ]
+                          │                               │
+              Updates users[0] directly          Updates tempUser in RAM
+                          │                               │
+                          ▼                               ▼
+              [ Written to Blockchain! ]           [ Shredded on Return! ]
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> This diagram represents how data mutations are routed inside the EVM. When animating this flow in the UI, highlight the active green path representing `storage` writing directly back to the persistent storage box, vs the red path showing `memory` data loading into a floating box and dissolving when the execution terminates.
+
+---
+
+### 4. Technical Explanation: EVM Data Allocations & Slot Mechanics
+
+Now, let's look at what is happening inside the Ethereum Virtual Machine (EVM) under the hood.
+
+Solidity manages variables using three distinct memory spaces, each behaving differently and costing vastly different amounts of gas:
+
+#### 1. State Storage (`storage`)
+* **Under the Hood:** A contract's storage is a persistent key-value store mapping 32-byte keys to 32-byte values. It is written permanently to the blockchain ledger and stored on the hard drives of thousands of nodes globally.
+* **Gas Mechanics:** Writing to storage is the most expensive operation in the EVM. An `SSTORE` opcode costs **20,000 gas** when writing to an empty slot, and **5,000 gas** when modifying an existing slot.
+* **How Pointer References Work:** When you write `User storage pointerUser = users[_index]`, the compiler does not copy any state variables. Instead, it creates an internal **storage pointer** that contains the raw slot coordinate of that user in contract storage. When you modify `pointerUser.isActive`, the EVM executes a direct `SSTORE` on that exact slot coordinate.
+
+#### 2. Temporary Memory (`memory`)
+* **Under the Hood:** Memory is a temporary byte-array allocated dynamically during transaction execution. It is initialized to zero on every function call and is completely wiped clean the millisecond the function returns.
+* **Gas Mechanics:** Memory is extremely cheap. Reading or writing a 32-byte slot in memory costs only **3 gas**.
+* **How Copy Assignments Work:** When you write `User memory tempUser = users[_index]`, the EVM loads all variables of the struct from the node's hard drive (`SLOAD`) and copies them into sequential memory offsets in RAM. Modifying `tempUser.isActive` writes to the memory offset (3 gas) but never triggers an `SSTORE` to the blockchain. When the execution exits, this memory is cleared, and your changes are lost forever.
+
+#### 3. Read-Only Arguments (`calldata`)
+* **Under the Hood:** Calldata is a temporary, non-modifiable byte-array where the incoming transaction parameters (the data payload) are stored. 
+* **Gas Mechanics:** Calldata cannot be modified at all. Because it points directly to the raw bytes sent in the transaction data field, the EVM does not need to allocate new memory slots or perform any copying, making it the absolute cheapest way to read incoming function arguments.
 
 ---
 
@@ -44,9 +111,9 @@ To make this instantly clear, imagine you are a general contractor:
 
 ---
 
-### 2. Technical Breakdown: The Mutation Bug
+### 5. Code Comparison: The Mutation Bug vs The Pointer Fix
 
-Let's look at the exact Solidity code that triggers the status update bug:
+Let's look at the exact code configurations:
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -78,24 +145,15 @@ contract UserRegistry {
 }
 ```
 
-* **`memory` Copy:** In `deactivateUserMemory`, the assignment `User memory tempUser = users[_index]` copies the data. Modifying `tempUser.isActive` changes the scratchpad, which is shredded when the function returns.
-* **`storage` Pointer:** In `deactivateUserStorage`, the assignment `User storage pointerUser = users[_index]` does *not* copy data. It creates a memory address reference (pointer) to the persistent blockchain state slot, modifying the stone wall directly.
+* **The Copy Disaster (`deactivateUserMemory`):** The assignment `User memory tempUser` copies data into the ephemeral RAM stack. The modification of `isActive` changes the RAM cell but leaves the persistent SSD ledger untouched.
+* **The Pointer Optimization (`deactivateUserStorage`):** The assignment `User storage pointerUser` behaves like a reference link. Modifying it writes to the original array position directly via an active state connection.
 
 ---
 
 <MistakeCallout>
-  A common beginner mistake is using `memory` as function arguments for large read-only lists. If a function only reads incoming parameters (like a list of addresses in a whitelist check), always declare them as `calldata`. It skips the memory copy step completely, saving users up to 30% in gas fees!
+  **The Calldata Optimization Mistake:**
+  A common beginner mistake is declaring dynamic function parameters as `memory` when they are never modified inside the function body (e.g. checking a whitelist array inside a validation check). If you only need to read a parameter, always declare it as `calldata`. This tells the EVM to read directly from the transaction payload, skipping the memory copy entirely and saving up to 30% in gas fees!
 </MistakeCallout>
-
----
-
-### 3. Summary of Data Locations
-
-| Location | Persistent? | Editable? | Gas Cost |
-| :--- | :--- | :--- | :--- |
-| **`storage`** | Yes (Blockchain) | Yes | **Extremely High** (Writes to Node Hard Drives) |
-| **`memory`** | No (Wiped on Return) | Yes | **Low** (Reads/Writes to Validator RAM) |
-| **`calldata`** | No (Wiped on Return) | No (Read-Only) | **Cheapest** (Direct transaction payload reference) |
 
 ---
 
