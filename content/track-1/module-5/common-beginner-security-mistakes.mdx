@@ -1,0 +1,109 @@
+---
+title: "Common Beginner Security Mistakes"
+description: "Origin authentication exploits, missing validations, and unsafe state assumptions."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 5
+moduleName: "Security & Production Reality"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 12
+tags: ["security", "origin", "auth", "mistakes"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Essential security validations required to pass initial developer audits."
+---
+
+# Common Beginner Security Mistakes: Spoofed Caller IDs
+
+Let's address the most common access control exploit in Solidity:
+
+You are writing an authentication check to verify if the caller is the owner. You read the Solidity documentation and see there are two variables representing the sender: `msg.sender` and `tx.origin`. You think: *`tx.origin` is awesome because it always reflects the physical person who clicked sign in MetaMask, rather than an intermediate contract. I'll use it for my ownership checks!*
+
+I genuinely made this exact mistake early on. I was shocked to find out that this simple decision leaves your contract wide open to **phishing draining exploits**.
+
+Understanding the difference between `tx.origin` and `msg.sender` is critical to securing your contracts.
+
+---
+
+### 1. The Metaphor: The Spoofed Caller ID and the Proxy Agent
+
+Imagine you have a secure voice-activated home security system:
+* **`msg.sender` (Direct Caller):** The security system looks at the person standing directly in front of the door holding the microphone. If your friend is standing there repeating commands for you, the system recognizes *your friend's voice* and rejects them.
+* **`tx.origin` (Original Caller ID):** The system ignores the person holding the microphone and checks the caller ID of the telephone line that initiated the connection. 
+* **The Phishing Attack:** 
+  1. An attacker builds a shiny phishing website offering a "Free NFT Claim." 
+  2. You open the website and click "Claim" (you initiate transaction `tx.origin`).
+  3. The website's smart contract intercepts your call, acts as your intermediary proxy, and immediately calls the withdraw function of your home vault contract.
+  4. Your home vault contract checks `tx.origin`. It sees the call originally came from *your* MetaMask wallet, thinks everything is fine, and releases all your funds to the phishing contract!
+
+---
+
+<RealityCheck>
+  `tx.origin` should **never be used for access control or authentication check-ins**. It is strictly a transaction tracing variable. If you use `tx.origin` for authorization, any user who interacts with a malicious smart contract can have their assets completely drained by that contract on your platform!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: `tx.origin` Phishing Exploit
+
+Let's look at the vulnerable authentication vault code side-by-side with the phishing contract that exploits it:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract VulnerableVault {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // ❌ VULNERABLE: Uses tx.origin for authorization checks!
+    function withdrawAll(address payable _to) public {
+        require(tx.origin == owner, "Not owner");
+        _to.transfer(address(this).balance);
+    }
+}
+
+contract AttackPhishingContract {
+    VulnerableVault public vault;
+    address payable public attacker;
+
+    constructor(address _vaultAddress) {
+        vault = VulnerableVault(_vaultAddress);
+        attacker = payable(msg.sender);
+    }
+
+    // The trap: Attacker tricks the vault owner into calling this function!
+    fallback() external payable {
+        vault.withdrawAll(attacker); // Exploits the tx.origin check!
+    }
+}
+```
+
+* **The Phishing Exploit:** When the vault owner sends a transaction to `AttackPhishingContract` (for example, thinking they are claiming a free token), the fallback function executes. It calls `vault.withdrawAll(attacker)`. Inside the vault, `tx.origin` is the owner's MetaMask address, so the require check passes, and all funds are sent to the attacker!
+
+---
+
+<MistakeCallout>
+  **The Unchecked Return Value Trap:** Another common beginner security mistake is failing to verify the success return values of raw ETH transfers (like `msg.sender.send()`). In Solidity, if `send()` fails, it does not throw a revert; it simply returns `false`. If you don't check it, the contract will continue executing its state changes as if the transfer succeeded, leading to massive accounting discrepancies!
+</MistakeCallout>
+
+---
+
+### 3. Core Rules of Smart Contract Authentication
+
+1. **Always use `msg.sender`:** It represents the immediate caller (which could be a contract or a wallet), shielding you from intermediate phishing proxies.
+2. **Never trust external inputs blindly:** Always sanitize variables, check bounds, and verify return values.
+3. **Keep validations local:** Validate state parameters immediately at the entrance of your functions.
+
+---
+
+<LessonChallenge>
+  Trace the execution: If a user calls a contract `ContractA`, which in turn calls `ContractB`, identify what `msg.sender` and `tx.origin` will evaluate to inside `ContractB`. Who is the immediate caller and who is the transaction initiator?
+</LessonChallenge>
