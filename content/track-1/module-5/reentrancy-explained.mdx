@@ -1,0 +1,128 @@
+---
+title: "Reentrancy Explained"
+description: "Understanding checks-effects-interactions and recursive call vulnerabilities."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 5
+moduleName: "Security & Production Reality"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 15
+tags: ["security", "reentrancy", "hacks"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core security pattern understanding required to pass smart contract audits."
+---
+
+# Reentrancy Explained: The Slow ATM Dispenser
+
+Let's address the single most expensive security vulnerability in smart contract history:
+
+In 2016, a decentralized venture fund called **The DAO** was launched on Ethereum. Within weeks, it had gathered over $150 million worth of ETH. But shortly after launch, an attacker exploited a simple 4-line vulnerability in the withdrawal code, draining over $60 million worth of ETH in a few hours, eventually forcing the entire Ethereum network to split (fork) to recover the funds.
+
+How did a simple withdrawal function allow a hacker to swipe millions of dollars without any admin access?
+
+I genuinely found this hard to comprehend early on. The secret is that **smart contracts can call other smart contracts, and when they do, the execution flow pauses, allowing the receiver to take total control of the thread.**
+
+This is the dread **Reentrancy Attack**.
+
+---
+
+### 1. The Metaphor: The Slow ATM Cash Dispenser
+
+To understand how reentrancy executes, imagine a physical bank ATM with a mechanical flaw:
+* **The Normal Payout Flow (Checks-Effects-Interactions):**
+  1. You swipe your card and ask for $100 (**Check**).
+  2. The ATM check-in computer verifies you have $100 and subtracts $100 from your screen account balance (**Effect**).
+  3. The ATM physical dispenser door clicks open and hands you the cash (**Interaction**).
+* **The Slow Flaw Flow (Vulnerable Code):**
+  Imagine the ATM executes in a broken sequence:
+  1. You request $100.
+  2. The ATM verifies you have it, skips updating your balance, and immediately opens the door to hand you the cash.
+  3. **The Interception:** While the dispenser door is still holding the cash open, you reach out, intercept the cash dispenser sensor, and hit the "Withdraw $100" button *again* before the screen can update your balance.
+  4. The machine sees your account still shows the original $100 balance, so it dispenser cash again.
+  5. You repeat this loop 500 times until the cash vault is completely empty, and only then do you let the ATM complete its task and update your screen balance.
+
+This is exactly what happens during a reentrancy attack. The attacker intercepts the payout interaction before the contract can subtract their balance.
+
+---
+
+<RealityCheck>
+  Reentrancy is not an ancient history lesson. It is still the single most exploited smart contract bug today, responsible for hundreds of millions of dollars in DeFi hacks annually. Any contract that transfers raw ETH or calls an untrusted receiver address is wide open to reentrancy unless protected strictly!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: The Exploitable Code vs The Fix
+
+Let's look at the vulnerable withdrawal function side-by-side with the secure, audit-ready fix:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract VulnerableVault {
+    mapping(address => uint256) public balances;
+
+    // ❌ VULNERABLE: Performs interaction BEFORE updating state effect!
+    function withdraw() public {
+        uint256 amount = balances[msg.sender];
+        require(amount > 0, "No balance");
+
+        // 1. INTERACTION: Sends raw ETH to msg.sender
+        (bool success, ) = msg.sender.call{value: amount}(""); 
+        require(success, "Transfer failed");
+
+        // 2. EFFECT: Updates state balance too late!
+        balances[msg.sender] = 0; 
+    }
+}
+
+contract SecureVault {
+    mapping(address => uint256) public balances;
+
+    // ✅ SECURE: Follows the Checks-Effects-Interactions pattern strictly!
+    function withdraw() public {
+        // 1. CHECKS
+        uint256 amount = balances[msg.sender];
+        require(amount > 0, "No balance");
+
+        // 2. EFFECTS (Update balance FIRST before sending!)
+        balances[msg.sender] = 0; 
+
+        // 3. INTERACTIONS (Send ETH last!)
+        (bool success, ) = msg.sender.call{value: amount}(""); 
+        require(success, "Transfer failed");
+    }
+}
+```
+
+* **The Vulnerability:** In `VulnerableVault`, when the contract executes `msg.sender.call`, it hands over control. If the receiver is a malicious contract, its `receive()` fallback function intercepts the execution and calls `withdraw()` *again*. The vault sees the balance hasn't been set to 0 yet, so it sends the funds again.
+* **The Secure Pattern:** In `SecureVault`, we set `balances[msg.sender] = 0` *before* the transfer. When the attacker's fallback function attempts to re-enter `withdraw()`, the balance check sees `0` and reverts the transaction immediately.
+
+---
+
+```
+  [ Attacker Contract ] ──1. Call withdraw() ──> [ VulnerableVault ]
+           │                                             │
+      3. Re-enter                                    2. Send ETH
+      withdraw() ────────────────────────────────────────┤
+           │                                             ▼
+           ▼                                      (Control handed over)
+  [ Loop continues until vault is empty! ]
+```
+
+---
+
+<MistakeCallout>
+  **The Reentrancy Guard Protection:** While following Checks-Effects-Interactions is your first line of defense, advanced developers also import OpenZeppelin's `ReentrancyGuard` and apply the `nonReentrant` modifier. This modifier uses a simple boolean state lock to prevent any function from executing recursively.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Analyze the `SecureVault` code. If the `call` transfer fails for some reason (e.g. the receiver contract reverts), why is it critical that Solidity rolls back the state changes using `require(success)`? What would happen if we didn't check the return value?
+</LessonChallenge>
