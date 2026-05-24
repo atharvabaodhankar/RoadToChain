@@ -1,0 +1,129 @@
+---
+title: "Replay Attacks Explained"
+description: "Offline signature validation risks, transaction reuse, and nonce validation checks."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+module: 5
+moduleName: "Security & Production Reality"
+lesson: 2
+difficulty: "advanced"
+estimatedMinutes: 13
+tags: ["security", "signatures", "replays"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Core signature security foundations required to protect multisigs and cross-chain bridge integrations."
+---
+
+# Replay Attacks: The Photocopied Bank Check
+
+Let's address the silent cryptographic hazard of offline signature verification:
+
+Imagine you run a multi-signature wallet. To execute a withdrawal of $1,000, you sign an offline approval voucher message using your MetaMask private key, and hand the signed hex string to a co-signer who broadcasts it to execute the transaction. The transaction finishes successfully.
+
+But the next day, you open your wallet dashboard and realize **the co-signer called the withdrawal function 10 more times, pocketing $10,000 in the process.**
+
+You panic: *"Wait! I only clicked 'Approve' once! How did they execute 10 separate withdrawals using my signature?"*
+
+I genuinely made this mistake during early research. This is the classic **Signature Replay Attack**.
+
+---
+
+### 1. The Metaphor: The Photocopied Bank Check
+
+To understand why this is possible, imagine writing a traditional paper bank check:
+* **The Check (The Cryptographic Signature):** You write a check: *"Pay Bob $100."* You sign it with your unique pen signature.
+* **The Vulnerability (No Nonces):** Bob takes the check, walks into a bank branch, and gets $100 cash. But instead of the teller tearing up the check, Bob walks out, goes to the photocopier machine, prints 10 identical copies of the check, and submits them to 10 different bank branches. Because the pen signature on every copy is mathematically identical and valid, the tellers keep paying out.
+* **The Security Guard (Nonces and Chain IDs):** To prevent this, you print a unique, sequential check serial number (**Nonce**) on the paper check, and write the name of the bank branch location (**Chain ID**). If Bob tries to present the same serial number twice, the teller rejects it. If he tries to use it at a completely different bank, that teller rejects it.
+
+Cryptographic signatures are infinitely duplicable. You must explicitly build sequential serial number check-ins to make them single-use!
+
+---
+
+<RealityCheck>
+  A signature is strictly offline data. It does not contain an internal "spent" flag, it does not exist on the blockchain state until broadcasted, and the same signature remains mathematically valid forever unless your smart contract explicitly records and invalidates its unique hash coordinates in state after first use!
+</RealityCheck>
+
+---
+
+### 2. Technical Breakdown: Replay Exploits vs Nonce Protection
+
+Let's look at a vulnerable multi-sig validator contract versus an audit-safe version that implements nonces:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract VulnerableValidator {
+    address public signer;
+
+    // Mapping to track if a signature has been spent
+    mapping(bytes => bool) public isSignatureSpent;
+
+    constructor(address _signer) {
+        signer = _signer;
+    }
+
+    // ❌ VULNERABLE: The signature can be replayed on other networks!
+    function claimFunds(uint256 _amount, bytes memory _signature) public {
+        require(!isSignatureSpent[_signature], "Signature already spent");
+
+        bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, _amount));
+        bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+
+        address recovered = ecrecover(ethSignedMessageHash, _signature);
+        require(recovered == signer, "Invalid signature");
+
+        isSignatureSpent[_signature] = true; // Marks spent, but only on this specific network!
+        payable(msg.sender).transfer(_amount);
+    }
+}
+
+contract SecureValidator {
+    address public signer;
+    mapping(address => uint256) public nonces; // Tracks user nonces sequentially
+
+    constructor(address _signer) {
+        signer = _signer;
+    }
+
+    // ✅ SECURE: Incorporates Nonce, Chain ID, and Contract Address to prevent replays!
+    function claimFundsSecure(uint256 _amount, uint256 _nonce, bytes memory _signature) public {
+        require(_nonce == nonces[msg.sender], "Invalid nonce");
+
+        // Hash includes Nonce, Chain ID (block.chainid) and target contract address!
+        bytes32 messageHash = keccak256(abi.encodePacked(
+            msg.sender, 
+            _amount, 
+            _nonce, 
+            block.chainid, 
+            address(this)
+        ));
+        
+        bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+
+        address recovered = ecrecover(ethSignedMessageHash, _signature);
+        require(recovered == signer, "Invalid signature");
+
+        nonces[msg.sender] += 1; // Increment nonce to invalidate the signature forever!
+        payable(msg.sender).transfer(_amount);
+    }
+}
+```
+
+* **Vulnerable Replays:** In `VulnerableValidator`, if a hard fork occurs (e.g. Ethereum split into ETH and ETC), an attacker can take your valid signature from Ethereum and submit it to the contract on the fork network. The signature spent mapping is clean there, so it will payout again!
+* **Secure Replays:** In `SecureValidator`, we bind the signature hash to the sequential user `_nonce`, `block.chainid`, and the target `address(this)`. It cannot be replayed on other networks, other contracts, or repeated sequentially on the same account.
+
+---
+
+<MistakeCallout>
+  **The ecrecover Zero Signature Attack:** In Solidity, `ecrecover` returns the `0x000...000` (zero address) if the signature is invalid or malformed. If your contract doesn't explicitly check `require(recovered != address(0))` and has a default uninitialized signer variable, any junk signature will recover as `address(0)` and pass the authentication check!
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Trace the variables hashed inside `SecureValidator`. If the target contract `address(this)` was left out of the hash, explain how an attacker could replay your signature to drain funds from a completely different contract address that you deployed on the same network.
+</LessonChallenge>

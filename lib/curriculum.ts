@@ -348,9 +348,9 @@ export const tracks: Track[] = [
     color: "#3b82f6",
     difficulty: "intermediate",
     prerequisites: [0],
-    estimatedHours: 10,
+    estimatedHours: 12,
     moduleCount: 5,
-    lessonCount: 18,
+    lessonCount: 22,
     heroProject: {
       name: "Evolutionary Voting System",
       description: "Intentionally starts with a broken architecture (voter data stored on-chain), hits gas failures in practice, and evolves through optimization to a production-grade contract."
@@ -361,27 +361,143 @@ export const tracks: Track[] = [
         id: "m1-1",
         number: "M1.1",
         name: "Solidity Fundamentals",
-        description: "Types, functions, visibility, storage vs memory. The correct mental models.",
+        description: "Understand how smart contracts think, store state variables, manage volatile memory, and coordinate event indexers.",
         lessons: [
           {
-            slug: "solidity-types-gas",
-            title: "Solidity types and why they cost gas",
-            description: "uint256, mapping, struct. Storage slot packing rules.",
-            tags: ["types", "gas"],
+            slug: "variables-and-state",
+            title: "Variables and State",
+            description: "State variables, local variables, visibility, and smart contract storage behaviors.",
+            tags: ["variables", "state", "visibility"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "storage-vs-memory",
+            title: "Storage vs Memory",
+            description: "Storage, memory, and calldata. Why copying arrays behaves differently and costs different gas.",
+            tags: ["storage", "memory", "calldata"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
+          },
+          {
+            slug: "arrays-and-mappings",
+            title: "Arrays and Mappings",
+            description: "Understanding O(1) lookup mappings versus dynamic iteration arrays.",
+            tags: ["arrays", "mappings", "iteration"],
+            hasDiagram: false,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 12
+          },
+          {
+            slug: "structs-and-data-modeling",
+            title: "Structs and Data Modeling",
+            description: "Modeling users, custom nested struct arrays, and on-chain database schemas.",
+            tags: ["structs", "data-modeling", "gas"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 14
+          },
+          {
+            slug: "events-explained",
+            title: "Events Explained",
+            description: "Why smart contracts emit events instead of storing searchable parameters in blockchain state.",
+            tags: ["events", "logs", "indexing"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 11
+          }
+        ]
+      },
+      {
+        id: "m1-2",
+        number: "M1.2",
+        name: "Ownership & Smart Contract Control",
+        description: "Understand authorization patterns, modifier decorators, roles-based permissions, and smart contract immutability.",
+        lessons: [
+          {
+            slug: "what-onlyowner-actually-does",
+            title: "What onlyOwner Actually Does",
+            description: "msg.sender checks, owner access privileges, and transferOwnership sequences.",
+            tags: ["ownership", "authorization", "security"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "modifiers-explained",
+            title: "Modifiers Explained",
+            description: "Reusable validation logic, modifier ordering, and parameter pass-through execution.",
+            tags: ["modifiers", "logic", "validation"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "role-based-access-control",
+            title: "Role-Based Access Control",
+            description: "Multi-admin governance, role registries, and OpenZeppelin AccessControl patterns.",
+            tags: ["access-control", "roles", "openzeppelin"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
+          },
+          {
+            slug: "why-people-trust-smart-contracts",
+            title: "Why People Trust Smart Contracts",
+            description: "How immutable code and public verification eliminate the need for centralized administrators.",
+            tags: ["immutability", "transparency", "trust"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
+          }
+        ]
+      },
+      {
+        id: "m1-3",
+        number: "M1.3",
+        name: "Deployment & Blockchain State",
+        description: "Compiling bytecode, deterministic addresses, RPC switchboards, and the low-level virtual stack machine.",
+        lessons: [
+          {
+            slug: "what-deployment-actually-means",
+            title: "What deployment actually means — validator execution",
+            description: "Bytecode compilation, constructor execution, contract address creation, and validators storing contract state.",
+            tags: ["bytecode", "deployment", "constructors"],
             hasDiagram: true,
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 12
           },
           {
-            slug: "storage-memory-calldata",
-            title: "Storage vs memory vs calldata",
-            description: "Three data locations. Why using storage when you meant memory costs 100x more.",
-            tags: ["storage", "gas", "mistake"],
+            slug: "abi-as-translator",
+            title: "ABI as translator — mapping frontend to bytecode payloads",
+            description: "JSON interfaces, function selectors, encoding args, and translating frontend calls to raw hex payloads.",
+            tags: ["abi", "encoding", "selectors"],
             hasDiagram: false,
-            hasMistake: true,
+            hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 14
+            estimatedMinutes: 11
+          },
+          {
+            slug: "what-rpc-actually-does",
+            title: "What RPC actually does — your app's phone line to the blockchain",
+            description: "JSON-RPC spec. eth_call, eth_blockNumber. Why you need Alchemy or QuickNode.",
+            tags: ["rpc", "providers", "nodes"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
           },
           {
             slug: "how-evm-executes-code",
@@ -394,206 +510,110 @@ export const tracks: Track[] = [
             estimatedMinutes: 15
           },
           {
-            slug: "mappings-vs-arrays",
-            title: "Mappings vs arrays — when to use which",
-            description: "O(1) lookup vs iteration cost. Loop boundaries on mappings.",
-            tags: ["data-structures", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "how-i-broke-my-first-voting-system",
-            title: "How I broke my first voting system — a gas disaster",
-            description: "A flagship case study in Solidity anti-patterns: on-chain string storage, array traversals, and hitting the Block Gas Limit.",
-            tags: ["architecture", "security", "gas", "mistake"],
-            hasDiagram: true,
-            hasMistake: true,
-            hasProject: true,
-            estimatedMinutes: 16
-          },
-          {
-            slug: "events-logging",
-            title: "Events — the blockchain's logging system",
-            description: "Why events exist. How subgraphs read them. Cost difference between emit and store.",
-            tags: ["events", "indexing"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 11
-          }
-        ]
-      },
-      {
-        id: "m1-2",
-        number: "M1.2",
-        name: "Smart Contract Architecture",
-        description: "Modifiers, ownership, role systems, access control. Structured production setups.",
-        lessons: [
-          {
-            slug: "modifiers-access-control",
-            title: "Modifiers and access control basics",
-            description: "onlyOwner, custom errors vs require/revert.",
-            tags: ["architecture", "security"],
+            slug: "contract-lifecycle",
+            title: "Contract Lifecycle",
+            description: "Tracing a contract from local Solidity compile to permanent validator replication.",
+            tags: ["lifecycle", "compilation", "state"],
             hasDiagram: false,
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 10
-          },
-          {
-            slug: "openzeppelin-access-control",
-            title: "OpenZeppelin Access Control",
-            description: "Roles as bytes32. grantRole, revokeRole, hasRole. Security audit trails.",
-            tags: ["access-control", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "multi-admin-chaincure",
-            title: "Multi-admin systems — the ChainCure pattern",
-            description: "Granular admin approvals. Real contract walkthrough from a shipped project.",
-            tags: ["architecture", "real-code", "diagram"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 15
-          }
-        ]
-      },
-      {
-        id: "m1-3",
-        number: "M1.3",
-        name: "Deployment & Blockchain State",
-        description: "Compiling, bytecode, ABI, and network verification.",
-        lessons: [
-          {
-            slug: "what-deployment-actually-means",
-            title: "What deployment actually means — validator execution",
-            description: "Bytecode compilation, constructor execution, contract address creation, and validators storing contract state.",
-            tags: ["bytecode", "deployment", "diagram"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "abi-as-translator",
-            title: "ABI as translator — mapping frontend to bytecode payloads",
-            description: "JSON interfaces, function selectors, encoding args, and translating frontend calls to raw hex payloads.",
-            tags: ["abi", "frontend"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 11
-          },
-          {
-            slug: "hardhat-local-dev",
-            title: "Hardhat — local development environment",
-            description: "Local node, deploy scripts, testing, compiler configurations.",
-            tags: ["hardhat", "toolchain", "mistake"],
-            hasDiagram: false,
-            hasMistake: true,
-            hasProject: false,
-            estimatedMinutes: 13
-          },
-          {
-            slug: "deploying-polygon-amoy",
-            title: "Deploying to Polygon Amoy testnet",
-            description: "Config, secrets, verification, and script templates.",
-            tags: ["hardhat", "deployment", "project"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: true,
-            estimatedMinutes: 15
           }
         ]
       },
       {
         id: "m1-4",
         number: "M1.4",
-        name: "Token Standards",
-        description: "ERC-20, ERC-721, soulbound tokens, and decentralized metadata rules.",
+        name: "Evolutionary Voting System",
+        description: "Build, break, analyze, and optimize an evolutionary production-grade voting architecture.",
         lessons: [
           {
-            slug: "erc20-fungible-tokens",
-            title: "ERC-20 — fungible tokens",
-            description: "Approvals, allowances, and the transferFrom flow.",
-            tags: ["erc20", "tokens", "project"],
+            slug: "building-first-voting-system",
+            title: "Building First Voting System",
+            description: "Designing a naive Solidity voting engine using simple arrays and state allocations.",
+            tags: ["architecture", "voting", "project"],
             hasDiagram: false,
             hasMistake: false,
             hasProject: true,
-            estimatedMinutes: 13
+            estimatedMinutes: 12
           },
           {
-            slug: "erc721-nfts",
-            title: "ERC-721 — NFTs from first principles",
-            description: "Metadata URIs, tokenId mapping, and minting rules.",
-            tags: ["erc721", "nfts", "project"],
+            slug: "how-i-broke-my-first-voting-system",
+            title: "How I broke my first voting system — a gas disaster",
+            description: "A flagship case study in Solidity anti-patterns: on-chain string storage, array traversals, and hitting the Block Gas Limit.",
+            tags: ["gas", "reverts", "mistake", "loops"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 16
+          },
+          {
+            slug: "blockchain-is-not-your-database",
+            title: "Blockchain is NOT your database — hybrid design rules",
+            description: "Crucial system design architectures: ProofChain, Firebase caching, IPFS hashing, event indexing, and resolving query issues.",
+            tags: ["hybrid", "storage", "ipfs", "database"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 15
+          },
+          {
+            slug: "optimizing-smart-contract-storage",
+            title: "Optimizing Smart Contract Storage",
+            description: "Refactoring state layout, slot packing, O(1) mappings, and lightweight event index architectures.",
+            tags: ["gas", "packing", "optimization"],
             hasDiagram: false,
             hasMistake: false,
             hasProject: true,
             estimatedMinutes: 14
-          },
-          {
-            slug: "soulbound-tokens-erc5192",
-            title: "ERC-5192 — soulbound (non-transferable) NFTs",
-            description: "Locked states. Why ZKredential used soulbound tokens.",
-            tags: ["sbt", "erc5192", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "ipfs-metadata-correct",
-            title: "IPFS metadata — the correct pattern",
-            description: "Permanent CIDs vs brittle API links. Pinata integration.",
-            tags: ["ipfs", "metadata", "mistake"],
-            hasDiagram: false,
-            hasMistake: true,
-            hasProject: false,
-            estimatedMinutes: 13
           }
         ]
       },
       {
         id: "m1-5",
         number: "M1.5",
-        name: "Contract Security",
-        description: "Reentrancy, arithmetic bugs, origin authentication, and static analysis tools.",
+        name: "Security & Production Reality",
+        description: "Understand reentrancy execution states, signature replays, tx.origin authentication exploits, and post-deployment audits.",
         lessons: [
           {
-            slug: "reentrancy-dao-hack",
-            title: "Reentrancy — the $60M DAO hack explained",
-            description: "Checks-Effects-Interactions, reentrancy guards.",
-            tags: ["security", "reentrancy", "diagram"],
-            hasDiagram: true,
+            slug: "reentrancy-explained",
+            title: "Reentrancy Explained",
+            description: "Understanding checks-effects-interactions and recursive call vulnerabilities.",
+            tags: ["security", "reentrancy", "hacks"],
+            hasDiagram: false,
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 15
           },
           {
-            slug: "arithmetic-bugs",
-            title: "Integer overflow and underflow",
-            description: "Solidity 0.8 safe math vs legacy bugs.",
-            tags: ["security", "math"],
+            slug: "replay-attacks-explained",
+            title: "Replay Attacks Explained",
+            description: "Offline signature validation risks, transaction reuse, and nonce validation checks.",
+            tags: ["security", "signatures", "replays"],
             hasDiagram: false,
             hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 10
+            estimatedMinutes: 13
           },
           {
-            slug: "tx-origin-auth",
-            title: "tx.origin vs msg.sender — the phishing vector",
-            description: "How tx.origin attacks work and how to prevent them.",
-            tags: ["security", "auth", "mistake"],
+            slug: "common-beginner-security-mistakes",
+            title: "Common Beginner Security Mistakes",
+            description: "Origin authentication exploits, missing validations, and unsafe state assumptions.",
+            tags: ["security", "origin", "auth", "mistakes"],
             hasDiagram: false,
             hasMistake: true,
             hasProject: false,
             estimatedMinutes: 12
+          },
+          {
+            slug: "production-reality-smart-contracts",
+            title: "Production Reality of Smart Contracts",
+            description: "Managing audits, monitoring deployments, proxy patterns, and emergency timelocks.",
+            tags: ["audits", "upgrades", "monitoring"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 14
           }
         ]
       }
