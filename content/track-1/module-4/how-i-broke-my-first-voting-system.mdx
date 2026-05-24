@@ -23,9 +23,7 @@ This is the story of my biggest and most embarrassing smart contract failure.
 
 I was building my first "production" smart contract: a decentralized voting system for a local developer hackathon with a few hundred participants. I wanted everything to be perfectly decentralized, transparent, and completely immutable.
 
-My contract worked beautifully in my local Hardhat test suite with 5 candidates and 10 voters. I felt like a genius. But when we deployed it on-chain for the actual live event with 120 candidates and 800 voters, **the system collapsed completely.** 
-
-Users began swarming our support desk. Etherscan showed a sea of red transaction alerts: `Fail [Out of Gas]`. Worst of all, **voters were still charged real Polygon gas fees for their failed attempts.** They were losing real money, their votes weren't registering, and eventually, the contract completely froze—meaning *no one* could cast a vote or tally the results. 
+Users began swarming our support desk. Etherscan showed a sea of red transaction alerts: `Fail [Out of Gas]`. Worst of all, **voters were still charged real Polygon gas fees for their failed attempts.** They were losing real money, their votes weren't registering, and eventually, critical functions became practically unusable due to gas costs—meaning *no one* could cast a vote or tally the results. 
 
 I was sitting in the corner of the room, sweating profusely, watching our dApp fail in real-time. We had completely bricked the hackathon voting system.
 
@@ -115,7 +113,7 @@ But as `voterList` grew to 800 addresses:
 2. The gas required to loop scaled linearly (O(N)) with the number of voters.
 3. Eventually, the gas cost to iterate 800 times exceeded the gas limit of the block.
 
-At that moment, the transaction hit the **Block Gas Limit** and reverted. The loop was now too large to ever be executed again. **The contract was bricked forever.**
+At that moment, the transaction hit the **Block Gas Limit** and reverted. The loop was now too large to ever be executed inside a single block. **The critical voting functions became practically unusable at this scale.**
 
 ---
 
