@@ -1,0 +1,194 @@
+---
+title: "How I designed APIs for Web3 — the ownership model"
+description: "Why the frontend can't call IPFS directly, how an Express proxy becomes a secure access layer, and the three-tier ownership model: Blockchain → IPFS → Backend → Frontend."
+track: 1
+trackName: "Solidity & Smart Contract Engineering"
+trackColor: "#3b82f6"
+label: "Lesson 4"
+module: 4
+moduleName: "Evolutionary Voting System"
+lesson: 4
+difficulty: "intermediate"
+estimatedMinutes: 14
+tags: ["api", "backend", "ipfs", "security", "architecture"]
+hasDiagram: true
+hasMistake: true
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The backend API architecture that completes the hybrid system design, connecting the blockchain storage layer to a secure, authenticated frontend."
+---
+
+# How I Designed APIs for Web3: The Ownership Model
+
+Let's address a mistake that almost every Web3 beginner makes on their first full-stack project:
+
+**They put their Pinata API key directly in the frontend.**
+
+I made this mistake. I know exactly how it happens: you're moving fast, the code works, the uploads work, everything looks fine. Then someone DMs you.
+
+*"Hey... is this your Pinata API key? I found it in your JavaScript bundle."*
+
+I immediately checked the browser DevTools Network tab. There it was: `Authorization: Bearer sk_prod_...` — my production API key, broadcasting itself to every visitor's browser, in plain text, on every single IPFS upload request.
+
+---
+
+### 1. The Story: The DM That Changed My Architecture
+
+I had built ChainElect's voter registration to upload profile images directly to Pinata from the React frontend:
+
+```javascript
+// ❌ THE MISTAKE — directly in the React component
+const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+  headers: {
+    Authorization: `Bearer ${process.env.REACT_APP_PINATA_API_KEY}` // ← visible to everyone
+  }
+});
+```
+
+The `REACT_APP_` prefix is a Vite/CRA convention that **bakes the value into the compiled JavaScript bundle**. It is not secret. It is not hidden. It is sent to every browser that loads your site. Anyone who opens DevTools → Network → copies the Authorization header has your API key.
+
+In my case, the damage was minor: someone used my key to upload a few hundred megabytes of junk files, burning through my Pinata storage quota overnight. It could have been much worse.
+
+---
+
+### 2. The Metaphor: The Nightclub Wristband
+
+A nightclub has a VIP room. The way IN to the VIP room is a wristband check at a bouncer's door.
+
+If you give every guest the bouncer's master override keycard when they walk in the front door, the VIP room is not protected. Anyone can walk in and help themselves to the private bar.
+
+The frontend is the public lobby. Your API keys are the master keycard. **You never give master keycards to guests in the public lobby.**
+
+Instead, a proper system works like this:
+1. A guest (frontend) requests access to the VIP room (IPFS upload).
+2. They show their ticket (authenticated session) to a **staff member at the desk** (the backend).
+3. The staff member verifies the ticket and then uses their master keycard to grant access.
+4. The guest never touches the keycard.
+
+The backend is your staff member. The frontend is the public lobby. They are not the same thing.
+
+---
+
+### 3. The Visual Ownership Model
+
+```
+BROKEN ARCHITECTURE (API key exposed)
+Frontend ──────────── API Key in JS bundle ──────────────► Pinata
+         (Anyone can extract this from DevTools)
+
+SECURE ARCHITECTURE (Backend proxy)
+Frontend ──── Authenticated Request ────► Backend (Express)
+                                               │
+                                      Validate session/auth
+                                               │
+                                      Use server-side API key
+                                               │
+                                               ▼
+                                           Pinata / IPFS
+                                               │
+                                         Returns CID hash
+                                               │
+                                               ▼
+                              Backend ──► Frontend (just the CID)
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate this as two data flow diagrams side by side. In the broken architecture, highlight the API key leaking into the public browser box in red. In the secure architecture, the API key never leaves the server box — animate it as a locked vault that only the backend can open.
+
+---
+
+### 4. Technical Explanation: The Three-Layer Ownership Model
+
+Once I refactored ChainElect to use a proper backend proxy, I discovered the natural architecture that emerges in every serious Web3 dApp:
+
+```
+LAYER 1 — TRUST (Blockchain)
+  Stores: cryptographic proofs, ownership records, hashes
+  Access: permissionless, public, immutable
+  Example: contract.registerVoter(address)
+
+LAYER 2 — FILES (IPFS / Decentralized Storage)
+  Stores: images, documents, large binary data
+  Access: public content-addressing by CID hash
+  Example: ipfs://QmXyZ... (voter profile image)
+
+LAYER 3 — AUTH & CACHE (Backend / Express)
+  Stores: nothing permanently — it's a proxy
+  Controls: API keys, session validation, rate limiting, caching
+  Example: POST /api/upload → validates session → calls Pinata → returns CID
+
+LAYER 4 — INTERFACE (Frontend / React)
+  Renders: UI, reads from blockchain and backend
+  Knows: nothing about API keys or private credentials
+  Example: useAccount() → displays voter dashboard
+```
+
+Each layer has one job. Each layer trusts only the layers it directly communicates with.
+
+---
+
+### 5. The ChainElect Backend in Practice
+
+Here is the actual Express proxy pattern from ChainElect's backend (`server.js`):
+
+```javascript
+// context/ChainElectBackend/server.js (simplified)
+const express = require('express');
+const multer = require('multer');
+const FormData = require('form-data');
+const axios = require('axios');
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/api/upload-image', isAuthenticated, upload.single('file'), async (req, res) => {
+  try {
+    // 1. Server-side session check — frontend can't fake this
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // 2. Build the Pinata request server-side
+    const formData = new FormData();
+    formData.append('file', req.file.buffer, { filename: req.file.originalname });
+
+    // 3. API key NEVER leaves the server
+    const pinataResponse = await axios.post(
+      'https://api.pinata.cloud/pinning/pinFileToIPFS',
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          Authorization: `Bearer ${process.env.PINATA_API_KEY}` // server env var only
+        }
+      }
+    );
+
+    // 4. Return only the CID to the frontend — not the key
+    res.json({ cid: pinataResponse.data.IpfsHash });
+  } catch (error) {
+    res.status(500).json({ error: 'Upload failed' });
+  }
+});
+```
+
+The frontend calls `POST /api/upload-image` with the file. It gets back a CID. It never knows the Pinata API key exists.
+
+---
+
+<RealityCheck>
+  The backend in a Web3 dApp is NOT the trust layer. The blockchain is the trust layer. The backend is the **access control layer** — it manages authentication, rate limits, API secrets, and caching. If your backend goes down, users lose access to the UI, but the on-chain data (votes, ownership records, proofs) remains perfectly intact and verifiable by anyone with an RPC node.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  **The `.env` False Security Trap:**
+  Many developers think that putting API keys in `.env` files makes them secret in frontend projects. It does not. Vite and Create React App both bundle any variable prefixed with `VITE_` or `REACT_APP_` directly into the compiled JavaScript output. These values are fully visible in production bundles. Only variables used by a **server-side process** (Node.js, Next.js API routes, Express) are truly private.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Open any production dApp that uses IPFS uploads (like a minting site). Open DevTools → Network → filter by XHR. Find an upload request. Check the Authorization headers. Is the API key visible? If so, you've found a real security vulnerability — this is a common mistake in early Web3 projects.
+</LessonChallenge>
