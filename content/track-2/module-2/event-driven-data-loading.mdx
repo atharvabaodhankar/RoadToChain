@@ -1,0 +1,156 @@
+---
+title: "Event-driven data loading — the correct pattern"
+description: "How to use smart contract events as the source of truth for frontend data, with real-time listeners, optimistic UI updates, and the bridge to off-chain indexing."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 2
+moduleName: "The First Pain: Fetching"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 12
+tags: ["events", "react", "realtime", "listeners"]
+hasDiagram: true
+hasMistake: false
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The event-driven pattern that bridges direct contract reads to full indexing — and sets up the subgraph query system in Module M2.5."
+---
+
+# Event-Driven Data Loading: The Correct Pattern
+
+After discovering that direct contract reads don't scale and that `eth_getLogs` has hidden limits, there's a middle-ground pattern that works well for medium-scale apps: **event-driven data loading**.
+
+Instead of querying current state from contract storage (slow, expensive, doesn't support filtering), you listen to the events that the contract emits whenever state changes. Events are the blockchain's broadcast system — every state change announcement is permanently logged, cheap to store, and designed to be queried.
+
+---
+
+### 1. The Mental Model: Events as the Notification Bus
+
+In ChainElect, every significant state change emits an event:
+
+```solidity
+// MyContract.sol — the event definitions
+event VoterRegistered(address voter);
+event VotingStarted(uint256 endTime);
+event Voted(address indexed voter, uint256 indexed candidateId);
+event VotingEnded();
+event CandidateAdded(string name);
+```
+
+These events are your **notification bus**. They tell the frontend exactly what happened, when it happened, and who triggered it — without requiring any additional RPC calls to reconstruct state.
+
+The key insight: if you build your frontend state **by replaying and listening to events**, you only need to query events (not raw state), and you can maintain that state incrementally as new events arrive.
+
+---
+
+### 2. The Visual: Event-Driven State Machine
+
+```
+INITIAL LOAD
+Events query (paginated, M2.2) ──► Replay all historical events
+                                          │
+                                   Build local state:
+                                   { candidates: [...],
+                                     voterCount: 342,
+                                     isVotingActive: true }
+                                          │
+                                          ▼
+                                   Render UI from local state
+
+REAL-TIME UPDATES
+Subscribe to contract.events.Voted()
+                    │
+        New Voted event arrives ──► Update local state
+        { voterCount: 343 }     ──► Re-render UI
+        (No RPC call needed!)
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate the initial load as a "replay" — show historical events streaming in and building up a state object like a ledger. Then show the real-time subscription as a live wire that updates the same state object in place. This helps students understand state reconstruction from events vs polling contract state.
+
+---
+
+### 3. Technical Explanation: Web3.js Event Subscriptions
+
+Web3.js supports both historical event queries and real-time event subscriptions:
+
+```javascript
+// context/src/pages/Results.jsx (event-driven approach)
+const loadResultsFromEvents = async () => {
+  // Step 1: Replay historical Voted events to build vote counts
+  const votedEvents = await contract.getPastEvents('Voted', {
+    fromBlock: DEPLOY_BLOCK, // Known constant
+    toBlock: 'latest'
+  });
+
+  // Build vote tally from events (no contract state reads needed)
+  const tally = {};
+  votedEvents.forEach(event => {
+    const { candidateId } = event.returnValues;
+    tally[candidateId] = (tally[candidateId] || 0) + 1;
+  });
+
+  setVoteTally(tally);
+  setTotalVotes(votedEvents.length);
+};
+
+// Step 2: Subscribe to NEW votes in real-time
+const subscribeToVotes = () => {
+  const subscription = contract.events.Voted()
+    .on('data', (event) => {
+      const { candidateId } = event.returnValues;
+      // Update tally incrementally — no re-query needed
+      setVoteTally(prev => ({
+        ...prev,
+        [candidateId]: (prev[candidateId] || 0) + 1
+      }));
+      setTotalVotes(prev => prev + 1);
+    })
+    .on('error', console.error);
+
+  return subscription; // Store for cleanup
+};
+
+// Cleanup on component unmount
+useEffect(() => {
+  const sub = subscribeToVotes();
+  return () => sub.unsubscribe();
+}, [contract]);
+```
+
+This pattern:
+- Historical load: one paginated `eth_getLogs` query (still has limits, but manageable at medium scale)
+- Real-time updates: WebSocket subscription (no RPC calls for new events)
+- No polling loop required
+
+---
+
+### 4. The Bridge to Indexing
+
+Event-driven loading works well up to ~50,000 historical events or ~10,000 blocks of history. Beyond that, the initial historical replay becomes too slow.
+
+This is the exact moment where **The Graph** (Module M2.5) becomes necessary. Instead of replaying events in the browser on every page load, The Graph does the replay once, stores the result in a PostgreSQL-backed subgraph, and exposes a GraphQL API for instant queries.
+
+```
+Without indexing (current approach):
+User loads page → Replay 50,000 events in browser → 8 seconds
+
+With The Graph (Module M2.5):
+User loads page → GraphQL query to subgraph → 80ms
+```
+
+The event-driven pattern you're learning now is the conceptual foundation of how indexers work — they do the same replay, just once, off-chain, and much faster.
+
+---
+
+<RealityCheck>
+  Web3.js WebSocket subscriptions only work when connected to a WebSocket-enabled RPC endpoint (like `wss://polygon-amoy.g.alchemy.com/v2/KEY`). Standard HTTP RPC endpoints (`https://...`) do not support real-time event subscriptions. Always check your RPC endpoint supports WebSocket when building live-updating UIs.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  In ChainElect's contract, identify which events are marked as `indexed` (e.g. `Voted(address indexed voter, uint256 indexed candidateId)`). Why does marking an event parameter as `indexed` matter for querying? Try filtering `getPastEvents('Voted', { filter: { candidateId: '1' } })` — would this work without the `indexed` keyword?
+</LessonChallenge>
