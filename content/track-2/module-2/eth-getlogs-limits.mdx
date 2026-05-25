@@ -1,0 +1,135 @@
+---
+title: "The hidden limits of eth_getLogs"
+description: "Why event log queries break at scale. Block range limits, RPC node restrictions, and why historical lookups hit silent walls."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 2
+moduleName: "The First Pain: Fetching"
+lesson: 2
+difficulty: "intermediate"
+estimatedMinutes: 13
+tags: ["events", "eth_getLogs", "rpc", "limits", "mistake"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: "ChainElect"
+heroProjectContribution: "The eth_getLogs scaling wall that makes event indexing (Module M2.5) the only production-ready solution."
+---
+
+# The Hidden Limits of eth_getLogs
+
+After discovering that direct contract reads don't scale, I tried a smarter approach: **read from events instead**.
+
+Smart contracts emit events. Events are cheaper to store than state. And `eth_getLogs` can query them in bulk. Surely this would solve the scaling problem?
+
+*"I'll just grab all VoteCast events and rebuild the voter list from them. Perfect."*
+
+I shipped it. It worked perfectly... for blocks 0 to 499. Then it silently returned an empty array for everything after.
+
+---
+
+### 1. The Story: The Invisible Block Range Ceiling
+
+My event-loading code:
+
+```javascript
+// Looks reasonable — get all VoteCast events
+const events = await web3.eth.getPastEvents('VoteCast', {
+  fromBlock: 0,
+  toBlock: 'latest'
+});
+```
+
+In local Hardhat testing with 50 blocks: returned everything.
+In production on Polygon Amoy after 2 weeks of use: returned an empty array.
+
+No error. No warning. Just an empty array where 400 events should have been.
+
+After three hours of debugging, I found the root cause in Polygon Amoy's public RPC documentation: **block range limit of 500 blocks per `eth_getLogs` query**.
+
+My contract was deployed at block 8,200,000. By the time I queried, the latest block was 8,201,800. My query spanned 1,800 blocks — 3.6x over the limit. The RPC silently truncated the results to the first 500 blocks and returned.
+
+---
+
+### 2. The Visual: Where the Ceiling Hits
+
+```
+Block Range Query: fromBlock=0, toBlock='latest'
+
+[Block 0]──────────────────────────────[Block 10,000,000+]
+
+Public RPC Limit: max 500 blocks per query
+
+     ├── Returns ──┤
+[Block 0]─[Block 500]    ×───────────────[Block 10M]
+                         │
+                  Results silently cut off here
+                  (no error, just empty results
+                  beyond the limit boundary)
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate this as a sliding window on the block range. The window (query range) is fixed at 500 blocks. To cover the full history, the window must slide across the entire chain in sequential steps. Show the number of required API calls = (latestBlock - deployBlock) / 500. Highlight how this grows over time.
+
+---
+
+### 3. Technical Explanation: RPC Node Log Limits by Provider
+
+Different RPC providers enforce different `eth_getLogs` limits:
+
+| Provider | Block Range Limit | Max Results |
+|:---|:---|:---|
+| Alchemy (free tier) | 2,000 blocks | 10,000 events |
+| QuickNode (free tier) | 10,000 blocks | 10,000 events |
+| Infura (free tier) | 10,000 blocks | 10,000 events |
+| Polygon Amoy public RPC | 500 blocks | ~500 events |
+| Local Hardhat | Unlimited | Unlimited |
+
+The local Hardhat environment has no limits, which is why the problem is invisible during development and only surfaces in production.
+
+The correct solution for historical queries is to paginate through block ranges:
+
+```javascript
+const getEventsPaginated = async (contract, eventName, fromBlock, toBlock) => {
+  const PAGE_SIZE = 499; // Stay under the 500-block limit
+  const allEvents = [];
+  
+  let currentBlock = fromBlock;
+  while (currentBlock <= toBlock) {
+    const endBlock = Math.min(currentBlock + PAGE_SIZE, toBlock);
+    
+    const events = await contract.getPastEvents(eventName, {
+      fromBlock: currentBlock,
+      toBlock: endBlock
+    });
+    
+    allEvents.push(...events);
+    currentBlock = endBlock + 1;
+  }
+  
+  return allEvents;
+};
+```
+
+This works — but for a contract deployed at block 8,000,000 with 200,000 blocks of history, this requires **400+ individual RPC calls** on every page load. Still not a production solution.
+
+---
+
+<RealityCheck>
+  The eth_getLogs limit problem gets worse over time — as the chain grows, the gap between your deploy block and the latest block increases linearly. A query that requires 10 paginated RPC calls today might require 1,000 calls in two years. Any app that directly queries historical events from the RPC node is building in a time bomb. The solution is indexing (Module M2.5): pre-process and cache events off-chain, so your frontend never needs to query raw logs at all.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  **The Silent Empty Array Bug:**
+  When `eth_getLogs` hits a range limit, it does NOT throw an error. It silently returns fewer results (or an empty array). This is one of the most insidious bugs in Web3 development — your code runs perfectly, it just shows incomplete data. Always validate the count of returned events against your expected state. If the count is suspiciously low or zero, range limits are the first suspect.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Find your contract's deployment block number on Amoy Etherscan. Calculate how many 500-block pages you'd need to paginate through to fetch all events from deployment to today. Now calculate what this will look like in 6 months if the chain produces 1 block every 2 seconds.
+</LessonChallenge>
