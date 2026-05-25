@@ -1,0 +1,178 @@
+---
+title: "Reading and writing to contracts from React"
+description: "The complete flow for contract reads (view calls), contract writes (signed transactions), and handling pending states, receipts, and errors in a React UI."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 1
+moduleName: "My First Social dApp"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 15
+tags: ["react", "ethers", "contract-reads", "contract-writes", "diagram"]
+hasDiagram: true
+hasMistake: true
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The two core contract interaction patterns (read and write) that all subsequent modules optimize, cache, or index."
+---
+
+# Reading and Writing to Contracts from React
+
+There are exactly two things your frontend does with a smart contract:
+
+1. **Read** — ask the contract a question (free, instant, no MetaMask popup)
+2. **Write** — send a transaction that changes state (costs gas, requires MetaMask approval, takes time)
+
+Every Web3 frontend confusion traces back to not understanding this boundary clearly.
+
+---
+
+### 1. The Story: The Phantom Vote
+
+In ChainElect's early days, I had a bug that took me three hours to find.
+
+A voter would click the vote button. MetaMask would pop up. They'd approve the transaction. The UI would reload. The vote count wouldn't change.
+
+*"Did the vote work? Did it fail? Why isn't the count updating?"*
+
+The bug was embarrassingly simple: my "reload" function called `getCandidate()` **immediately** after `sendTransaction()` returned. But `sendTransaction()` returns as soon as the transaction is *submitted to the mempool* — not when it's *confirmed by a validator*. The vote existed in pending state. The read came back before the block was mined. Old data.
+
+I was reading state before the write had landed.
+
+---
+
+### 2. The Visual: Read vs Write Flow
+
+```
+CONTRACT READ (view function)
+React ──► ethers.js.call() ──► RPC Node
+                                    │
+                              Queries local DB
+                                    │
+                              Returns data (0ms–500ms)
+                                    │
+React ◄── Data (no MetaMask, no gas, instant)
+
+CONTRACT WRITE (state-changing function)
+React ──► ethers.js.sendTransaction() ──► MetaMask popup
+                                                │
+                                        User approves
+                                                │
+                                          TX hash returned (PENDING)
+                                                │
+                    ┌──────────────────────────────┐
+                    ▼ (may take 5–30 seconds)       │
+              Validators pick up TX                │
+              Execute function                     │
+              Write new state                      │
+              Emit event                           │
+                    │                             │
+                    ▼                             │
+              TX confirmed                        │
+              receipt.status === 1 ◄──────────────┘
+                    │
+              NOW safe to re-read state
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate both flows as simultaneous signal paths. The read path is a short, fast loop. The write path is a longer sequential pipeline with a clear "PENDING" state bubble that animates until the block confirmation arrives. This sets user expectations correctly.
+
+---
+
+### 3. Technical Explanation: The Read Pattern
+
+Reading from a contract is free — it executes locally on the RPC node, never touches the blockchain consensus layer. In Web3.js (ChainElect's library):
+
+```javascript
+// context/src/pages/Results.jsx (simplified)
+const loadCandidates = async () => {
+  const count = await contract.methods.getCandidatesCount().call();
+  
+  const candidateList = [];
+  for (let i = 1; i <= count; i++) {
+    const [name, voteCount] = await contract.methods.getCandidate(i).call();
+    candidateList.push({ id: i, name, voteCount: parseInt(voteCount) });
+  }
+  
+  setCandidates(candidateList);
+};
+```
+
+Key properties of `.call()`:
+- **Free** — no gas consumed, no MetaMask popup
+- **Instant** — executes on the RPC node, not the chain
+- **Reads current confirmed state** — does NOT read pending transactions
+
+---
+
+### 4. Technical Explanation: The Write Pattern with Proper Pending State
+
+The write pattern must explicitly handle three states: **pending**, **confirmed**, **failed**:
+
+```javascript
+// context/src/pages/Voters.jsx (production vote handler)
+const castVote = async (candidateId) => {
+  try {
+    // 1. Set UI to pending state BEFORE MetaMask popup
+    setVoteStatus('pending');
+    setVoteError(null);
+
+    // 2. Send transaction — this returns when TX hits mempool (NOT confirmed)
+    const tx = await contract.methods.vote(candidateId).send({
+      from: account,
+      gas: 300000,
+      gasPrice: '40000000000' // 40 gwei for Polygon Amoy
+    });
+
+    // 3. tx.transactionHash is available immediately — show it for tracking
+    console.log('TX submitted:', tx.transactionHash);
+
+    // 4. Wait for receipt — this resolves when block is mined
+    // Note: Web3.js .send() already waits for receipt by default
+    // tx.status === true means success, false means revert
+    if (tx.status) {
+      setVoteStatus('confirmed');
+      // 5. NOW safe to reload candidate data
+      await loadCandidates();
+    } else {
+      setVoteStatus('failed');
+      setVoteError('Transaction reverted on-chain.');
+    }
+
+  } catch (error) {
+    if (error.code === 4001) {
+      setVoteStatus('idle');
+      // User rejected MetaMask popup — not an error
+    } else {
+      setVoteStatus('failed');
+      setVoteError(error.message);
+    }
+  }
+};
+```
+
+The three UI states to handle:
+1. **`idle`** — vote button enabled, normal state
+2. **`pending`** — spinner shown, button disabled, TX hash displayed for Etherscan link
+3. **`confirmed` / `failed`** — success message or error message, data reloaded
+
+---
+
+<RealityCheck>
+  Beginners often use `useEffect` with the contract as a dependency to "auto-refresh" data after writes. This almost always causes infinite render loops or reads stale data. The correct pattern is: **trigger reads explicitly after confirmed writes**. Call your read function inside the `then()` or `await` block that fires after confirmation, not on component re-render.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  **The Gas Estimation Trap:**
+  Hardcoding `gas: 300000` works during development but can fail in production if the contract's gas requirements change (e.g. after an upgrade, or as state grows). Always call `contract.methods.vote(id).estimateGas({ from: account })` before sending and use that value (with a small buffer like `* 1.2`) to set gas dynamically. ChainElect's `contractConfig.js` stores the hardcoded gas values — this is a known technical debt.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  In ChainElect's `Voters.jsx`, find the function that casts a vote. Trace the full execution path: what happens if the user rejects the MetaMask popup (error code 4001)? What happens if the transaction gets included in a block but reverts (e.g. because the voter already voted)? Does the current UI handle both cases distinctly?
+</LessonChallenge>
