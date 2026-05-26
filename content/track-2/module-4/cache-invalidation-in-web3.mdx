@@ -1,0 +1,149 @@
+---
+title: "Cache invalidation in Web3 — when does truth change?"
+description: "The unique cache invalidation properties of blockchain data: immutable content addressing vs mutable on-chain state, and how to design cache strategies that stay consistent."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 4
+moduleName: "Why Redis Suddenly Appeared"
+lesson: 2
+difficulty: "intermediate"
+estimatedMinutes: 13
+tags: ["redis", "caching", "invalidation", "consistency"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: "ChainElect"
+heroProjectContribution: "The cache consistency thinking that becomes critical in Track 3 system design, where data from multiple sources (chain, IPFS, backend) must remain synchronized."
+---
+
+# Cache Invalidation in Web3: When Does Truth Change?
+
+There are two hard problems in computer science, as the saying goes: cache invalidation and naming things.
+
+In Web3, cache invalidation has a fascinating property that makes it both simpler and trickier than traditional web apps.
+
+Simpler: **IPFS content is immutable.** A CID never changes. Cached content is always correct — the cache only becomes stale when a new CID is referenced.
+
+Trickier: **on-chain state is mutable but unpredictably updated.** Vote counts change on every vote transaction. Voting status changes when `startVoting()` or `endVoting()` is called. Your cache of "current vote count" becomes stale the moment any voter submits a transaction.
+
+Getting cache invalidation wrong in Web3 means users see incorrect data — often in high-stakes situations like election results.
+
+---
+
+### 1. The Two Cache Types in a Web3 dApp
+
+```
+TYPE 1: Content-Addressed Cache (IPFS)
+   Key:     ipfs:{CID}
+   Changes: NEVER (immutable content)
+   TTL:     Long (days/weeks) or infinite
+   Strategy: Cache-forever-until-new-reference
+
+TYPE 2: State Cache (On-Chain Contract State)
+   Key:     contract:{address}:candidate:{id}:voteCount
+   Changes: After every Voted transaction
+   TTL:     Short (seconds) or event-driven
+   Strategy: Cache briefly, invalidate on events
+```
+
+---
+
+### 2. The Story: The Wrong Vote Count Display
+
+After adding Redis to ChainElect, I made a mistake in the results page:
+
+```javascript
+// ❌ Cached vote counts with a 1-hour TTL
+const cacheKey = `votes:candidate:${candidateId}`;
+const cached = await redis.get(cacheKey);
+if (cached) return JSON.parse(cached);
+
+const count = await contract.methods.candidates(candidateId).call();
+await redis.setEx(cacheKey, 3600, JSON.stringify(count)); // 1-hour TTL
+return count;
+```
+
+During a live voting session, the results page was showing vote counts from up to 1 hour ago. A candidate who had received 50 new votes in the last 30 minutes was still showing their old count. During an election — even a demo one — this is unacceptable.
+
+The fix: invalidate the vote count cache **on every Voted event**, using the event subscription from Module M2.2:
+
+```javascript
+// ✓ Event-driven cache invalidation
+contract.events.Voted()
+  .on('data', async (event) => {
+    const { candidateId } = event.returnValues;
+    
+    // Invalidate the stale cache entry immediately
+    await redis.del(`votes:candidate:${candidateId}`);
+    
+    // The next request will re-fetch fresh data and re-cache it
+  });
+```
+
+---
+
+### 3. The Visual: TTL vs Event-Driven Invalidation
+
+```
+TTL-BASED CACHE (wrong for vote counts)
+                    Event fires at T=0 (vote submitted)
+                              │
+         ┌────── Cache entry ─┤──────────────────────────────┐
+         │ (created at T=-3600)                              │
+         │ Stale data served for                             │
+         │ up to 3,600 seconds after reality changes         │
+         └───────────────────────────────────────────────────┘
+                                                 TTL expiry at T=3600
+                                                 (finally re-fetches)
+
+EVENT-DRIVEN INVALIDATION (correct)
+                    Event fires at T=0 (vote submitted)
+                              │
+                        Cache DEL key
+                              │
+                       Next request
+                              │
+                       Fresh fetch ──► new value
+                              │
+                       Re-cache ──► valid data from T=0 onward
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate a timeline with two parallel tracks. Track A (TTL) shows a long period of serving stale data after a state change. Track B (Event-driven) shows an immediate invalidation the instant the event fires. Make the difference stark and visible — this is the intuition that explains why event subscriptions matter.
+
+---
+
+### 4. The Hybrid Cache Strategy
+
+The correct strategy in ChainElect matches each data type to its cache behavior:
+
+| Data Type | Source of Truth | Cache TTL | Invalidation Trigger |
+|:---|:---|:---|:---|
+| Voter profile images | IPFS (immutable) | 30 days | Never (CID changes = new key) |
+| Candidate vote counts | Contract state | 10 seconds max | `Voted` event |
+| Voting status (active/ended) | Contract state | 5 seconds max | `VotingStarted` / `VotingEnded` events |
+| Remaining voting time | `votingEndTime` | 0 (compute live) | N/A (computed from timestamp) |
+| Voter registration status | Contract mapping | 60 seconds | `VoterRegistered` event |
+
+Remaining voting time (`getRemainingTime()`) should **never be cached** — it's a timestamp computation that changes every second. Cache it even for 5 seconds and the timer on the UI will visibly freeze.
+
+---
+
+<RealityCheck>
+  Cache invalidation in high-stakes applications (governance votes, token distributions) has real financial consequences. If your results page shows stale vote tallies during an on-chain election, decisions might be made on incorrect data. In production governance systems, the UI typically reads directly from the subgraph (Module M2.5) rather than maintaining a local cache — the subgraph is itself a cache that's updated on every indexed event.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  **The "Cache Everything" Over-Engineering Trap:**
+  After discovering Redis, many developers start caching everything with aggressive TTLs. This creates a system where user actions appear to have no effect (they vote, count doesn't change, confusion ensues). Before adding caching to any data type, ask: "How stale is acceptable?" For immutable IPFS content: infinitely stale is fine. For live vote counts: even 10 seconds stale may be too long.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Look at ChainElect's contract — `getRemainingTime()` returns how many seconds until voting ends. Should this value ever be cached? Now consider: `candidatesCount` — a number that increases each time a candidate is added but never decreases during an election. What cache TTL would be appropriate for this value? What event should trigger its invalidation?
+</LessonChallenge>
