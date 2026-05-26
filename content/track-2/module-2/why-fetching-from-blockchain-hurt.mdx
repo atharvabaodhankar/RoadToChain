@@ -1,0 +1,161 @@
+---
+title: "Why fetching from blockchain hurt — the getAllPosts() disaster"
+description: "What happens when direct contract reads scale from 10 items to 1,000. RPC timeouts, silent failures, and the moment you realize blockchain is not a database."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 2
+moduleName: "The First Pain: Fetching"
+lesson: 1
+difficulty: "intermediate"
+estimatedMinutes: 14
+tags: ["rpc", "scaling", "reads", "mistake", "diagram"]
+hasDiagram: true
+hasMistake: true
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The read-scaling problem that forces the introduction of event indexing in Module M2.5."
+---
+
+# Why Fetching from Blockchain Hurt: The getAllPosts() Disaster
+
+The ChainElect voting dashboard worked beautifully at 5 candidates and 30 voters.
+
+Then I added 1,000 test voters to simulate a real election. I opened the admin panel. The page loaded. The browser spun. And spun. And spun.
+
+12 seconds later: the page loaded. With data from 4 seconds ago.
+
+Then I tried it on a phone on a slow 4G connection. The browser timeout fired. The page showed a blank white screen with no error message.
+
+*"Wait. This worked yesterday. What changed?"*
+
+Nothing changed in my code. The number of voters changed. That was enough to break everything.
+
+---
+
+### 1. The Story: 1,000 Voters, 1,000 RPC Calls
+
+In ChainElect v0.1, the voter list was fetched like this:
+
+```javascript
+// ❌ The disaster — called on every admin panel load
+const loadAllVoters = async () => {
+  const voterAddresses = await contract.methods.getAllVoters().call();
+  
+  // One RPC call per voter!
+  const voterDetails = await Promise.all(
+    voterAddresses.map(address => 
+      contract.methods.voters(address).call()
+    )
+  );
+  
+  setVoters(voterDetails);
+};
+```
+
+At 30 voters: 30 RPC calls. Fine.
+At 300 voters: 300 RPC calls. Slow.
+At 1,000 voters: 1,000 RPC calls fired in parallel to the same Polygon Amoy RPC endpoint.
+
+The RPC node responded to the first ~200. Then it started rate-limiting. Then some calls timed out. Then `Promise.all` rejected the moment any single call failed. The entire voter list load crashed.
+
+---
+
+### 2. The Hidden Chain Read Loop
+
+```
+Admin panel loads
+       │
+       ▼
+getAllVoters() ──► 1 RPC call ──► returns [addr1, addr2, ..., addr1000]
+       │
+       ▼
+Promise.all([
+  voters(addr1),    ──► RPC call 1
+  voters(addr2),    ──► RPC call 2
+  ...               ──► RPC calls 3 through 999
+  voters(addr1000)  ──► RPC call 1000
+])
+       │
+       ▼
+RPC Node rate-limits at ~200 concurrent calls
+       │
+       ▼
+Some calls timeout after 5 seconds
+       │
+       ▼
+Promise.all rejects ──► UI shows blank screen
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate this as a fan-out diagram where the single admin load spawns 1,000 parallel arrows hitting the RPC node. Show the node visually "overloading" as the arrows pile up, then some turning red (timeouts) and the entire Promise.all collapsing. This is the exact moment the naive architecture breaks.
+
+---
+
+### 3. Technical Explanation: Why Blockchain Reads Don't Scale Like This
+
+Every `.call()` in Web3.js or ethers.js is an HTTP request to an RPC node. RPC nodes have:
+
+**Rate Limits:** Free-tier Alchemy and QuickNode nodes cap concurrent requests. On Polygon Amoy's public RPC (`rpc-amoy.polygon.technology`), aggressive batching causes HTTP 429 errors.
+
+**No Connection Pooling:** Unlike PostgreSQL, which maintains persistent database connections, RPC nodes handle each `eth_call` as a stateless HTTP request with no connection reuse optimization.
+
+**Sequential State:** The EVM state is a sequential ledger. To read 1,000 accounts, you need 1,000 individual `eth_call` operations — there is no `SELECT * FROM voters` equivalent that the node can execute in O(1).
+
+The mathematical reality:
+```
+Cost of loading N voters = N × (RPC latency per call)
+At N=1,000, latency=100ms:
+  Sequential: 100,000ms = 100 seconds ❌
+  Parallel:   Limited by RPC rate limits ❌
+  With Multicall: ~3 batched calls ✓ (see lesson 2)
+```
+
+---
+
+### 4. The Immediate Bandaid: Multicall
+
+Before the proper solution (event indexing), there is a short-term fix: **Multicall**.
+
+Multicall is a smart contract deployed on every major network that accepts a batch of `eth_call` requests and executes them all in a single RPC roundtrip:
+
+```javascript
+// Using Multicall3 (deployed on Polygon Amoy)
+import { Multicall } from 'ethereum-multicall';
+
+const multicall = new Multicall({ web3Instance: web3, tryAggregate: true });
+
+const callsForAllVoters = voterAddresses.map(address => ({
+  reference: address,
+  contractAddress: CONTRACT_ADDRESS,
+  abi: contractABI,
+  calls: [{ reference: 'voterData', methodName: 'voters', methodParameters: [address] }]
+}));
+
+// 1,000 voters → 1 RPC call (batched)
+const results = await multicall.call(callsForAllVoters);
+```
+
+1,000 individual RPC calls become **1 batched RPC call**. Load time drops from 12 seconds to ~800ms.
+
+But Multicall is still a bandaid. If you need to paginate, filter, or sort — you still have a problem. The real solution is indexing, which we cover in Module M2.5.
+
+---
+
+<RealityCheck>
+  The "1,000 RPC call" problem is not unique to your project. It's the standard hitting point for every Web3 developer. The moment your app needs to display a list of more than ~50 on-chain items, you need an indexing strategy. This is why The Graph, Subgraph Studio, and Goldsky exist — they pre-index chain events so your frontend can query them like a traditional SQL database.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  **The Promise.all Failure Mode:**
+  Using `Promise.all` for RPC calls seems clever (parallel = faster) but creates a brittle system: if any single call fails, the entire batch fails. In production, use `Promise.allSettled` instead, which resolves with each result's status (`fulfilled` or `rejected`) individually. This way, one RPC timeout doesn't blank the entire voter list.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  In ChainElect's `Admin.jsx`, find where the voter list is loaded. Count the number of individual RPC calls triggered per page load. Now calculate: if Polygon Amoy's public RPC has a rate limit of 10 requests per second, how long would loading 500 voters take sequentially? What does this tell you about relying on public RPC nodes for production UIs?
+</LessonChallenge>
