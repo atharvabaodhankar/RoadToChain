@@ -1,0 +1,165 @@
+---
+title: "Why we added Redis — IPFS was too slow"
+description: "How direct IPFS gateway loads were killing user experience, how a Redis cache layer dropped load times from 4 seconds to 80ms, and the Web3-specific cache invalidation challenge."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 4
+moduleName: "Why Redis Suddenly Appeared"
+lesson: 1
+difficulty: "intermediate"
+estimatedMinutes: 14
+tags: ["redis", "caching", "ipfs", "performance", "diagram"]
+hasDiagram: true
+hasMistake: false
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The caching layer that makes IPFS-powered apps production-performant — and introduces the cache invalidation thinking needed for Track 3 system design."
+---
+
+# Why We Added Redis: IPFS Was Too Slow
+
+ChainElect's voter registration was working. Profile images uploaded to IPFS. CIDs stored on-chain. Admin panel displayed voter profiles.
+
+Then I sat down with a stopwatch and measured how long it took to load the admin panel.
+
+**8.3 seconds.**
+
+The page loaded in 200ms. The voter cards appeared in 200ms. But each voter's profile image took **3 to 5 seconds** to appear — one by one, loading in sequence, as the browser fetched each image from IPFS.
+
+I watched the admin panel load like a slow Polaroid camera developing 30 pictures at once.
+
+The drop-off rate on the registration confirmation page — where users waited for their uploaded photo to appear — was over 60%.
+
+IPFS was the bottleneck.
+
+---
+
+### 1. Why IPFS Gateways Are Slow
+
+IPFS is a **distributed hash table (DHT)** — a global peer-to-peer network where files are addressed by their content hash (CID). When you request `ipfs://QmXyZ...`, the IPFS gateway must:
+
+1. Ask the DHT network: *"Which node has QmXyZ?"*
+2. Wait for nodes to respond (may contact dozens of peers)
+3. Download the file from the responding node
+4. Return it to the requester
+
+This lookup process takes **2 to 6 seconds** for cold files — files that haven't been accessed recently and aren't cached in any nearby gateway node.
+
+Pinata's private gateway is faster (it caches pinned files closer to CDN edges), but it still adds 500ms to 1500ms per load vs a traditional image CDN.
+
+For a voter list with 30 profiles: 30 sequential IPFS fetches × 3 seconds each = **90 seconds** worst case.
+
+---
+
+### 2. The Cache Architecture
+
+```
+WITHOUT REDIS:
+Frontend Request ──► Backend ──► IPFS Gateway (3-6 seconds per image)
+                                      │
+                              DHT lookup + download
+                              (cold miss every time)
+
+WITH REDIS:
+Frontend Request ──► Backend ──► Redis (check cache)
+                                     │
+                   Cache HIT ◄───────┤        Cache MISS
+                   (80ms)            │               │
+                                     │          Fetch from IPFS
+                                     │               │
+                                     │          Store in Redis
+                                     │               │
+                                     └────────────────┘
+                                        Return to Frontend
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate the cache hit path as a short, green loop that resolves immediately. The cache miss path shows the full IPFS lookup journey, then the result stored in a Redis box, then returned. On repeat requests, the path skips the IPFS gateway entirely — the green loop.
+
+---
+
+### 3. Technical Explanation: Redis as a CID → URL Cache
+
+Redis is an in-memory key-value store. For IPFS caching, the pattern is simple:
+
+```
+Key:   ipfs:{CID}
+Value: { url: "https://gateway.pinata.cloud/ipfs/{CID}", timestamp: Date.now() }
+TTL:   86400 seconds (24 hours)
+```
+
+The Express backend checks Redis before hitting IPFS:
+
+```javascript
+// Backend: GET /api/ipfs/:cid — with Redis cache
+const redis = require('redis');
+const client = redis.createClient({ url: process.env.REDIS_URL });
+
+app.get('/api/ipfs/:cid', async (req, res) => {
+  const { cid } = req.params;
+  const cacheKey = `ipfs:${cid}`;
+
+  try {
+    // 1. Check Redis first (O(1), ~1ms)
+    const cached = await client.get(cacheKey);
+    if (cached) {
+      return res.json(JSON.parse(cached)); // Cache HIT — 1-5ms total
+    }
+
+    // 2. Cache MISS — fetch from IPFS gateway
+    const gatewayUrl = `https://gateway.pinata.cloud/ipfs/${cid}`;
+    const response = await fetch(gatewayUrl);
+    
+    if (!response.ok) throw new Error('IPFS fetch failed');
+
+    const data = { url: gatewayUrl, fetchedAt: Date.now() };
+
+    // 3. Store in Redis with 24-hour TTL
+    await client.setEx(cacheKey, 86400, JSON.stringify(data));
+
+    res.json(data); // Cache MISS — 2-6 seconds first time only
+
+  } catch (error) {
+    // Fallback: return direct IPFS URL even if we can't cache
+    res.json({ url: `https://ipfs.io/ipfs/${cid}` });
+  }
+});
+```
+
+After the first request for a CID, every subsequent request for the same CID returns in under 5ms from Redis — regardless of IPFS gateway latency.
+
+---
+
+### 4. The Web3 Cache Invalidation Problem
+
+Standard caching asks: *"When does this data change?"*
+
+In Web3, this question has an interesting answer for IPFS: **IPFS content never changes**. A CID is the SHA-256 hash of its content. If the content changes, the CID changes. The old CID is immutable forever.
+
+This means IPFS caches can theoretically have **infinite TTLs** — the content at a given CID will never change, so the cached value is always correct.
+
+The catch: voter profiles on-chain might reference a new CID if a user updates their profile image. The smart contract stores the latest CID. Your cache stores the image at a specific CID. If a user updates their profile image:
+- New CID is written to the contract
+- Frontend fetches new CID
+- Redis doesn't have it yet (cache miss)
+- IPFS is slow (but only once)
+- Redis caches the new CID
+- All future requests for new CID: fast
+
+Old CID cache entry: irrelevant (no one references it anymore).
+
+This is the elegant property of content-addressed storage: **cache invalidation is automatic**. If the content changes, so does the key. Old cached entries expire naturally via TTL.
+
+---
+
+<RealityCheck>
+  Redis is an in-memory store — if the Redis server restarts or runs out of memory, the entire cache is lost. This is fine for an IPFS proxy cache (the data can always be re-fetched from IPFS), but it's NOT fine for data that has no other source of truth. Never use Redis as your only copy of important data.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Think through the cache invalidation for ChainElect voter profiles: a voter registers with photo A (CID1). Later, the admin resets their registration and they re-register with photo B (CID2). The contract now points to CID2. What happens to the Redis cache entry for CID1? What happens to the Redis cache entry for CID2 on first access? Does the old cache entry cause any problem?
+</LessonChallenge>
