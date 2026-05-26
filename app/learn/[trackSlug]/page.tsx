@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { tracks } from "@/lib/curriculum";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Star, Clock } from "lucide-react";
+import fs from "fs";
+import path from "path";
 
 interface Props {
   params: Promise<{
@@ -174,16 +176,15 @@ export default async function TrackPage({ params }: Props) {
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {mod.lessons.map((lesson) => {
                   const moduleSlug = `module-${mod.number.split(".")[1]}`;
-                  // Check if we actually have the MDX file implemented
-                  // We only implemented these specific files:
-                  const isImplemented =
-                    (track.id === 0 &&
-                      (lesson.slug === "trust-problem" ||
-                        lesson.slug === "transaction-anatomy" ||
-                        lesson.slug === "what-metamask-does" ||
-                        lesson.slug === "why-gas-exists")) ||
-                    (track.id === 4 && lesson.slug === "why-metamask-ux-fails") ||
-                    (track.id === 5 && lesson.slug === "poseidon-vs-sha256");
+                  // Check dynamically if the MDX file exists on disk
+                  const filePath = path.join(
+                    process.cwd(),
+                    "content",
+                    track.slug,
+                    moduleSlug,
+                    `${lesson.slug}.mdx`
+                  );
+                  const isImplemented = fs.existsSync(filePath);
 
                   const href = `/learn/${track.slug}/${moduleSlug}/${lesson.slug}`;
 
