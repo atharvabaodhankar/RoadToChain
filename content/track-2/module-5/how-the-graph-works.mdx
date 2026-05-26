@@ -1,0 +1,165 @@
+---
+title: "How The Graph works internally"
+description: "Subgraphs, indexing nodes, AssemblyScript handlers, and how The Graph processes every blockchain event into a queryable GraphQL database."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 5
+moduleName: "Why Indexing Appeared"
+lesson: 2
+difficulty: "intermediate"
+estimatedMinutes: 14
+tags: ["the-graph", "subgraph", "graphql", "indexing", "diagram"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: "ChainElect"
+heroProjectContribution: "The conceptual internals of The Graph that make the subgraph writing lesson (M2.5.3) intuitive rather than magic."
+---
+
+# How The Graph Works Internally
+
+When I first heard "The Graph indexes your contract events," I nodded confidently without understanding what that actually meant.
+
+*Indexes? Like a database index? Like a book index? What does indexing mean here?*
+
+This lesson is the one I wish I'd had before I tried to write my first subgraph.
+
+---
+
+### 1. The Layered Architecture
+
+The Graph is a **decentralized indexing protocol** — a network of nodes that run indexing jobs (called subgraphs) and expose the results as GraphQL APIs.
+
+```
+┌─────────────────────────────────────────────────────┐
+│              THE GRAPH NETWORK                      │
+│                                                     │
+│  ┌──────────────┐    ┌──────────────────────────┐   │
+│  │  Blockchain  │    │   Indexer Node           │   │
+│  │  (Polygon)   │    │                          │   │
+│  │              │───►│  1. Read new blocks      │   │
+│  │  Events:     │    │  2. Find matching events  │   │
+│  │  Voted()     │    │  3. Run your handler code │   │
+│  │  CandidateAdded│  │  4. Write to PostgreSQL   │   │
+│  └──────────────┘    └──────────────┬───────────┘   │
+│                                     │               │
+│                                     ▼               │
+│                          ┌─────────────────────┐    │
+│                          │  PostgreSQL DB       │    │
+│                          │  (entities table)   │    │
+│                          │                     │    │
+│                          │  Candidate { id,    │    │
+│                          │    name, voteCount } │    │
+│                          │  Voter { id, address│    │
+│                          │    hasVoted, votedFor}│   │
+│                          └──────────┬──────────┘    │
+│                                     │               │
+│                                     ▼               │
+│                          ┌─────────────────────┐    │
+│                          │  GraphQL API         │    │
+│                          │  /subgraphs/name/.../│    │
+│                          │  graphql             │    │
+│                          └─────────────────────┘    │
+└─────────────────────────────────────────────────────┘
+```
+
+> [!TIP]
+> **VISUAL TRIGGER FOR FRONTEND:**
+> Animate this as three animated layers. Layer 1: blockchain emitting events (pulsing). Layer 2: The Graph indexer consuming them (shows handler function running). Layer 3: PostgreSQL building up rows in real-time. Layer 4: GraphQL cursor querying the result table. Show the entire pipeline processing a single "Voted" event end-to-end.
+
+---
+
+### 2. What a Subgraph Actually Is
+
+A subgraph is three files that you write, which tell The Graph how to process your contract's events:
+
+**File 1: `subgraph.yaml`** — the manifest
+```yaml
+# What contract to watch and which events to handle
+dataSources:
+  - kind: ethereum
+    name: ChainElect
+    network: matic
+    source:
+      address: "0xdbbFB787ee25aC1d3E85f5a1CE7556195dbA6286"
+      abi: MyContract
+    mapping:
+      eventHandlers:
+        - event: Voted(indexed address,indexed uint256)
+          handler: handleVoted
+        - event: CandidateAdded(string)
+          handler: handleCandidateAdded
+```
+
+**File 2: `schema.graphql`** — the data model
+```graphql
+# The shape of data you want to query
+type Candidate @entity {
+  id: ID!
+  name: String!
+  voteCount: BigInt!
+}
+
+type VoteRecord @entity {
+  id: ID!
+  voter: Bytes!
+  candidateId: BigInt!
+  blockTimestamp: BigInt!
+}
+```
+
+**File 3: `mapping.ts`** — the event handler (AssemblyScript)
+```typescript
+// What to do when a Voted event fires
+export function handleVoted(event: VotedEvent): void {
+  let candidateId = event.params.candidateId.toString();
+  
+  // Load existing candidate entity (or create new)
+  let candidate = Candidate.load(candidateId);
+  if (!candidate) {
+    candidate = new Candidate(candidateId);
+    candidate.voteCount = BigInt.fromI32(0);
+  }
+  
+  // Update vote count
+  candidate.voteCount = candidate.voteCount.plus(BigInt.fromI32(1));
+  candidate.save();
+  
+  // Create vote record
+  let voteId = event.transaction.hash.toHex() + '-' + event.logIndex.toString();
+  let vote = new VoteRecord(voteId);
+  vote.voter = event.params.voter;
+  vote.candidateId = event.params.candidateId;
+  vote.blockTimestamp = event.block.timestamp;
+  vote.save();
+}
+```
+
+That's the entire subgraph. You write three files. Deploy them. The Graph does the rest — indexing all historical events and watching for new ones.
+
+---
+
+### 3. Technical Explanation: The Indexing Process
+
+When you deploy a subgraph, The Graph indexer:
+
+1. **Historical sync:** Fetches all blocks from the contract's `startBlock` to the current block. For every block containing your contract's events, it runs your handler functions. This is the "initial sync" — can take minutes to hours depending on history depth.
+
+2. **Real-time indexing:** After historical sync, the indexer subscribes to new blocks. Every new block is checked for relevant events. Handlers run near-instantly (~1-2 seconds after block finality).
+
+3. **Entity storage:** Handler functions use a CRUD API (`Entity.load()`, `entity.save()`) to write to The Graph's PostgreSQL database. These are your data entities.
+
+4. **Query serving:** The GraphQL API is served from the PostgreSQL database, not from the blockchain. This is why queries are fast — they're standard SQL joins under the hood.
+
+---
+
+<RealityCheck>
+  The Graph's hosted service (Subgraph Studio) is free for development. Production usage requires allocating GRT tokens (The Graph's native token) to attract indexers to process your subgraph. For most projects, the hosted service is sufficient. High-traffic production subgraphs should plan for indexer economics.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Look at ChainElect's contract events: `VoterRegistered`, `CandidateAdded`, `Voted`, `VotingStarted`, `VotingEnded`, `VoterReset`. For each event, think about what entity it would create or update in a subgraph schema. Which events would need to update the same entity (hint: `Voted` and `VoterReset` both affect voter state)? Sketch a `schema.graphql` with at least 3 entity types that would support the ChainElect admin dashboard's data needs.
+</LessonChallenge>
