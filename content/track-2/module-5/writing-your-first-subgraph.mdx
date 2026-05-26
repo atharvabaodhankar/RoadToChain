@@ -1,0 +1,294 @@
+---
+title: "Writing and deploying your first subgraph"
+description: "Step-by-step: create a subgraph for ChainElect, define entities, write event handlers, deploy to Subgraph Studio, and query your data with GraphQL."
+track: 2
+trackName: "Full Stack Web3"
+trackColor: "#14b8a6"
+module: 5
+moduleName: "Why Indexing Appeared"
+lesson: 3
+difficulty: "intermediate"
+estimatedMinutes: 18
+tags: ["the-graph", "subgraph", "graphql", "assemblyscript", "project"]
+hasDiagram: false
+hasMistake: true
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The complete subgraph implementation that replaces all direct contract reads in the Socio3 Evolution project, enabling the leaderboard, voter history, and real-time vote tracking features."
+---
+
+# Writing and Deploying Your First Subgraph
+
+We've covered why indexers exist and how The Graph works conceptually. Now let's actually build one for ChainElect.
+
+By the end of this lesson, you'll have a deployed subgraph that answers the question:
+
+> *"Give me the top 10 candidates sorted by vote count."*
+
+With instant response time, no RPC calls, and no on-chain read limits.
+
+---
+
+### 1. Project Setup
+
+Install The Graph CLI:
+
+```bash
+npm install -g @graphprotocol/graph-cli
+```
+
+Initialize a new subgraph project for ChainElect:
+
+```bash
+graph init --product subgraph-studio \
+  --from-contract 0xdbbFB787ee25aC1d3E85f5a1CE7556195dbA6286 \
+  --network matic \
+  --abi ./context/contracts/MyContract.sol \
+  chainalect-subgraph
+```
+
+This scaffolds the three files: `subgraph.yaml`, `schema.graphql`, and `src/mapping.ts`.
+
+---
+
+### 2. Schema: Define the Data Model
+
+Replace the scaffolded `schema.graphql` with our ChainElect model:
+
+```graphql
+# schema.graphql
+
+type Candidate @entity(immutable: false) {
+  id: ID!           # candidateId as string
+  name: String!
+  voteCount: BigInt!
+  votes: [VoteRecord!]! @derivedFrom(field: "candidate")
+}
+
+type Voter @entity(immutable: false) {
+  id: ID!           # wallet address
+  hasVoted: Boolean!
+  votedFor: Candidate
+  registeredAt: BigInt
+}
+
+type VoteRecord @entity(immutable: true) {
+  id: ID!           # tx hash + log index
+  voter: Voter!
+  candidate: Candidate!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ElectionStatus @entity(immutable: false) {
+  id: ID!           # singleton: "status"
+  isActive: Boolean!
+  startTime: BigInt
+  endTime: BigInt
+}
+```
+
+Key design decisions:
+- `Candidate.votes` uses `@derivedFrom` — it's not stored, but computed from `VoteRecord.candidate` references. This gives you candidate → all votes without storing duplicate data.
+- `VoteRecord` is `immutable: true` — votes never change, so The Graph can optimize storage.
+- `ElectionStatus` is a singleton entity (id: "status") representing the global voting state.
+
+---
+
+### 3. Manifest: Tell The Graph What to Watch
+
+Update `subgraph.yaml`:
+
+```yaml
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: MyContract
+    network: matic
+    source:
+      address: "0xdbbFB787ee25aC1d3E85f5a1CE7556195dbA6286"
+      abi: MyContract
+      startBlock: 12000000  # Block when ChainElect was deployed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Candidate
+        - Voter
+        - VoteRecord
+        - ElectionStatus
+      abis:
+        - name: MyContract
+          file: ./abis/MyContract.json
+      eventHandlers:
+        - event: CandidateAdded(string)
+          handler: handleCandidateAdded
+        - event: Voted(indexed address,indexed uint256)
+          handler: handleVoted
+        - event: VotingStarted(uint256)
+          handler: handleVotingStarted
+        - event: VotingEnded()
+          handler: handleVotingEnded
+        - event: VoterRegistered(address)
+          handler: handleVoterRegistered
+      file: ./src/mapping.ts
+```
+
+---
+
+### 4. Handlers: The AssemblyScript Logic
+
+```typescript
+// src/mapping.ts
+import {
+  CandidateAdded,
+  Voted,
+  VotingStarted,
+  VotingEnded,
+  VoterRegistered
+} from "../generated/MyContract/MyContract";
+import { Candidate, Voter, VoteRecord, ElectionStatus } from "../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts";
+
+let candidateCounter = 0; // Note: use a Counter entity in production
+
+export function handleCandidateAdded(event: CandidateAdded): void {
+  candidateCounter++;
+  let id = candidateCounter.toString();
+  
+  let candidate = new Candidate(id);
+  candidate.name = event.params.name;
+  candidate.voteCount = BigInt.fromI32(0);
+  candidate.save();
+}
+
+export function handleVoted(event: Voted): void {
+  let candidateId = event.params.candidateId.toString();
+  let voterAddress = event.params.voter.toHex();
+  
+  // Update candidate vote count
+  let candidate = Candidate.load(candidateId);
+  if (candidate) {
+    candidate.voteCount = candidate.voteCount.plus(BigInt.fromI32(1));
+    candidate.save();
+  }
+  
+  // Update voter status
+  let voter = Voter.load(voterAddress);
+  if (!voter) {
+    voter = new Voter(voterAddress);
+    voter.hasVoted = false;
+    voter.registeredAt = BigInt.fromI32(0);
+  }
+  voter.hasVoted = true;
+  voter.votedFor = candidateId;
+  voter.save();
+  
+  // Create immutable vote record
+  let voteId = event.transaction.hash.toHex() + "-" + event.logIndex.toString();
+  let vote = new VoteRecord(voteId);
+  vote.voter = voterAddress;
+  vote.candidate = candidateId;
+  vote.blockTimestamp = event.block.timestamp;
+  vote.transactionHash = event.transaction.hash;
+  vote.save();
+}
+
+export function handleVotingStarted(event: VotingStarted): void {
+  let status = ElectionStatus.load("status");
+  if (!status) status = new ElectionStatus("status");
+  
+  status.isActive = true;
+  status.startTime = event.block.timestamp;
+  status.endTime = event.params.endTime;
+  status.save();
+}
+
+export function handleVotingEnded(_event: VotingEnded): void {
+  let status = ElectionStatus.load("status");
+  if (!status) return;
+  
+  status.isActive = false;
+  status.save();
+}
+
+export function handleVoterRegistered(event: VoterRegistered): void {
+  let voterAddress = event.params.voter.toHex();
+  let voter = Voter.load(voterAddress);
+  
+  if (!voter) {
+    voter = new Voter(voterAddress);
+    voter.hasVoted = false;
+  }
+  voter.registeredAt = event.block.timestamp;
+  voter.save();
+}
+```
+
+---
+
+### 5. Deploy to Subgraph Studio
+
+```bash
+# Build the subgraph (compiles AssemblyScript to WASM)
+graph codegen && graph build
+
+# Authenticate with Subgraph Studio
+graph auth --studio <YOUR_DEPLOY_KEY>
+
+# Deploy
+graph deploy --studio chainalect-subgraph
+```
+
+---
+
+### 6. Query Your Data
+
+After deployment, query the GraphQL endpoint:
+
+```graphql
+# Top 5 candidates by votes
+query Leaderboard {
+  candidates(orderBy: voteCount, orderDirection: desc, first: 5) {
+    id
+    name
+    voteCount
+  }
+}
+
+# All votes for candidate ID 1
+query CandidateVotes {
+  voteRecords(where: { candidate: "1" }, orderBy: blockTimestamp, orderDirection: desc) {
+    voter { id }
+    blockTimestamp
+    transactionHash
+  }
+}
+
+# Current election status
+query ElectionStatus {
+  electionStatus(id: "status") {
+    isActive
+    startTime
+    endTime
+  }
+}
+```
+
+These queries resolve in under 100ms — no RPC calls, no blockchain reads, no rate limits.
+
+---
+
+<MistakeCallout>
+  **The `startBlock` Oversight:**
+  If you don't specify `startBlock` in `subgraph.yaml`, The Graph will index from block 0 — scanning the entire blockchain history. For a contract deployed at block 12,000,000 on Polygon, this means processing 12 million empty blocks before reaching your data. Always set `startBlock` to your contract's deployment block. Find it on PolygonScan → your contract → "Contract Creator" transaction block number.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Deploy the ChainElect subgraph to Subgraph Studio. Cast 3 votes from your MetaMask wallet to different candidates. Wait 30-60 seconds for the indexer to process the blocks. Then query the leaderboard endpoint and verify that your votes appear. Now write a query that returns all `VoteRecord` entities for a specific voter address. Does the result match what you see on-chain via Etherscan?
+</LessonChallenge>
