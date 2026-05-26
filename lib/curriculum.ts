@@ -47,9 +47,9 @@ export const tracks: Track[] = [
     color: "#7c3aed",
     difficulty: "beginner",
     prerequisites: [],
-    estimatedHours: 6,
-    moduleCount: 4,
-    lessonCount: 14,
+    estimatedHours: 7,
+    moduleCount: 5,
+    lessonCount: 16,
     heroProject: {
       name: "Visual Blockchain Simulator",
       description: "Students build a transaction flow simulator, block visualizer, node propagation animation, and gas simulation system — using vanilla JS + SVG."
@@ -158,6 +158,26 @@ export const tracks: Track[] = [
         name: "Networks & Storage",
         description: "Mainnet vs testnet. Ethereum vs Polygon vs L2s. RPC explained. Where blockchain data actually lives.",
         lessons: [
+          {
+            slug: "why-web3-needs-wallets",
+            title: "Why Web3 needs wallets — identity without a server",
+            description: "Why a faucet asks for an address, why an address requires a wallet, and why a wallet is not a bank account. The rubber stamp vs library card mental model.",
+            tags: ["wallets", "identity", "faucets", "beginner"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "how-testnets-feel-in-real-life",
+            title: "How testnets feel in real life — the student struggle",
+            description: "The raw friction of getting test ETH: Gitcoin gates, wrong network confusion, mainnet ETH requirements. The exact steps from zero to deployed on Sepolia.",
+            tags: ["testnet", "faucets", "metamask", "real-life"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 11
+          },
           {
             slug: "data-location",
             title: "Where does blockchain data actually live?",
@@ -348,9 +368,9 @@ export const tracks: Track[] = [
     color: "#3b82f6",
     difficulty: "intermediate",
     prerequisites: [0],
-    estimatedHours: 12,
+    estimatedHours: 13,
     moduleCount: 5,
-    lessonCount: 22,
+    lessonCount: 23,
     heroProject: {
       name: "Evolutionary Voting System",
       description: "Intentionally starts with a broken architecture (voter data stored on-chain), hits gas failures in practice, and evolves through optimization to a production-grade contract."
@@ -558,6 +578,17 @@ export const tracks: Track[] = [
             estimatedMinutes: 15
           },
           {
+            slug: "how-i-designed-apis-for-web3",
+            title: "How I designed APIs for Web3 — the ownership model",
+            description: "Why the frontend can't call IPFS directly, how an Express proxy becomes a secure access layer, and the three-tier ownership model: Blockchain → IPFS → Backend → Frontend.",
+            tags: ["api", "backend", "ipfs", "security", "architecture"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
+          },
+          {
             slug: "optimizing-smart-contract-storage",
             title: "Optimizing Smart Contract Storage",
             description: "Refactoring state layout, slot packing, O(1) mappings, and lightweight event index architectures.",
@@ -624,169 +655,195 @@ export const tracks: Track[] = [
     slug: "track-2",
     number: "T2",
     name: "Full Stack Web3",
-    tagline: "Connect deployed contracts to real UIs.",
-    description: "ethers.js v6, viem, wagmi, IPFS, wallet integration — with the production differences explained that no tutorial ever covers.",
+    tagline: "Watch a real dApp break — then fix it, layer by layer.",
+    description: "Follow ChainElect from a naive React+MetaMask prototype to a production-grade dApp. Each module solves a real problem that appeared in production: scaling reads, securing API keys, caching IPFS, and indexing events.",
     color: "#14b8a6",
     difficulty: "intermediate",
     prerequisites: [0, 1],
-    estimatedHours: 9,
-    moduleCount: 4,
+    estimatedHours: 12,
+    moduleCount: 5,
     lessonCount: 16,
     heroProject: {
-      name: "Socio3 Classic",
-      description: "Traditional Web3 social app: MetaMask wallet connection, IPFS content storage, smart contract interactions, decentralized metadata."
+      name: "ChainElect — Socio3 Classic → Evolution",
+      description: "Start with the naive React+MetaMask+direct-contract architecture. Watch it break at scale. Evolve it through backend introduction, Redis caching, and The Graph indexing until it becomes production-grade."
     },
     isSignature: false,
     modules: [
       {
         id: "m2-1",
         number: "M2.1",
-        name: "ethers.js v6 & viem",
-        description: "The two libraries every Web3 frontend uses. Reads, writes, and migrations.",
+        name: "My First Social dApp",
+        description: "The starting architecture: React calls contracts directly, MetaMask is the only auth, Firebase stores metadata. Works at 20 users. Setting up the narrative before the pain.",
         lessons: [
           {
-            slug: "ethers-v6-migration",
-            title: "ethers.js v6 — what changed from v5",
-            description: "Provider, Signer, and Contract API updates.",
-            tags: ["ethers", "frontend", "mistake"],
-            hasDiagram: false,
-            hasMistake: true,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "reading-contracts-ethcall",
-            title: "Reading from contracts — eth_call",
-            description: "Views, ABI decoding, and Multicall batching.",
-            tags: ["reading", "multicall", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 11
-          },
-          {
-            slug: "writing-contracts-flow",
-            title: "Writing to contracts — transaction flow",
-            description: " receipts, pending states, and error parsing.",
-            tags: ["writing", "transactions", "diagram"],
+            slug: "my-first-thought-i-only-need-blockchain",
+            title: "My first thought: I only need the blockchain",
+            description: "The naive starting point — React calling contracts directly, MetaMask as the only backend, and why it actually works at small scale.",
+            tags: ["react", "metamask", "contracts", "beginner-mistakes"],
             hasDiagram: true,
             hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 13
+            hasProject: true,
+            estimatedMinutes: 13,
+            isRealProject: true
+          },
+          {
+            slug: "connecting-metamask-to-react",
+            title: "Connecting MetaMask to React — the real way",
+            description: "Network validation, chain switching, event listeners, and disconnection handling. The production-grade wallet connection pattern.",
+            tags: ["metamask", "react", "web3js", "wallet-connection"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
+          },
+          {
+            slug: "reading-and-writing-contracts",
+            title: "Reading and writing to contracts from React",
+            description: "The complete flow for reads (view calls), writes (signed transactions), pending states, receipts, and error handling.",
+            tags: ["react", "ethers", "contract-reads", "contract-writes"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 15,
+            isRealProject: true
           }
         ]
       },
       {
         id: "m2-2",
         number: "M2.2",
-        name: "wagmi + Wallet Connection",
-        description: "The standard React hooks library for Web3. UI state machines and configs.",
+        name: "The First Pain: Fetching",
+        description: "getAllVoters() worked at 30 voters. At 1,000 it froze the browser. RPC rate limits, eth_getLogs block ceilings, and why event-driven loading is the correct pattern.",
         lessons: [
           {
-            slug: "wagmi-setup",
-            title: "wagmi setup — WagmiConfig and chains",
-            description: "Configuring transport layers and Polygon networks.",
-            tags: ["wagmi", "react", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
+            slug: "why-fetching-from-blockchain-hurt",
+            title: "Why fetching from blockchain hurt — the getAllVoters() disaster",
+            description: "What happens when direct contract reads scale from 10 items to 1,000. RPC timeouts, silent failures, and the moment you realize blockchain is not a database.",
+            tags: ["rpc", "scaling", "reads", "mistake"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
           },
           {
-            slug: "wallet-hooks",
-            title: "useAccount, useConnect, useDisconnect",
-            description: "Onboarding users, checking networks, chain switching.",
-            tags: ["wallets", "react", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
+            slug: "eth-getlogs-limits",
+            title: "The hidden limits of eth_getLogs",
+            description: "Why event log queries break at scale. Block range limits, RPC node restrictions, and the silent empty array bug.",
+            tags: ["events", "eth_getLogs", "rpc", "limits", "mistake"],
+            hasDiagram: true,
+            hasMistake: true,
             hasProject: false,
-            estimatedMinutes: 12
+            estimatedMinutes: 13
           },
           {
-            slug: "read-write-hooks",
-            title: "useReadContract and useWriteContract",
-            description: "Executing contract interactions inside React rendering loops.",
-            tags: ["react", "wagmi"],
-            hasDiagram: false,
+            slug: "event-driven-data-loading",
+            title: "Event-driven data loading — the correct pattern",
+            description: "Using contract events as the source of truth: historical replays, real-time WebSocket subscriptions, and the bridge to off-chain indexing.",
+            tags: ["events", "react", "realtime", "listeners"],
+            hasDiagram: true,
             hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 14
+            hasProject: true,
+            estimatedMinutes: 12
           }
         ]
       },
       {
         id: "m2-3",
         number: "M2.3",
-        name: "IPFS & Decentralized Storage",
-        description: "CIDs, Pinata uploads, and hybrid database storage architectures.",
+        name: "Why Backend Suddenly Appeared",
+        description: "The Pinata API key was in the browser JS bundle. Someone DM'd me the key. This is the story of why every serious Web3 dApp needs a backend — and what the backend's actual job is.",
         lessons: [
           {
-            slug: "ipfs-content-addressing",
-            title: "Why IPFS exists — content vs location addressing",
-            description: "How CIDs guarantee data integrity globally.",
-            tags: ["ipfs", "storage", "diagram"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 10
-          },
-          {
-            slug: "pinata-react-upload",
-            title: "Pinata — uploading from React",
-            description: "Configuring API keys, gateways, and secure uploads.",
-            tags: ["pinata", "storage", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "hybrid-storage-pattern",
-            title: "The hybrid storage pattern",
-            description: "Store hashes on-chain, files in IPFS, metadata in DB.",
-            tags: ["architecture", "storage", "diagram", "mistake"],
+            slug: "the-day-i-realized-frontend-is-not-enough",
+            title: "The day I realized the frontend is not enough",
+            description: "Why frontend code is a public document, how API key exposure happens in production, and the four operations that require a backend.",
+            tags: ["security", "backend", "api-keys", "frontend-limits", "mistake"],
             hasDiagram: true,
             hasMistake: true,
-            hasProject: false,
-            estimatedMinutes: 15
+            hasProject: true,
+            estimatedMinutes: 13,
+            isRealProject: true
+          },
+          {
+            slug: "building-the-express-proxy-layer",
+            title: "Building the Express proxy layer for IPFS uploads",
+            description: "The complete Node.js/Express backend that proxies IPFS uploads, validates sessions, and keeps API keys server-side only.",
+            tags: ["express", "node", "ipfs", "proxy", "backend"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: true,
+            estimatedMinutes: 15,
+            isRealProject: true
           }
         ]
       },
       {
         id: "m2-4",
         number: "M2.4",
-        name: "Event Indexing & The Graph",
-        description: "GraphQL APIs, subgraphs, AssemblyScript, and high-performance querying.",
+        name: "Why Redis Suddenly Appeared",
+        description: "IPFS gateways took 3–5 seconds per image. The admin panel took 8.3 seconds to load. 60% drop-off. This is why Redis appeared — and why cache invalidation in Web3 is uniquely elegant.",
         lessons: [
           {
-            slug: "why-live-queries-break",
-            title: "Why live event queries break at scale",
-            description: "RPC limits, historical lookups, eth_getLogs blocks.",
-            tags: ["indexing", "rpc", "mistake"],
-            hasDiagram: false,
+            slug: "why-we-added-redis",
+            title: "Why we added Redis — IPFS was too slow",
+            description: "How direct IPFS gateway loads were killing UX, how Redis dropped load times from 4s to 80ms, and the Web3-specific cache invalidation insight.",
+            tags: ["redis", "caching", "ipfs", "performance"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
+          },
+          {
+            slug: "cache-invalidation-in-web3",
+            title: "Cache invalidation in Web3 — when does truth change?",
+            description: "Immutable content-addressed caching vs mutable on-chain state. TTL-based vs event-driven invalidation. The hybrid cache strategy for a voting dApp.",
+            tags: ["redis", "caching", "invalidation", "consistency"],
+            hasDiagram: true,
             hasMistake: true,
             hasProject: false,
-            estimatedMinutes: 11
+            estimatedMinutes: 13
+          }
+        ]
+      },
+      {
+        id: "m2-5",
+        number: "M2.5",
+        name: "Why Indexing Appeared",
+        description: "The PM asked for a leaderboard sorted by votes. There is no ORDER BY in Solidity. This is why The Graph was invented — and how to deploy a subgraph that replaces all direct contract reads.",
+        lessons: [
+          {
+            slug: "why-blockchain-needs-indexers",
+            title: "Why blockchain needs indexers — the sort/filter problem",
+            description: "The EVM has no query engine. No sorting, filtering, or aggregation. Why fetching everything to sort in JS doesn't scale — and how indexers pre-process events.",
+            tags: ["indexing", "the-graph", "events", "query-limits"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
           },
           {
             slug: "how-the-graph-works",
             title: "How The Graph works internally",
-            description: "Subgraphs, mapping handlers, and GraphQL.",
-            tags: ["the-graph", "indexing", "diagram"],
+            description: "Subgraphs, indexing nodes, AssemblyScript handlers, and how The Graph processes every blockchain event into a queryable GraphQL database.",
+            tags: ["the-graph", "subgraph", "graphql", "indexing"],
             hasDiagram: true,
             hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 13
+            estimatedMinutes: 14
           },
           {
-            slug: "writing-subgraph",
-            title: "Writing and deploying a subgraph",
-            description: "Creating models, mappings, schemas, and queries.",
-            tags: ["the-graph", "graphql", "project"],
+            slug: "writing-your-first-subgraph",
+            title: "Writing and deploying your first subgraph",
+            description: "Step-by-step: define entities, write AssemblyScript event handlers, deploy to Subgraph Studio, and query the leaderboard with GraphQL.",
+            tags: ["the-graph", "subgraph", "graphql", "assemblyscript", "project"],
             hasDiagram: false,
-            hasMistake: false,
+            hasMistake: true,
             hasProject: true,
-            estimatedMinutes: 16
+            estimatedMinutes: 18
           }
         ]
       }
