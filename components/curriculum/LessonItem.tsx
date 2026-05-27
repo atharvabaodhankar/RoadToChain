@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Lesson } from "@/lib/curriculum";
 import { Star } from "lucide-react";
+import LessonStatusBadge from "@/components/layout/LessonStatusBadge";
+
 
 interface LessonItemProps {
   lesson: Lesson;
@@ -49,6 +51,12 @@ export default function LessonItem({
 
       {/* Badges/Tags block */}
       <div className="mt-3 flex flex-wrap items-center gap-1.5 sm:mt-0 sm:justify-end">
+        <LessonStatusBadge
+          trackSlug={trackSlug}
+          moduleSlug={moduleSlug}
+          lessonSlug={lesson.slug}
+          trackColor={trackColor}
+        />
         {lesson.isRealProject && (
           <span className="inline-flex items-center gap-1 rounded bg-pink-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-pink-400 border border-pink-500/20">
             <Star className="h-2.5 w-2.5 fill-pink-400" /> REAL PROJECT

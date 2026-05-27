@@ -18,6 +18,12 @@ import LessonChallenge from "@/components/mdx/LessonChallenge";
 import KeyConfusion from "@/components/mdx/KeyConfusion";
 import CodeBlock from "@/components/mdx/CodeBlock";
 import ReadingProgressBar from "@/components/layout/ReadingProgressBar";
+import LessonCompleteButton from "@/components/layout/LessonCompleteButton";
+// Import interactive simulator components
+import GasSimulator from "@/components/simulators/GasSimulator";
+import TransactionVisualizer from "@/components/simulators/TransactionVisualizer";
+import WalletSigningSimulator from "@/components/simulators/WalletSigningSimulator";
+import DeploymentSimulator from "@/components/simulators/DeploymentSimulator";
 
 interface Props {
   params: Promise<{
@@ -77,6 +83,11 @@ const mdxComponents = {
   HeroProject,
   LessonChallenge,
   KeyConfusion,
+  // Interactive simulators
+  GasSimulator,
+  TransactionVisualizer,
+  WalletSigningSimulator,
+  DeploymentSimulator,
   // Custom code block renderer to replace standard markdown pre blocks
   pre: (props: React.ComponentPropsWithoutRef<"pre">) => {
     // MDX v2 wraps code blocks in <pre><code className="language-xyz">...</code></pre>
@@ -249,6 +260,12 @@ export default async function LessonPage({ params }: Props) {
             }}
           />
         </div>
+        <LessonCompleteButton
+          trackSlug={trackSlug}
+          moduleSlug={moduleSlug}
+          lessonSlug={lessonSlug}
+          trackColor={currentTrack.color}
+        />
       </main>
 
       {/* ── Bottom Lesson Navigation ────────────────────────────── */}
