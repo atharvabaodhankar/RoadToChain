@@ -5,6 +5,9 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Star, Clock } from "lucide-react";
 import fs from "fs";
 import path from "path";
+import TrackProgressBar from "@/components/layout/TrackProgressBar";
+import LessonStatusBadge from "@/components/layout/LessonStatusBadge";
+
 
 interface Props {
   params: Promise<{
@@ -123,6 +126,11 @@ export default async function TrackPage({ params }: Props) {
               </div>
             )}
           </div>
+          <TrackProgressBar
+            trackSlug={track.slug}
+            totalLessons={track.lessonCount}
+            trackColor={track.color}
+          />
         </div>
       </header>
 
@@ -201,7 +209,14 @@ export default async function TrackPage({ params }: Props) {
                         <h4 className="font-sans text-xs font-semibold text-text group-hover:text-[#a78bfa] transition-colors leading-snug">
                           {lesson.title}
                         </h4>
-                        {!isImplemented && (
+                        {isImplemented ? (
+                          <LessonStatusBadge
+                            trackSlug={track.slug}
+                            moduleSlug={moduleSlug}
+                            lessonSlug={lesson.slug}
+                            trackColor={track.color}
+                          />
+                        ) : (
                           <span className="rounded bg-bg4 px-1.5 py-0.5 font-mono text-[9px] text-dim border border-border/50 shrink-0">
                             Upcoming
                           </span>
