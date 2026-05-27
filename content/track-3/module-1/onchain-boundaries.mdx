@@ -1,0 +1,200 @@
+---
+title: "What goes on-chain vs off-chain — the gas optimization boundary"
+description: "The exact decision framework for determining which data belongs on the blockchain and which belongs in IPFS, databases, or caches — with real gas cost numbers."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 1
+moduleName: "System Design Thinking"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 14
+tags: ["architecture", "gas", "diagram", "mistake"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+realProjectSource: "ProofChain"
+heroProjectContribution: "The on-chain/off-chain split you define here directly sets the storage layout of the ProofChain contract. Every storage variable maps to one side of this boundary."
+---
+
+# What Goes On-Chain vs Off-Chain
+
+There is exactly one question that determines where a piece of data lives in a Web3 system:
+
+**Does this data need to be verified by people who don't trust each other?**
+
+If yes: on-chain.  
+If no: off-chain.
+
+That's it. Everything else — cost, speed, queryability — flows from that single constraint.
+
+---
+
+### 1. Why the Boundary Exists
+
+On-chain storage is the most expensive storage medium ever invented for general use.
+
+Here are real numbers from Ethereum mainnet:
+
+```text
+SSTORE opcode (writing 32 bytes to a new slot): 20,000 gas
+At 30 gwei base fee:                            20,000 × 30 gwei = 600,000 gwei = $0.0018
+
+Storing 1 KB of data:                           ~32 slots × 20,000 gas = 640,000 gas
+At 30 gwei:                                     = ~$1.15
+
+Storing a 50 MB PDF:                            = ~$47,000
+```
+
+Databases store a 50 MB PDF for fractions of a cent. IPFS stores it for free (pinning aside).
+
+On-chain storage is not competing with databases on price. It is offering something databases cannot: **consensus without a trusted intermediary.**
+
+That premium is only worth paying for data that genuinely requires it.
+
+---
+
+### 2. The Decision Framework
+
+Walk every data field through this decision tree:
+
+```text
+For each piece of data, ask:
+
+1. Does altering this data constitute fraud?
+   └─ Yes → needs blockchain immutability
+   └─ No  → database or IPFS is fine
+
+2. Do multiple parties with conflicting interests need to agree on its state?
+   └─ Yes → needs blockchain consensus
+   └─ No  → centralized storage is fine
+
+3. Does it need to be verified without trusting the party presenting it?
+   └─ Yes → needs blockchain or cryptographic proof
+   └─ No  → standard API response is fine
+
+If ANY answer is Yes → ON-CHAIN (but store only the minimum necessary)
+If ALL answers are No → OFF-CHAIN
+```
+
+---
+
+### 3. ProofChain: Walking Every Field
+
+ProofChain is a document proof-of-existence system. A user uploads a contract PDF and gets proof it existed unmodified at a specific time, owned by a specific wallet.
+
+Let's walk every data field:
+
+```text
+┌────────────────────────┬──────────────┬───────────────────────────────────┐
+│ Data Field             │ Decision     │ Reason                            │
+├────────────────────────┼──────────────┼───────────────────────────────────┤
+│ SHA-256 hash of file   │ ON-CHAIN ✅  │ Fraud if altered. Core proof.     │
+│ Owner wallet address   │ ON-CHAIN ✅  │ Ownership dispute = fraud.        │
+│ Timestamp (block time) │ ON-CHAIN ✅  │ Existence at time = core claim.   │
+├────────────────────────┼──────────────┼───────────────────────────────────┤
+│ Filename               │ OFF-CHAIN ❌ │ No consensus needed.              │
+│ File size              │ OFF-CHAIN ❌ │ Informational only.               │
+│ IPFS CID               │ OFF-CHAIN ❌ │ Redundant with hash. Mutable ptr. │
+│ User display name      │ OFF-CHAIN ❌ │ Not a trust primitive.            │
+│ Upload description     │ OFF-CHAIN ❌ │ Subjective. No consensus needed.  │
+└────────────────────────┴──────────────┴───────────────────────────────────┘
+```
+
+The ProofChain contract stores exactly 3 fields per proof:
+
+```solidity
+struct Proof {
+    bytes32 fileHash;    // 32 bytes — the SHA-256 hash
+    address owner;       // 20 bytes — who registered it
+    uint32 timestamp;    // 4 bytes  — when it was registered (block.timestamp)
+}
+// Total per proof: 56 bytes → fits in 2 storage slots
+// Gas cost to register: ~42,000 gas (~$0.003 at 30 gwei)
+```
+
+Everything else — the filename, IPFS link, description, owner display name — lives in Firebase. The frontend reads Firebase for display, and reads the contract to verify integrity.
+
+---
+
+### 4. The Mistake: Storing the IPFS CID On-Chain
+
+<MistakeCallout>
+  When I first designed ProofChain, I stored the IPFS CID on-chain alongside the hash. My reasoning: "the CID proves where the file is." This was wrong for two reasons. First, the CID is derivable from the hash — it's redundant data. Second, IPFS CIDs can be unpinned and disappear. Storing a pointer to potentially-missing data on a permanent ledger creates false confidence. The hash is the proof. The CID is a convenience link. One belongs on-chain. One belongs in Firebase.
+</MistakeCallout>
+
+---
+
+### 5. The Gas Packing Rule
+
+When you do put data on-chain, pack it into storage slots efficiently.
+
+The EVM stores state in 32-byte slots. If your struct fields don't fill complete slots, you waste money.
+
+**Wasteful layout:**
+
+```solidity
+struct BadProof {
+    bytes32 fileHash;  // Slot 0: full (32 bytes)
+    uint256 timestamp; // Slot 1: full (32 bytes) — wasteful, timestamp never needs 32 bytes
+    address owner;     // Slot 2: only 20 bytes used — 12 bytes wasted
+}
+// 3 slots = 3 × 20,000 gas = 60,000 gas per write
+```
+
+**Packed layout:**
+
+```solidity
+struct GoodProof {
+    bytes32 fileHash;  // Slot 0: full (32 bytes)
+    address owner;     // Slot 1: 20 bytes
+    uint32 timestamp;  // Slot 1: +4 bytes → still fits in same slot
+    // uint32 max value = 4,294,967,295 = year 2106. Fine for timestamps.
+}
+// 2 slots = 2 × 20,000 gas = 40,000 gas per write
+// Saves 33% on storage cost — for free.
+```
+
+The rule: **order your struct fields from largest to smallest, group address + small uints together.**
+
+---
+
+### 6. The Off-Chain Storage Decision
+
+Once a field is confirmed off-chain, you still need to choose where:
+
+```text
+┌─────────────────┬──────────────────────────────────────────────────┐
+│ Storage         │ Use When                                         │
+├─────────────────┼──────────────────────────────────────────────────┤
+│ IPFS / Arweave  │ File content. Large blobs. Permanent references. │
+│                 │ Immutable by design. Content-addressed.          │
+├─────────────────┼──────────────────────────────────────────────────┤
+│ Firebase / SQL  │ User metadata. Search indexes. Display data.     │
+│                 │ Needs sorting, filtering, fuzzy search.          │
+├─────────────────┼──────────────────────────────────────────────────┤
+│ Redis           │ Frequently read on-chain state that's too slow   │
+│                 │ to fetch from RPC on every page load.            │
+├─────────────────┼──────────────────────────────────────────────────┤
+│ The Graph       │ Historical event data. Aggregations. Sorted      │
+│                 │ views over on-chain event logs.                  │
+└─────────────────┴──────────────────────────────────────────────────┘
+```
+
+ProofChain's routing:
+- **IPFS:** stores the actual PDF file
+- **Firebase:** stores filename, CID, owner display name, description
+- **The Graph:** indexes `ProofLogged` events for wallet → proof history queries
+- **On-chain:** only the 3-field struct above
+
+---
+
+<RealityCheck>
+  "But what if Firebase goes down? The proof is lost." No. The cryptographic proof is the hash on-chain. Firebase going down means the frontend can't display the filename. The tamper-evidence is unaffected. Design your system so that the off-chain layer failing degrades UX gracefully, but never compromises the core trust primitive.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  You are designing a decentralized freelance marketplace. A client posts a job. A freelancer delivers work. Payment is released on delivery approval. For each of the following fields, apply the decision framework and assign it to the correct storage layer: (1) agreed payment amount, (2) freelancer's portfolio URL, (3) client's approval signature, (4) project description text, (5) dispute resolution vote, (6) freelancer's wallet address, (7) delivery timestamp.
+</LessonChallenge>

@@ -1,0 +1,184 @@
+---
+title: "Actor modeling — who does what in a blockchain system"
+description: "How to map every human, contract, and service in a system to their exact role, trust level, and permission set — before writing a single line of Solidity."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 1
+moduleName: "System Design Thinking"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 13
+tags: ["system-design", "roles", "diagram", "real-code"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: "ChainCure"
+heroProjectContribution: "The 5-actor model you define here is exactly the actor map ProofChain uses. Every contract function you write in later lessons maps to one of these actors."
+---
+
+# Actor Modeling — Who Does What
+
+Before I wrote a single line of Solidity for **ChainCure** — a pharmaceutical supply chain system where fake drugs kill people — I had to answer one question first:
+
+*Who is actually allowed to do what?*
+
+Not in a hand-wavy, "the admin manages things" way. Precisely. Cryptographically. At the function selector level.
+
+That process is called **actor modeling**, and it is the first thing I do on every system design now.
+
+---
+
+### 1. What Is an Actor?
+
+An actor is any entity that interacts with your system and has a distinct permission set.
+
+Actors are not users. A single human can play multiple actor roles depending on context. An actor is a **role with a trust level**, not a person.
+
+```text
+Actor = Role + Trust Level + Allowed Actions
+```
+
+In a traditional Web2 system, you enforce this with JWT claims and database row-level security.
+
+In a smart contract system, you enforce this with `msg.sender` checks, `modifier` decorators, and `AccessControl` role registries — permanently, immutably, and publicly verifiable.
+
+---
+
+### 2. The ChainCure 5-Actor Model
+
+ChainCure tracks pharmaceutical drugs from manufacturer to patient. A counterfeit tablet costs lives. The trust model must be precise.
+
+Here is the full actor map I designed before writing a single contract:
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                    CHAINCURE ACTOR MAP                          │
+├───────────────┬──────────────┬─────────────────────────────────┤
+│ Actor         │ Trust Level  │ Permitted Actions               │
+├───────────────┼──────────────┼─────────────────────────────────┤
+│ Manufacturer  │ Highest      │ registerDrug()                  │
+│               │              │ mintBatchNFT()                  │
+│               │              │ assignToDistributor()           │
+├───────────────┼──────────────┼─────────────────────────────────┤
+│ Distributor   │ High         │ acceptShipment()                │
+│               │              │ transferToPharmacy()            │
+├───────────────┼──────────────┼─────────────────────────────────┤
+│ Pharmacy      │ Medium       │ receiveFromDistributor()        │
+│               │              │ dispenseToProcurement()         │
+├───────────────┼──────────────┼─────────────────────────────────┤
+│ Regulator     │ Read + Flag  │ verifyDrugHistory()             │
+│               │              │ flagCounterfeit()               │
+├───────────────┼──────────────┼─────────────────────────────────┤
+│ Patient / QR  │ Lowest       │ verifyAuthenticity() (public)   │
+└───────────────┴──────────────┴─────────────────────────────────┘
+```
+
+Notice what the **Patient** actor can do: one thing. Read-only verification. No write access. The QR code on the drug box points to a public `verifyAuthenticity()` call — the patient never even knows they're reading from a blockchain.
+
+---
+
+### 3. Trust Levels → Solidity Patterns
+
+Each trust level maps directly to a Solidity implementation pattern:
+
+**Highest trust (Manufacturer):** Assigned during contract deployment. Cannot be transferred to an arbitrary address. Uses OpenZeppelin `Ownable` or a custom `MANUFACTURER_ROLE`.
+
+```solidity
+// Manufacturer is set once, in the constructor
+constructor(address _manufacturer) {
+    _grantRole(MANUFACTURER_ROLE, _manufacturer);
+}
+
+function registerDrug(bytes32 serialHash) external onlyRole(MANUFACTURER_ROLE) {
+    // Only a wallet with MANUFACTURER_ROLE can call this
+}
+```
+
+**Medium trust (Pharmacy):** Dynamic — pharmacies are registered after deployment. Uses `AccessControl` with a role registry.
+
+```solidity
+// Regulator can add/remove pharmacies dynamically
+function grantPharmacyRole(address pharmacy) external onlyRole(REGULATOR_ROLE) {
+    _grantRole(PHARMACY_ROLE, pharmacy);
+}
+```
+
+**Lowest trust (Public):** No role check needed. Any address can verify. These are `view` functions — they cost no gas to call.
+
+```solidity
+// Anyone, any wallet, any device, any QR scanner
+function verifyAuthenticity(bytes32 serialHash) external view returns (bool) {
+    return drugsOnChain[serialHash].isVerified;
+}
+```
+
+---
+
+### 4. Multi-Signature Bounds
+
+Some actions are too critical for a single actor to authorize alone.
+
+In ChainCure, **flagging a drug as counterfeit** has severe consequences — it triggers a recall. A single compromised regulator wallet cannot be allowed to halt an entire supply chain.
+
+This is where **multi-signature bounds** come in:
+
+```text
+Flag as Counterfeit requires:
+  2 of 3 Regulator wallets to sign
+  OR
+  1 Regulator + 1 Manufacturer signature
+```
+
+Implementation: off-chain signatures collected, verified on-chain via `ECDSA.recover()` before state change executes.
+
+```solidity
+function flagCounterfeit(
+    bytes32 serialHash,
+    bytes calldata sig1,
+    bytes calldata sig2
+) external {
+    // Verify both signatures come from registered REGULATOR_ROLE addresses
+    address signer1 = ECDSA.recover(_hashFlag(serialHash), sig1);
+    address signer2 = ECDSA.recover(_hashFlag(serialHash), sig2);
+
+    require(hasRole(REGULATOR_ROLE, signer1), "Invalid signer 1");
+    require(hasRole(REGULATOR_ROLE, signer2), "Invalid signer 2");
+    require(signer1 != signer2, "Same signer");
+
+    drugs[serialHash].flaggedCounterfeit = true;
+}
+```
+
+---
+
+### 5. The Actor Modeling Process
+
+For any new system you design, follow this sequence before writing code:
+
+**Step 1 — List every human or system that touches your product.**
+Don't think in roles yet. Think in real people. A warehouse manager. A hospital procurement officer. A government inspector.
+
+**Step 2 — Cluster them by trust.**
+Who can create records? Who can read? Who can destroy? Draw clear lines.
+
+**Step 3 — Map each cluster to a Solidity pattern.**
+Highest trust → constructor assignment. Dynamic trust → `AccessControl`. Public trust → `view` functions.
+
+**Step 4 — Identify multi-party thresholds.**
+For every irreversible action, ask: can a single compromised key cause catastrophic damage? If yes → require multi-sig.
+
+**Step 5 — Write the actor map before opening Remix.**
+If you cannot fill in the table above for your system, you are not ready to write contracts.
+
+---
+
+<RealityCheck>
+  The most common smart contract architecture mistake I see is "admin does everything." One owner address with full control is a single point of failure — and a single point of compromise. Actor modeling forces you to distribute trust before you code it in.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Map the actors for a decentralized voting system. Who registers candidates? Who casts votes? Who tallies results? Who can pause the election? For each actor, specify: (1) their trust level, (2) which Solidity access pattern applies, and (3) whether any action requires multi-party sign-off.
+</LessonChallenge>
