@@ -13,26 +13,33 @@ tags: ["ux", "mobile", "wallets", "mistake"]
 hasDiagram: true
 hasMistake: true
 hasProject: false
-realProjectSource: ""
-heroProjectContribution: "Prerequisite for implementing the social Google-sign-in dApp integrations in modern AA."
+realProjectSource: "Faucet"
+heroProjectContribution: "The mobile faucet friction experience directly motivates why embedded wallets and AA solve the onboarding problem for real users."
 ---
 
 # Why Web3 Mobile Onboarding Sucks: And the Privy Solution
 
-If you’ve ever tried to use a Web3 application on your phone, you probably wanted to throw your phone out the window. 
+I want to show you the real version of this problem before we talk about the solution.
 
-The traditional mobile Web3 onboarding flow goes something like this:
-1. You open Twitter on your phone and click a link to a cool new dApp.
-2. The link opens in **Twitter's in-app browser**.
-3. You click "Connect Wallet". A MetaMask modal pops up.
-4. You click "Connect with MetaMask."
-5. **Nothing happens.** 
+I was building a **faucet app** — a simple tool that lets students get test ETH on their phone, no laptop required. Seemed simple. The user opens the link on mobile, connects their wallet, enters their address, gets test ETH.
 
-You click again. Still nothing. You realize you need to copy the link, open the MetaMask mobile app, navigate to their clunky internal built-in browser tab, paste the link, log in again, and *then* sign the transaction. 
+Here is what actually happened when my first tester (a friend, on their iPhone) tried it:
 
-By the time you get to step 6, **90% of your users have abandoned your app.** This is why Web3 mobile conversion rates are notoriously awful.
+1. They clicked the link from WhatsApp.
+2. It opened in **WhatsApp's in-app browser**.
+3. They tapped "Connect Wallet."
+4. MetaMask modal appeared. They tapped "Open MetaMask."
+5. **Nothing happened.**
 
-Let’s understand why this breaks physically, and how embedded social wallets like **Privy** and **Account Abstraction** solve this once and for all.
+They tried again. Nothing. They closed the tab, reopened it. Still nothing.
+
+The fix I had to tell them: *"Copy the link. Open the MetaMask app. Go to the Browser tab inside MetaMask. Paste the link. Now try."*
+
+My friend said: *"This is too much work."* And closed it.
+
+They were right. A tool designed to make Web3 easier had a 7-step onboarding process that required knowing MetaMask has a built-in browser tab. That's not Web3 being hard. That's Web3 being badly designed.
+
+Let's understand why this breaks physically, and how embedded social wallets like **Privy** and **Account Abstraction** solve this once and for all.
 
 ---
 

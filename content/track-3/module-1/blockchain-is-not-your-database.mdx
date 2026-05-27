@@ -14,16 +14,22 @@ hasDiagram: true
 hasMistake: true
 hasProject: true
 realProjectSource: "ProofChain"
-heroProjectContribution: "Core architectural pattern utilized in the capstone ProofChain ledger integration."
+heroProjectContribution: "The exact file→hash→blockchain→Firebase architecture that ProofChain is built on. This lesson IS ProofChain's system design."
 ---
 
 # Blockchain is NOT Your Database: System Design Boundaries
 
-In enterprise system design, the most expensive mistake you can make is placing the wrong cargo on-chain.
+When I was building **ProofChain** — a proof-of-existence system where you can register a document on the blockchain and prove it hasn't been tampered with — I hit the wall instantly.
 
-Smart contracts excel at mathematical verification, double-spend prevention, and trustless state execution. However, they are fundamentally unsuited for large-scale data storage or rich query filters.
+My first instinct: store everything on-chain. The document. The metadata. The owner. The timestamp. The filename.
 
-To design high-performance, enterprise-grade Web3 systems, you must learn to define **strict trust boundaries** and coordinate a **hybrid application architecture**.
+I calculated the gas cost for storing a 50MB PDF on Ethereum.
+
+*$47,000 per upload.*
+
+I stared at that number for a full minute. Then I understood the fundamental rule that every enterprise Web3 architect eventually learns the hard way:
+
+**The blockchain is not your database. It's your notary.**
 
 ---
 
@@ -83,19 +89,46 @@ A production-grade Web3 architecture separates execution, storage, and querying 
 
 ---
 
-### 3. Case Study: Enterprise Document Verification
+### 3. ProofChain: The Real Example
 
-Let's examine how this hybrid boundary functions during a high-scale document registration transaction:
+**ProofChain** is a proof-of-existence system. You upload a document. It proves it existed at a specific moment, unchanged, with a specific owner. Here is exactly how the hybrid architecture makes this possible:
 
-1. **Client Action:** The user uploads a 50MB PDF document.
-2. **Browser Processing:** The frontend hashes the PDF client-side to generate a 32-byte SHA-256 fingerprint: `0x9a8f...`
-3. **File Archival:** The frontend uploads the actual PDF to an IPFS gateway, receiving the CID hash: `QmXyZ...`
-4. **Ledger Registry:** The user signs a transaction calling `registerProof(0x9a8f...)`. The smart contract writes *only* the 32-byte fingerprint to its storage slot (costs flat, cheap gas).
-5. **Event Emission:** The contract emits a `ProofLogged(0x9a8f..., msg.sender)` event.
-6. **Indexer Processing:** The Subgraph catches the event, updates its database schema, and links the fingerprint to the IPFS CID metadata.
-7. **Frontend Query:** The React app reads the clean, sorted history from the Subgraph in milliseconds.
+```
+FILE (50MB PDF)
+  │
+  ├─► Browser hashes it: SHA-256 → 0x9a8f... (32 bytes)
+  │
+  ├─► Browser uploads PDF to IPFS → CID: QmXyZ...
+  │
+  └─► User signs: registerProof(0x9a8f...) → blockchain
+                    │
+                    Only 32 bytes on-chain.
+                    Gas cost: ~$0.002.
+                    (vs $47,000 to store the PDF itself)
 
-If anyone alters a single pixel in the PDF sitting on the IPFS gateway, their hash will mismatch the fingerprint permanently chiseled on the blockchain ledger, immediately exposing the fraud.
+FIREBASE (off-chain cache)
+  │
+  Stores: { hash: "0x9a8f...", cid: "QmXyZ...",
+            filename: "contract.pdf", ownerId: "user123",
+            timestamp: 1716000000 }
+  │
+  Serves: instant search, sort, filter, dashboard
+
+THE GRAPH (indexing)
+  │
+  Listens to: ProofLogged(hash, owner) events
+  Serves: historical proof registry, owner lookup
+```
+
+If anyone alters a single pixel in the PDF sitting on IPFS, their recomputed hash will mismatch `0x9a8f...` — the fingerprint permanently written to the chain. The tamper is immediately provable.
+
+Notice what the blockchain stores: **32 bytes**. Not the file. Not the metadata. Not the owner's name. Just the cryptographic fingerprint.
+
+Notice what Firebase stores: everything humans actually need to browse and search.
+
+Notice what The Graph indexes: the on-chain event history, so the frontend can query "all documents registered by this wallet" in milliseconds.
+
+**The blockchain is the notary. Firebase is the filing cabinet. IPFS is the vault.**
 
 ---
 

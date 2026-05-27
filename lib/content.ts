@@ -45,7 +45,16 @@ export async function getLessonData(
   moduleSlug: string,
   slug: string
 ): Promise<LessonData | null> {
-  const filePath = path.join(CONTENT_DIR, trackSlug, moduleSlug, `${slug}.mdx`);
+  // Normalize moduleSlug if in mX-Y format (e.g., m1-2 -> module-2)
+  let normalizedModuleSlug = moduleSlug;
+  if (moduleSlug.startsWith("m") && moduleSlug.includes("-")) {
+    const parts = moduleSlug.split("-");
+    if (parts.length === 2 && !isNaN(parseInt(parts[1], 10))) {
+      normalizedModuleSlug = `module-${parts[1]}`;
+    }
+  }
+
+  const filePath = path.join(CONTENT_DIR, trackSlug, normalizedModuleSlug, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
 
   const raw = fs.readFileSync(filePath, "utf-8");

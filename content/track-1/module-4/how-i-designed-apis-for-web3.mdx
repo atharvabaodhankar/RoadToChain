@@ -20,15 +20,15 @@ heroProjectContribution: "The backend API architecture that completes the hybrid
 
 # How I Designed APIs for Web3: The Ownership Model
 
-Let's address a mistake that almost every Web3 beginner makes on their first full-stack project:
+I got a DM at 11pm.
 
-**They put their Pinata API key directly in the frontend.**
+*"Hey, nice project. Also... is this your Pinata API key? I found it in your JS bundle. `pk_...5f8a`. Might want to rotate that."*
 
-I made this mistake. I know exactly how it happens: you're moving fast, the code works, the uploads work, everything looks fine. Then someone DMs you.
+I opened Chrome DevTools. Sources tab. Searched "pinata".
 
-*"Hey... is this your Pinata API key? I found it in your JavaScript bundle."*
+There it was. Baked directly into the compiled JavaScript. My production Pinata API key. Readable by any visitor. No hacking required. Just Ctrl+F.
 
-I immediately checked the browser DevTools Network tab. There it was: `Authorization: Bearer sk_prod_...` — my production API key, broadcasting itself to every visitor's browser, in plain text, on every single IPFS upload request.
+Within 20 minutes I had rotated the key, revoked the old one, and started thinking about why this happened — and how to fix it permanently.
 
 ---
 

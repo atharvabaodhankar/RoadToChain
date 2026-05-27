@@ -68,16 +68,19 @@ export default function ModuleAccordion({
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-2.5 px-5 pb-5 border-t border-border/20 pt-4 bg-bg2/20">
-              {module.lessons.map((lesson, index) => (
-                <LessonItem
-                  key={lesson.slug}
-                  lesson={lesson}
-                  trackSlug={trackSlug}
-                  moduleSlug={module.id}
-                  lessonIndex={index}
-                  trackColor={trackColor}
-                />
-              ))}
+              {module.lessons.map((lesson, index) => {
+                const moduleSlug = `module-${module.number.split(".")[1]}`;
+                return (
+                  <LessonItem
+                    key={lesson.slug}
+                    lesson={lesson}
+                    trackSlug={trackSlug}
+                    moduleSlug={moduleSlug}
+                    lessonIndex={index}
+                    trackColor={trackColor}
+                  />
+                );
+              })}
             </div>
           </motion.div>
         )}
