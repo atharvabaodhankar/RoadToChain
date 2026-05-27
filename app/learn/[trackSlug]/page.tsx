@@ -214,7 +214,6 @@ export default async function TrackPage({ params }: Props) {
                             trackSlug={track.slug}
                             moduleSlug={moduleSlug}
                             lessonSlug={lesson.slug}
-                            trackColor={track.color}
                           />
                         ) : (
                           <span className="rounded bg-bg4 px-1.5 py-0.5 font-mono text-[9px] text-dim border border-border/50 shrink-0">
