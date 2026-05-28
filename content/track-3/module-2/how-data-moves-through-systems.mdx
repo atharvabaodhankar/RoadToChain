@@ -1,0 +1,138 @@
+---
+title: "How data moves through hybrid systems"
+description: "Dissecting the journey of an uploaded image through standard web servers, IPFS, the blockchain log registry, and graph indexers."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 2
+moduleName: "Data Flow Design"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 14
+tags: ["data-flow", "architecture", "ipfs", "indexing"]
+hasDiagram: true
+hasMistake: false
+hasProject: true
+realProjectSource: "Socio3"
+heroProjectContribution: "This lesson details the exact frontend-to-backend-to-blockchain-to-indexer pipeline that Socio3 V2 is built on."
+---
+
+# How Data Moves Through Hybrid Systems
+
+In a standard Web2 app, data flows in a straight line:
+```text
+Browser ──▶ Express API ──▶ Postgres DB ──▶ Express API ──▶ Browser
+```
+It is simple, fast, and centralized.
+
+In a production Web3 system like **Socio3**, a single post upload triggers a multi-system choreograph involving decentralized storage, cryptographic registries, and indexers:
+
+```text
+               ┌──▶ Express Proxy ──▶ IPFS (Pinata) ──▶ CID Hash
+               │                                           │
+Browser Upload ┼───────────────────────────────────────────┴──▶ signs Tx
+               │
+               ▼
+         Polygon Amoy ──▶ Log Event ──▶ The Graph Node ──▶ React State
+```
+
+If you do not understand how data moves through this pipeline, you will write slow dApps and leak API credentials. Let's trace this journey step-by-step.
+
+---
+
+### Phase 1: Client Upload and Compression (The Frontend)
+
+A user uploads a 4MB high-res photo to **Socio3**.
+1. **Client-Side Compression**: The browser captures the file and compresses it down to ~500KB using Canvas rendering APIs to conserve IPFS storage and ensure fast retrieval.
+2. **Form Data Packing**: The frontend binds the compressed image into a standard `FormData` payload alongside the post text.
+
+---
+
+### Phase 2: The Gateway and Key Isolation (The Backend)
+
+The browser **never** talks to IPFS directly. If it did, your Pinata API keys would be exposed inside the client-side JavaScript bundle.
+
+1. **The Express Proxy**: The client sends the file to your Node.js gateway (`POST /api/upload`).
+2. **Credential Protection**: The Express server intercepts the upload, validates the user session, and appends the secure IPFS credentials (kept strictly in server `.env` variables).
+3. **Pinning**: The Express server uploads the file to Pinata (IPFS), receiving a unique content-addressed identifier (CID):
+   ```text
+   QmXyZ... (46-character hash)
+   ```
+
+---
+
+### Phase 3: The Cryptographic Notary (The Blockchain)
+
+Storing the image CID metadata inside Express is not Web3; storing it on-chain is.
+
+1. **Payload Packaging**: The Express backend returns the IPFS CID to the client.
+2. **Metadata Compilation**: The frontend creates a metadata JSON file linking the image CID and caption, uploads it to IPFS, and receives a second CID (`QmMetadata...`).
+3. **Transaction Signature**: The user signs a transaction calling `PostContract.createPost("QmMetadata...")`.
+4. **State Storage**: The Solidity contract records the transaction. It does not store the image or text. It only maps the `QmMetadata...` hash to the user's smart account address:
+   ```solidity
+   mapping(uint256 => Post) public posts; // Struct stores string ipfsHash
+   ```
+   **Gas cost:** ~$0.003 on Polygon Amoy.
+
+---
+
+### Phase 4: Event Emission and Propagation (The Indexer)
+
+Once the transaction is validated by block miners, the `PostCreated` event is emitted:
+
+```solidity
+event PostCreated(uint256 indexed postId, address indexed author, string ipfsHash);
+```
+
+At this moment, the data is permanent, but **unsearchable**. If the frontend wants to display a feed of posts, it cannot run `SELECT * FROM posts` against a Polygon node.
+
+1. **The Graph Listeners**: **The Graph** indexer node monitors Polygon block state. It catches the `PostCreated` event.
+2. **Handler Mapping**: The Graph node runs an AssemblyScript handler mapping the event parameters:
+   ```typescript
+   export function handlePostCreated(event: PostCreatedEvent): void {
+     let post = new Post(event.params.postId.toString());
+     post.author = event.params.author;
+     post.ipfsHash = event.params.ipfsHash;
+     post.createdAt = event.block.timestamp;
+     post.save();
+   }
+   ```
+3. **Data Hydration**: The Graph automatically fetches the IPFS metadata file, extracts the caption and image links, and caches them inside its internal database.
+
+---
+
+### Phase 5: Hydrated Feed Loading (The Loop Completes)
+
+The user's feed loads:
+1. **GraphQL Query**: The frontend queries The Graph's GraphQL endpoint:
+   ```graphql
+   query {
+     posts(orderBy: createdAt, orderDirection: desc, first: 10) {
+       id
+       author
+       ipfsHash
+       caption
+       imageUrl
+     }
+     user(id: "0x...") {
+       username
+     }
+   }
+   ```
+2. **Instant Rendering**: The GraphQL database returns the hydrated feed in under 150ms. The user sees their post.
+
+---
+
+<RealityCheck>
+  A common design failure is attempting to bypass the indexer by reading directly from contracts during feed render. If you do this, your app will take 5+ seconds to load a simple list of posts, hitting public RPC provider limits immediately.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Trace the data flow of a decentralized supply-chain trace (like **ChainCure**). When a QR code on a bottle of medicine is scanned by a regulator:
+  1. What data flows from the QR code to the scanner?
+  2. What on-chain state variables are checked?
+  3. Where is the drug batch manufacturing metadata retrieved from?
+  4. Sketch the pipeline in your notepad.
+</LessonChallenge>
