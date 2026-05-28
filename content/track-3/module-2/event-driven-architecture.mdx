@@ -1,0 +1,126 @@
+---
+title: "Event-driven architecture in Web3"
+description: "How user actions trigger contract events that act as asynchronous pipelines to update off-chain indexers and notification caches."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 2
+moduleName: "Data Flow Design"
+lesson: 2
+difficulty: "advanced"
+estimatedMinutes: 13
+tags: ["events", "indexing", "architecture", "notifications"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: "Socio3"
+heroProjectContribution: "This lesson details the event-driven loop powering likes, comments, and push notifications inside the Socio3 system."
+---
+
+# Event-Driven Architecture in Web3
+
+In a standard centralized Web2 system, when User A likes User B's post, the server updates the database and immediately pushes a socket notification to User B:
+```text
+Like Button ──▶ express.js ──▶ PostgreSQL (likes + 1)
+                    │
+                    └───────▶ Firebase (push notification to User B)
+```
+This is synchronous and tightly coupled.
+
+In Web3, the blockchain is **asynchronous** and **disconnected** from standard web servers. The blockchain cannot make HTTP requests, send push notifications, or wake up a device.
+
+To build interactive features, you must design an **event-driven loop**:
+
+```text
+Like Button ──▶ Smart Contract ──▶ emits PostLiked() event
+                                         │
+                                   Polygon Node logs
+                                         │
+   ┌─────────────────────────────────────┴─────────────────────────────────────┐
+   ▼                                                                           ▼
+The Graph Indexer                                                      Node.js Backend
+   │                                                                           │
+GraphQL Feed updates                                                  Firestore DB updates
+                                                                               │
+                                                                               ▼
+                                                                      Push Notification
+```
+
+---
+
+### 1. The On-Chain Event Trigger
+
+Solidity log logs are significantly cheaper than contract storage. When a user likes a post in **Socio3**, we emit a `PostLiked` event instead of storing the like inside a heavy on-chain array:
+
+```solidity
+// SocialContract.sol
+event PostLiked(
+    uint256 indexed postId,
+    address indexed liker,
+    address indexed author,
+    uint256 timestamp
+);
+
+function likePost(uint256 postId) external {
+    require(!postLikes[postId][msg.sender], "Post already liked");
+    postLikes[postId][msg.sender] = true;
+    
+    // Emit event for off-chain systems
+    emit PostLiked(postId, msg.sender, postAuthors[postId], block.timestamp);
+}
+```
+
+By indexing `postId`, `liker`, and `author`, we write their values to the transaction receipt's **log topics**. This makes it possible for external nodes to index and filter these logs instantly.
+
+---
+
+### 2. The Asynchronous Pipelines
+
+Once the transaction is included in a block, the event log becomes permanent on the Polygon Amoy network. Two separate indexers listen to these logs:
+
+#### Pipeline A: The Feed Indexer (The Graph)
+1. **The Graph Node** processes block receipts.
+2. It detects the `PostLiked` event.
+3. The AssemblyScript handler increments the `likeCount` entity in the subgraph cache.
+4. When other users request the feed, they see the updated like count instantly via GraphQL.
+
+#### Pipeline B: The Notification Daemon (Express Backend)
+1. A background daemon (such as a Web3 websocket listener or a Graph webhook) detects the event log.
+2. It reads the `author` and `liker` parameters.
+3. The Node.js server writes a record to Firestore:
+   ```text
+   collection("notifications").add({
+     type: "like",
+     sender: likerAddress,
+     recipient: authorAddress,
+     postId: postId,
+     timestamp: timestamp
+   })
+   ```
+4. A Firestore onSnapshot listener triggers a UI push notification on User B's screen.
+
+---
+
+### 3. Decoupling Web2 and Web3 State
+
+Notice the separation of concerns:
+* **Blockchain**: Cryptographic ledger of truth (authenticates the transaction, prevents double-liking).
+* **The Graph**: Read cache for pagination, filters, and rendering.
+* **Firebase**: Dynamic, short-lived notification delivery.
+
+If the notification database crashes, the core social graph remains completely unaffected on-chain. If the indexer node goes down, the client can fall back to direct contract calls temporarily.
+
+---
+
+<RealityCheck>
+  Do not write state variables for temporary features (like 'last active time' or 'like counts') directly to Solidity variables if they are not needed for smart contract execution logic. Emit events instead. Storage costs gas; event logs are cheap.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  In a Web3 marketplace, a buyer places a bid. Design the event-driven notifications pipeline.
+  1. What event does the contract emit?
+  2. Which parameters should be indexed (topics)?
+  3. Sketch the pipeline that alerts the seller's browser without polling the RPC node.
+</LessonChallenge>
