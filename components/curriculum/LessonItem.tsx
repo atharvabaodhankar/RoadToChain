@@ -55,7 +55,6 @@ export default function LessonItem({
           trackSlug={trackSlug}
           moduleSlug={moduleSlug}
           lessonSlug={lesson.slug}
-          trackColor={trackColor}
         />
         {lesson.isRealProject && (
           <span className="inline-flex items-center gap-1 rounded bg-pink-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-pink-400 border border-pink-500/20">
