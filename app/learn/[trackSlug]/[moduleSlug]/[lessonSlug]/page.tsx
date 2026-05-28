@@ -24,6 +24,8 @@ import GasSimulator from "@/components/simulators/GasSimulator";
 import TransactionVisualizer from "@/components/simulators/TransactionVisualizer";
 import WalletSigningSimulator from "@/components/simulators/WalletSigningSimulator";
 import DeploymentSimulator from "@/components/simulators/DeploymentSimulator";
+import ArchitectureExplorer from "@/components/simulators/ArchitectureExplorer";
+
 
 interface Props {
   params: Promise<{
@@ -88,6 +90,7 @@ const mdxComponents = {
   TransactionVisualizer,
   WalletSigningSimulator,
   DeploymentSimulator,
+  ArchitectureExplorer,
   // Custom code block renderer to replace standard markdown pre blocks
   pre: (props: React.ComponentPropsWithoutRef<"pre">) => {
     // MDX v2 wraps code blocks in <pre><code className="language-xyz">...</code></pre>
