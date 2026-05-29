@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldAlert, Cpu, Heart, CheckCircle2, ChevronRight, Activity } from "lucide-react";
+import { ShieldAlert, Cpu, CheckCircle2, ChevronRight, Activity } from "lucide-react";
 import Link from "next/link";
 
 interface Autopsy {
