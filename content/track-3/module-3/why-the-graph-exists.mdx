@@ -1,0 +1,172 @@
+---
+title: "Why The Graph exists — indexing deep dive"
+description: "EVM storage contains no ORDER BY or query features. How to compile smart contract events into instantly queryable GraphQL collections."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 3
+moduleName: "Scalability Thinking"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 15
+tags: ["indexing", "the-graph", "graphql", "queries"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: "Socio3"
+heroProjectContribution: "This lesson details the subgraph schema and event handler structure utilized by Socio3 V2."
+---
+
+# Why The Graph Exists — Indexing Deep Dive
+
+If you are a web developer coming from MySQL or MongoDB, you are used to writing queries like this:
+
+```sql
+SELECT * FROM posts WHERE author = '0x123...' ORDER BY timestamp DESC LIMIT 10;
+```
+
+When you transition to smart contract development, you hit a massive wall: **Solidity has no query engine.**
+
+Smart contract storage is a key-value store optimized for state transitions, not reading. There is no `ORDER BY`, no `LIMIT`, and no text indexing. 
+
+If you want to render a home feed of posts from the users you follow, your frontend would have to fetch **all** posts from the blockchain and sort/filter them in memory. This is completely unscalable.
+
+This is why **The Graph** was invented.
+
+---
+
+### 1. The EVM Query Limitation
+
+Let's look at how posts are stored inside **PostContract.sol**:
+
+```solidity
+struct Post {
+    uint256 id;
+    address author;
+    string ipfsHash;
+    uint256 timestamp;
+}
+
+mapping(uint256 => Post) public posts;
+uint256 public totalPosts;
+```
+
+If your frontend wants to show "the latest 10 posts uploaded by Alice," the only native way to do it is:
+1. Query `totalPosts` to find the highest index.
+2. Run a loop in React fetching every post one-by-one (`posts[1]`, `posts[2]`, etc.).
+3. Filter out posts where `author != Alice`.
+4. Sort by `timestamp`.
+
+If there are 50,000 posts in the system, this process requires 50,000 RPC requests, crashing the user's browser.
+
+---
+
+### 2. How The Graph Solves the Read Problem
+
+Instead of reading contract storage directly, **The Graph** monitors blockchain events and compiles them into a structured database.
+
+```text
+Solidity Contract ──▶ emits PostCreated() Event ──▶ Polygon Block Log
+                                                          │
+                                                    The Graph Node
+                                                          │
+                                                AssemblyScript Mapping
+                                                          │
+                                                PostgreSQL Database
+                                                          │
+                                                   GraphQL Endpoint
+```
+
+---
+
+### 3. The Subgraph Specification (`subgraph.yaml`)
+
+To index **Socio3**, we configure a subgraph mapping to listen for the `PostCreated` event on Polygon Amoy:
+
+```yaml
+# subgraph.yaml
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PostContract
+    network: amoy
+    source:
+      address: "0x5d5C1d313f580027204e04E8D4E3162f37A661CF"
+      abi: PostContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Post
+      abis:
+        - name: PostContract
+          file: ./abis/PostContract.json
+      eventHandlers:
+        - event: PostCreated(indexed uint256,indexed address,string)
+          handler: handlePostCreated
+      file: ./src/mapping.ts
+```
+
+---
+
+### 4. The Mapping Handler (`mapping.ts`)
+
+When a `PostCreated` event occurs, the Graph node executes an **AssemblyScript** function to update its local database:
+
+```typescript
+// src/mapping.ts
+import { PostCreated as PostCreatedEvent } from "../generated/PostContract/PostContract"
+import { Post } from "../generated/schema"
+
+export function handlePostCreated(event: PostCreatedEvent): void {
+  // Create a new database record (entity)
+  let post = new Post(event.params.postId.toString());
+  
+  post.author = event.params.author;
+  post.ipfsHash = event.params.ipfsHash;
+  post.createdAt = event.block.timestamp;
+  post.likeCount = 0;
+  post.tipTotal = 0;
+  
+  // Save to indexer's database
+  post.save();
+}
+```
+
+---
+
+### 5. Querying the Indexer
+
+Now, the client can query Alice's posts using standard GraphQL:
+
+```graphql
+query GetAlicesPosts {
+  posts(
+    where: { author: "0xAliceAddress..." }
+    orderBy: createdAt
+    orderDirection: desc
+    first: 10
+  ) {
+    id
+    ipfsHash
+    createdAt
+  }
+}
+```
+
+The Graph processes this query in **under 50ms**, returning exactly the 10 posts Alice created.
+
+---
+
+<RealityCheck>
+  The Graph is a READ cache. It does not replace the blockchain. Write actions (sending tokens, creating posts) must still go through smart contract transactions. The Graph is strictly for indexing those actions after they occur.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  If a user unfollows another user in Socio3, how does The Graph update the social graph? Sketch the schema and handler mappings required to delete or update a follow relation entity.
+</LessonChallenge>
