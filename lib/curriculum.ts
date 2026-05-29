@@ -855,13 +855,13 @@ export const tracks: Track[] = [
     number: "T3",
     name: "Blockchain System Design",
     tagline: "How production systems are actually designed.",
-    description: "Actors, flows, trust boundaries, storage decisions. How Uniswap, OpenSea, and rollups actually work.",
+    description: "Actors, flows, trust boundaries, storage decisions, caching layers, API gateways, and indexing engines. Dissect the architectural evolution of Uniswap, ProofChain, and Socio3.",
     color: "#22c55e",
     difficulty: "advanced",
     prerequisites: [2],
-    estimatedHours: 8,
-    moduleCount: 4,
-    lessonCount: 15,
+    estimatedHours: 9,
+    moduleCount: 5,
+    lessonCount: 11,
     heroProject: {
       name: "ProofChain",
       description: "Production-grade proof-of-existence system: file hashing on the frontend, IPFS storage, on-chain hash registry, event indexing, hybrid architecture."
@@ -871,8 +871,8 @@ export const tracks: Track[] = [
       {
         id: "m3-1",
         number: "M3.1",
-        name: "System Design Thinking",
-        description: "Actor modeling, boundaries, and selecting the correct stack.",
+        name: "Architecture Thinking",
+        description: "Actor modeling, boundaries, and why blockchain is not a database.",
         lessons: [
           {
             slug: "actor-modeling",
@@ -909,94 +909,112 @@ export const tracks: Track[] = [
       {
         id: "m3-2",
         number: "M3.2",
-        name: "Famous Protocol Breakdowns",
-        description: "Uniswap AMMs, OpenSea Seaport, Rollups, and AA Bundlers.",
+        name: "Data Flow Design",
+        description: "Tracing the lifecycles of on-chain and off-chain data flows.",
         lessons: [
           {
-            slug: "uniswap-amm-math",
-            title: "How Uniswap works — AMM from first principles",
-            description: "Constant product formula, slippage, liquidity pools.",
-            tags: ["uniswap", "amm", "math", "diagram"],
+            slug: "how-data-moves-through-systems",
+            title: "How data moves through hybrid systems",
+            description: "Dissecting the journey of an uploaded image through standard web servers, IPFS, the blockchain log registry, and graph indexers.",
+            tags: ["data-flow", "architecture", "ipfs", "indexing"],
             hasDiagram: true,
             hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 15
-          },
-          {
-            slug: "opensea-seaport-orders",
-            title: "How OpenSea works — NFT marketplace architecture",
-            description: "Off-chain signatures, Seaport settlement contracts.",
-            tags: ["opensea", "marketplace", "diagram"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
+            hasProject: true,
             estimatedMinutes: 14
           },
           {
-            slug: "scaling-rollups",
-            title: "How rollups work — L2 scaling",
-            description: "Optimistic vs Zero Knowledge, sequencers, fraud proofs.",
-            tags: ["rollups", "scaling", "diagram"],
+            slug: "event-driven-architecture",
+            title: "Event-driven architecture in Web3",
+            description: "How user actions trigger contract events that act as asynchronous pipelines to update off-chain indexers and notification caches.",
+            tags: ["events", "indexing", "architecture", "notifications"],
             hasDiagram: true,
             hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 15
+            estimatedMinutes: 13
           }
         ]
       },
       {
         id: "m3-3",
         number: "M3.3",
-        name: "Hybrid Web2 + Web3 Architecture",
-        description: "Sign-In With Ethereum, secure APIs, and fallback resilient setups.",
+        name: "Scalability Thinking",
+        description: "Identify performance bottlenecks and cache data correctly in distributed environments.",
         lessons: [
           {
-            slug: "hybrid-request-flows",
-            title: "The hybrid architecture pattern",
-            description: "Next.js backend, contract reads, cache layers, and DB states.",
-            tags: ["architecture", "database", "diagram"],
+            slug: "why-direct-rpc-dies",
+            title: "Why direct RPC queries die at scale",
+            description: "Socio3 V1 scaling autopsy: how loading feeds via JSON-RPC works at 10 posts, degrades at 1000, and freezes browsers at 10000.",
+            tags: ["rpc", "scalability", "bottlenecks", "mistake"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 15
+          },
+          {
+            slug: "why-redis-exists",
+            title: "Why Redis exists in Web3 systems",
+            description: "How direct IPFS gateway lookups cause massive latencies, and why caching immutable CIDs in Redis drops feed render times to 80ms.",
+            tags: ["redis", "caching", "ipfs", "performance"],
             hasDiagram: true,
             hasMistake: false,
-            hasProject: false,
+            hasProject: true,
             estimatedMinutes: 12
           },
           {
-            slug: "siwe-auth",
-            title: "Sign-In With Ethereum (SIWE)",
-            description: "EIP-4361 standard. Signing off-chain for JWT generation.",
-            tags: ["auth", "siwe", "real-code"],
-            hasDiagram: false,
+            slug: "why-the-graph-exists",
+            title: "Why The Graph exists — indexing deep dive",
+            description: "EVM storage contains no ORDER BY or query features. How to compile smart contract events into instantly queryable GraphQL endpoints.",
+            tags: ["indexing", "the-graph", "graphql", "queries"],
+            hasDiagram: true,
             hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 14
+            estimatedMinutes: 15
           }
         ]
       },
       {
         id: "m3-4",
         number: "M3.4",
-        name: "ChainCure Deep Dive",
-        description: " Pharmaceutical counterfeits, 5-actor models, state transitions, QR public scans.",
+        name: "Production Infrastructure",
+        description: "Backends, API gateways, proxying, rate-limiting, and defensive structures.",
         lessons: [
           {
-            slug: "pharmaceutical-problem",
-            title: "The counterfeit drug problem — why blockchain?",
-            description: "Trust boundaries, ledger requirements, and transparency.",
-            tags: ["pharmacy", "supply-chain"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
+            slug: "why-backends-exist-in-web3",
+            title: "Why backends exist in Web3 — API gateway design",
+            description: "Debunking the 'blockchain is my backend' myth. Exposing Express proxy gateways to secure Pinata keys and run off-chain validations.",
+            tags: ["backend", "api-gateway", "security", "proxies"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 13
           },
           {
-            slug: "drug-lifecycle-state",
-            title: "Drug lifecycle state machine",
-            description: "Created -> Transferred -> Verified on-chain contracts.",
-            tags: ["contracts", "states", "diagram"],
+            slug: "rate-limiting-and-abuse",
+            title: "Rate limiting and abuse prevention",
+            description: "Designing gas faucets that prevent Sybil attacks. Why native gas payouts must be rate-limited and routed strictly to EOA addresses.",
+            tags: ["faucets", "rate-limiting", "security", "anti-fraud"],
             hasDiagram: true,
-            hasMistake: false,
+            hasMistake: true,
             hasProject: false,
-            estimatedMinutes: 14
+            estimatedMinutes: 12
+          }
+        ]
+      },
+      {
+        id: "m3-5",
+        number: "M3.5",
+        name: "Architecture Autopsies",
+        description: "Dissecting the lifecycle transformations of five production dApps.",
+        lessons: [
+          {
+            slug: "system-evolution-autopsy",
+            title: "System evolution — autopsy of five Web3 architectures",
+            description: "Tracing ChainElect, ProofChain, Socio3 V1, Socio3 V2, and ChainCure from naive prototypes to robust, production-grade infrastructures.",
+            tags: ["autopsy", "case-studies", "evolution", "architecture"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 18
           }
         ]
       }
