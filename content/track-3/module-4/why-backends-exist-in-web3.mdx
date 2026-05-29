@@ -1,0 +1,135 @@
+---
+title: "Why backends exist in Web3 — API gateway design"
+description: "Debunking the 'blockchain is my backend' myth. Exposing Express proxy gateways to secure Pinata keys and run off-chain validations."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 3
+moduleName: "Production Infrastructure"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 13
+tags: ["backend", "api-gateway", "security", "proxies"]
+hasDiagram: true
+hasMistake: true
+hasProject: true
+realProjectSource: "Socio3"
+heroProjectContribution: "This lesson explains the Express API Gateway architecture used inside the Socio3 system."
+---
+
+# Why Backends Exist in Web3 — API Gateway Design
+
+When beginners start building dApps, they often hear the phrase: *"The blockchain is a serverless backend."*
+
+This leads to a dangerous architectural assumption: that a Web3 application should only consist of a **Solidity contract** and a **React frontend**, with no middle tier. 
+
+If you build an app this way, you will inevitably hit three massive walls:
+1. **Credentials Leakage**: How do you communicate with third-party APIs (like Pinata/IPFS or custom database services) without exposing secret keys in the browser bundle?
+2. **Computational Limits**: How do you run computationally heavy or private logic (like anti-abuse filters or machine learning moderation) that cannot run on a decentralized validator node?
+3. **Sybil/Spam Protection**: How do you prevent bots from spamming your contract transactions?
+
+Let's look at why **Socio3 V2** requires a dedicated Express backend proxy layer and how to design a secure API gateway.
+
+---
+
+### 1. The React Key Leak (The Danger)
+
+In **Socio3 V1**, we uploaded files to IPFS directly from the browser using the Pinata SDK:
+
+```javascript
+// ❌ Naive Socio3 V1 code - LEAKS KEYS
+import axios from 'axios';
+
+async function uploadToIPFS(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+    headers: {
+      pinata_api_key: "my_secret_api_key", // EXPOSED in build bundle!
+      pinata_secret_api_key: "my_secret_secret" // EXPOSED!
+    }
+  });
+  return response.data.IpfsHash;
+}
+```
+
+Since frontend JavaScript is parsed and executed directly on the user's browser, anyone can open their browser's dev tools, look at the network requests or search the loaded bundle, and extract your Pinata API keys. Within hours, spammers can use your keys to host gigabytes of illegal material on your account.
+
+---
+
+### 2. The API Gateway Proxy Pattern (The Solution)
+
+To fix this vulnerability, **Socio3 V2** routes all file uploads through an Express backend proxy. The frontend communicates with the backend, which forwards the request to Pinata using server-side environment variables.
+
+```text
+React Client ──(Image upload)──▶ Express Backend (Proxy) ──(Keys appended)──▶ Pinata/IPFS
+                                       │
+                         Reads VITE_PINATA_JWT from .env
+```
+
+Here is the implementation:
+
+```javascript
+// backend/routes/ipfs.js
+const express = require('express');
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
+
+const router = express.Router();
+const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
+
+router.post('/upload', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file provided" });
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('file', req.file.buffer, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+    });
+
+    // Send to Pinata using server-side keys
+    const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+      headers: {
+        ...formData.getHeaders(),
+        Authorization: `Bearer ${process.env.PINATA_JWT}` // Securely kept in backend env
+      }
+    });
+
+    return res.status(200).json({ hash: response.data.IpfsHash });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to upload to IPFS" });
+  }
+});
+```
+
+Now, the client never sees the Pinata API key. They only see their own upload payload.
+
+---
+
+### 3. API Gateway Jobs in Web3
+
+In a production Web3 system, the backend's jobs include:
+
+| Task | Where it runs | Why? |
+|------|---------------|------|
+| **Cryptography** | On-Chain (EVM) | Irreversible state validation and token rules. |
+| **API Proxies** | Express Server | Secure API credential management. |
+| **Caching** | Redis / The Graph | Instant loads without RPC rate limits. |
+| **Heavy Processing** | Express Server | Image compression, virus scanning, NSFW filtering. |
+
+---
+
+<RealityCheck>
+  "Decentralized" does not mean "serverless." Every major dApp (including Uniswap, OpenSea, and Blur) uses traditional backend servers to proxy assets, run indexers, route transactions, and protect keys. The blockchain is the notary, not the host.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  If a user uploads an inappropriate (NSFW) image to Socio3, where should the detection logic run? In the smart contract, on the client browser, or on the Express proxy backend? Design the pipeline and write your reasoning.
+</LessonChallenge>
