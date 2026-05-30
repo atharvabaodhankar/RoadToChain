@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/context/ProgressContext";
 
 // Real gas numbers from the voting disaster
 const BLOCK_GAS_LIMIT = 30_000_000;
@@ -52,10 +53,15 @@ function formatEth(gas: number, gwei = 30): string {
 }
 
 export default function GasSimulator() {
+  const { trackSimulatorUsage } = useProgress();
   const [voterCount, setVoterCount] = useState(5);
   const [reverted, setReverted] = useState(false);
   const [animating, setAnimating] = useState(false);
   const prevVoters = useRef(voterCount);
+
+  useEffect(() => {
+    trackSimulatorUsage("gas");
+  }, [trackSimulatorUsage]);
 
   const gasUsed = voterCount * 42_000 + 21_000; // base tx cost
   const tallyGas = voterCount * 5_800; // SLOAD loop cost
@@ -234,7 +240,10 @@ export default function GasSimulator() {
             {scenarios.map((s) => (
               <button
                 key={s.voters}
-                onClick={() => setVoterCount(s.voters)}
+                onClick={() => {
+                  setVoterCount(s.voters);
+                  trackSimulatorUsage("gas");
+                }}
                 className={`rounded px-3 py-1.5 text-[11px] border transition-all ${
                   voterCount === s.voters
                     ? "border-accent/60 bg-accent/10 text-accent"
