@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/context/ProgressContext";
 
 type Phase = "write" | "compile" | "abi" | "bytecode" | "deploy" | "address";
 
@@ -211,12 +212,18 @@ Address derivation:
 ];
 
 export default function DeploymentSimulator() {
+  const { trackSimulatorUsage } = useProgress();
   const [activePhase, setActivePhase] = useState(0);
   const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    trackSimulatorUsage("deployment");
+  }, [trackSimulatorUsage]);
 
   const current = phases[activePhase];
 
   const playThrough = () => {
+    trackSimulatorUsage("deployment");
     setPlaying(true);
     setActivePhase(0);
     let i = 0;
