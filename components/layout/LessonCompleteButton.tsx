@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useProgress } from "@/app/context/ProgressContext";
 import { Check, CheckCircle2, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
@@ -17,8 +18,12 @@ export default function LessonCompleteButton({
   lessonSlug,
   trackColor = "#7c3aed",
 }: LessonCompleteButtonProps) {
-  const { isComplete, markComplete, markIncomplete } = useProgress();
+  const { isComplete, markComplete, markIncomplete, trackLessonView } = useProgress();
   const completed = isComplete(trackSlug, moduleSlug, lessonSlug);
+
+  useEffect(() => {
+    trackLessonView(trackSlug, moduleSlug, lessonSlug);
+  }, [trackSlug, moduleSlug, lessonSlug, trackLessonView]);
 
   return (
     <div className="mt-12 flex flex-col items-center justify-center border-t border-border/40 pt-10">
