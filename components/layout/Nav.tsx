@@ -13,6 +13,7 @@ export default function Nav() {
 
   const links = [
     { name: "Curriculum", href: "/curriculum" },
+    { name: "Autopsies", href: "/architecture-autopsies" },
     { name: "Mistakes", href: "/mistakes" },
     { name: "Learn Portal", href: "/learn" },
   ];
