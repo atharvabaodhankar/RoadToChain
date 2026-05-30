@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/context/ProgressContext";
 
 // Lightweight ECDSA simulation — uses Web Crypto + deterministic derivation
 // For educational purposes, we use a simplified but cryptographically meaningful demo
@@ -56,6 +57,7 @@ const PRESET_KEYS = [
 type Step = "idle" | "hashing" | "signing" | "signed" | "verifying" | "verified";
 
 export default function WalletSigningSimulator() {
+  const { trackSimulatorUsage } = useProgress();
   const [message, setMessage] = useState("Vote for Proposal #3");
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [customKey, setCustomKey] = useState("");
@@ -64,11 +66,16 @@ export default function WalletSigningSimulator() {
   const [signature, setSignature] = useState<{ r: string; s: string; v: number } | null>(null);
   const [recoveredAddress, setRecoveredAddress] = useState("");
 
+  useEffect(() => {
+    trackSimulatorUsage("signing");
+  }, [trackSimulatorUsage]);
+
   const privateKey = selectedPreset < 2 ? PRESET_KEYS[selectedPreset].key : customKey || "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
   const signerAddress = deriveAddress(privateKey);
 
   const runSigning = useCallback(async () => {
     if (!message.trim()) return;
+    trackSimulatorUsage("signing");
 
     setStep("hashing");
     setSignature(null);
@@ -83,17 +90,18 @@ export default function WalletSigningSimulator() {
     const sig = await simulateSign(privateKey, hash);
     setSignature(sig);
     setStep("signed");
-  }, [message, privateKey]);
+  }, [message, privateKey, trackSimulatorUsage]);
 
   const runVerify = useCallback(async () => {
     if (!signature) return;
+    trackSimulatorUsage("signing");
     setStep("verifying");
     await new Promise((r) => setTimeout(r, 700));
     // In a real system, ecrecover(messageHash, v, r, s) → address
     // We simulate by deriving the same address from the key
     setRecoveredAddress(signerAddress);
     setStep("verified");
-  }, [signature, signerAddress]);
+  }, [signature, signerAddress, trackSimulatorUsage]);
 
   const reset = () => {
     setStep("idle");
