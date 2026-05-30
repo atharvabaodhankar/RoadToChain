@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cpu, Database, HelpCircle, AlertTriangle, ShieldCheck, X } from "lucide-react";
+import { useProgress } from "@/app/context/ProgressContext";
 
 type ComponentId = "auth" | "paymaster" | "index" | "storage" | "database" | "blockchain";
 
@@ -18,7 +19,12 @@ interface ExplorerComponent {
 }
 
 export default function ArchitectureExplorer() {
+  const { trackSimulatorUsage } = useProgress();
   const [selected, setSelected] = useState<ComponentId | null>(null);
+
+  useEffect(() => {
+    trackSimulatorUsage("architecture");
+  }, [trackSimulatorUsage]);
 
   const items: ExplorerComponent[] = [
     {
@@ -104,7 +110,10 @@ export default function ArchitectureExplorer() {
           return (
             <motion.button
               key={item.id}
-              onClick={() => setSelected(item.id)}
+              onClick={() => {
+                setSelected(item.id);
+                trackSimulatorUsage("architecture");
+              }}
               whileHover={{ scale: 1.01, translateY: -2 }}
               whileTap={{ scale: 0.99 }}
               className="w-full flex items-start gap-4 p-4 rounded-xl border bg-bg/40 text-left transition-all duration-300 relative cursor-pointer group"
