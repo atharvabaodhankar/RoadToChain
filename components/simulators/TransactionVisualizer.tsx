@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/context/ProgressContext";
 
 const steps = [
   {
@@ -123,15 +124,22 @@ receipt = {
 ];
 
 export default function TransactionVisualizer() {
+  const { trackSimulatorUsage } = useProgress();
   const [activeStep, setActiveStep] = useState(0);
   const [playing, setPlaying] = useState(false);
 
+  useEffect(() => {
+    trackSimulatorUsage("transaction");
+  }, [trackSimulatorUsage]);
+
   const goTo = (i: number) => {
+    trackSimulatorUsage("transaction");
     setActiveStep(i);
     setPlaying(false);
   };
 
   const playThrough = () => {
+    trackSimulatorUsage("transaction");
     setPlaying(true);
     setActiveStep(0);
     let i = 0;
