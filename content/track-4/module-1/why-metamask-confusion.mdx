@@ -1,0 +1,70 @@
+---
+title: "Why MetaMask confused everyone"
+description: "How browser extensions fail, and why non-technical users confuse local key managers with the blockchain networks."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 1
+moduleName: "Why Web3 UX Failed"
+lesson: 2
+difficulty: "advanced"
+estimatedMinutes: 12
+tags: ["ux", "metamask", "faucets", "mistake"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+---
+
+# Why MetaMask Confused Everyone
+
+For years, the standard entrance ticket to Web3 has been the **MetaMask browser extension**. While it was a pioneering piece of software, it created a massive conceptual barrier. Users didn't just find MetaMask difficult; they completely misunderstood what it was doing.
+
+---
+
+### 1. The Key Conceptual Confusion
+
+The single biggest mental hurdle for beginners is understanding where their assets are:
+
+* **The Mistake:** Users believe their tokens are "stored inside MetaMask" like files on a hard drive or cash in a physical wallet.
+* **The Reality:** A wallet stores zero coins. All balances are recorded as state variables inside the blockchain's distributed ledger. MetaMask is simply a **local key manager** and **signing client** that generates signatures using your private key and broadcasts transactions via RPC nodes.
+
+When a user asks: *"Is MetaMask down? I can't see my tokens,"* they are confusing the local interface with the public state of the blockchain.
+
+```
++-------------------------------------------------------------+
+|                     THE CONCEPTUAL ERROR                    |
+|                                                             |
+| WRONG MENTAL MODEL (Mainstream User):                       |
+| [ User ] ── Check Wallet ──> [ MetaMask App (Stores coins) ]|
+|                                                             |
+| CORRECT MENTAL MODEL (Engineer):                            |
+| [ User ] ── Signs UserOp ──> [ Private Key (MetaMask) ]     |
+|                                     │                       |
+|                                     ▼                       |
+|                       [ Blockchain Ledger state ]           |
+|                          - balance[0xabc] = 10 ETH          |
++-------------------------------------------------------------+
+```
+
+---
+
+### 2. The Sandbox Barrier
+
+Browser extensions live in isolated execution environments (sandboxes).
+* They inject a provider object (`window.ethereum`) into the DOM of every webpage the user loads.
+* Frontend React clients use libraries like Ethers.js or Viem to look for this injected object to request addresses and sign transactions.
+* **The Failure:** If a user opens your page in a standard mobile browser (like iOS Safari or Chrome) or inside an app Webview (like Twitter or Discord), the extension is not there. The injection fails, `window.ethereum` is `undefined`, and the site cannot interact with the blockchain.
+
+---
+
+<MistakeCallout>
+  During a live hackathon demo, the judges tried to test our project on their laptops but were greeted with a blank screen because they didn't have MetaMask installed. We spent the entire time installing Chrome extensions, creating accounts, writing down 12-word seed phrases, and explaining networks. We ran out of time before they saw a single feature.
+</MistakeCallout>
+
+---
+
+### 3. The Network Mismatch Loop
+
+When a React dApp expects Polygon Base network, but MetaMask is set to Ethereum Mainnet, the dApp has to request a network switch. This prompts a MetaMask popup asking the user to approve adding a new chain.
+
+Most non-technical users have no idea what a chain ID, RPC URL, or block explorer is. When they see a popup warning them that they are adding a custom network, they get scared and close the tab.
