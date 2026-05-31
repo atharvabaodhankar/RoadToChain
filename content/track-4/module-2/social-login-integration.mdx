@@ -1,0 +1,164 @@
+---
+title: "Social login OAuth integration"
+description: "Integrating Google and Apple social sign-in with Privy and validating JWT tokens in React."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 2
+moduleName: "Embedded Wallets"
+lesson: 4
+difficulty: "advanced"
+estimatedMinutes: 13
+tags: ["auth", "react", "oauth", "project"]
+hasDiagram: false
+hasMistake: false
+hasProject: true
+realProjectSource: "Socio3 V2"
+heroProjectContribution: "Teaches the basic login routing setup code that replaced standard connect-wallet buttons in Socio3 V2."
+---
+
+# Social Login OAuth Integration
+
+To implement embedded wallets in a React application, we wrap the DOM inside a Privy provider context and invoke standard hooks to trigger the OAuth login lifecycle.
+
+---
+
+### 1. Root Configuration
+
+First, wrap your root layout or application component inside `PrivyProvider`, passing your unique Application ID.
+
+```tsx
+// app/layout.tsx
+import { PrivyProvider } from "@privy-io/react-auth";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <PrivyProvider
+          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
+          config={{
+            // Configure authentication options
+            loginMethods: ["google", "apple", "email", "sms"],
+            // Automatically generate an embedded EOA wallet upon successful login
+            embeddedWallets: {
+              createOnLogin: "users-without-wallets",
+              requireUserPasswordOnCreate: false, // Set to true for higher value assets
+            },
+            appearance: {
+              theme: "dark",
+              accentColor: "#f59e0b", // Match your track/accent theme color
+              showWalletLoginFirst: false,
+            },
+          }}
+        >
+          {children}
+        </PrivyProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+---
+
+### 2. The Login Component
+
+Inside your pages, use the `usePrivy` hook to get the user's connection status, login actions, and wallet details.
+
+```tsx
+// components/AuthButton.tsx
+"use client";
+
+import { usePrivy } from "@privy-io/react-auth";
+
+export default function AuthButton() {
+  const { login, logout, ready, authenticated, user } = usePrivy();
+
+  if (!ready) {
+    return (
+      <button className="animate-pulse bg-bg3 text-muted rounded-md px-4 py-2 font-mono text-xs border border-border">
+        Initializing Auth...
+      </button>
+    );
+  }
+
+  if (authenticated && user) {
+    // Get the address of the generated embedded EOA wallet
+    const embeddedWallet = user.linkedAccounts.find(
+      (account) => account.type === "wallet" && account.connectorType === "embedded"
+    );
+
+    return (
+      <div className="flex items-center gap-3">
+        <div className="text-right">
+          <p className="text-xs font-semibold text-text">{user.google?.email || user.email?.address}</p>
+          <p className="font-mono text-[10px] text-muted">
+            EOA: {embeddedWallet ? `${embeddedWallet.address.slice(0, 6)}...${embeddedWallet.address.slice(-4)}` : "None"}
+          </p>
+        </div>
+        <button
+          onClick={logout}
+          className="bg-[#ef4444]/10 hover:bg-[#ef4444]/20 text-[#ef4444] border border-[#ef4444]/20 rounded-md px-4 py-2 font-mono text-xs transition-colors cursor-pointer"
+        >
+          Sign Out
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={login}
+      className="bg-accent hover:bg-accent2 text-text rounded-[7px] px-6 py-2.5 font-mono text-xs font-semibold transition-all hover:scale-[1.02] cursor-pointer"
+    >
+      Sign In with Google
+    </button>
+  );
+}
+```
+
+---
+
+### 3. Server-Side Token Verification
+
+When your client uploads metadata to your Express or Next.js backend proxy layer, the frontend must pass the Privy access token (an RS256 JWT) in the authorization headers.
+
+The backend validates the token using Privy's public keys to ensure the request is authenticated:
+
+```typescript
+// server/middleware/auth.ts
+import { PrivyClient } from "@privy-io/server-auth";
+import { Request, Response, NextFunction } from "express";
+
+const privy = new PrivyClient(
+  process.env.PRIVY_APP_ID || "",
+  process.env.PRIVY_APP_SECRET || ""
+);
+
+export async function verifyPrivySession(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Missing authentication credentials" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    // Validate the JWT. If expired or forged, throws an exception.
+    const claims = await privy.verifyClaims(token);
+    
+    // Attach verified user claims to request context
+    req.user = {
+      id: claims.userId,
+      appId: claims.appId
+    };
+    
+    next();
+  } catch (error) {
+    console.error("Token verification failed:", error);
+    return res.status(401).json({ error: "Invalid session credentials" });
+  }
+}
+```
+This secure loop prevents unauthorized requests from abusing your backend proxy nodes or IPFS pinning keys.
