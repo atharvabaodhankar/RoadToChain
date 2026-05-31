@@ -1,0 +1,59 @@
+---
+title: "EOA creation mechanics"
+description: "How Privy silently generates cryptographically secure local keys and stores them securely inside browser storage."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 2
+moduleName: "Embedded Wallets"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 11
+tags: ["wallets", "eoa", "cryptography"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+---
+
+# EOA Creation Mechanics
+
+When a user completes a social login via Google or Apple, the Privy client SDK triggers the silent creation of an **Externally Owned Account (EOA)**. Let's trace the physical execution flow of this process.
+
+---
+
+### 1. The Key Generation Loop
+
+The generation of the user's embedded wallet occurs entirely in the browser client using high-performance cryptographic libraries:
+
+1. **Entropy Collection:** The client gathers cryptographically secure pseudo-random numbers using the browser's native Web Crypto API:
+   ```javascript
+   const entropy = window.crypto.getRandomValues(new Uint8Array(32));
+   ```
+2. **Private Key Generation:** This entropy is used to derive a standard secp256k1 private key (a 256-bit number).
+3. **Public Key Derivation:** The private key is multiplied by the secp256k1 elliptic curve base generator point $G$ to yield the public key:
+   `Q = d * G`
+4. **Address Derivation:** The Keccak-256 hash of the public key's x and y coordinates is computed. The last 20 bytes of this hash are extracted and formatted as the standard hex Ethereum address:
+   ```
+   Address = 0x + Keccak256(PublicKey).slice(-40)
+   ```
+
+---
+
+### 2. Secure Local Storage Persistence
+
+To prevent the user from losing their wallet every time they refresh the page, the client share must be persisted locally:
+
+* **IndexedDB:** Privy utilizes **IndexedDB**, a transactional, object-oriented database system built into modern browsers. Unlike `localStorage` which is subject to silent deletion during browser memory cleanups, IndexedDB is more stable and handles structured data objects efficiently.
+* **Origin Sandboxing:** IndexedDB is protected by the browser's **Same-Origin Policy (SOP)**. Only JavaScript running on your exact domain (e.g., `app.socio3.com`) can query or read the stored database. If an attacker hosts a malicious clone at `app-socio3-phish.com`, they cannot access the original domain's IndexedDB.
+
+---
+
+### 3. Signing a Transaction
+
+When the user triggers an action (like liking a post or publishing content):
+1. The frontend React app passes the transaction parameters (`to`, `value`, `data`) to the Privy provider.
+2. The Privy client retrieves the Device Share from IndexedDB.
+3. The SDK requests the Auth Share from Privy's HSM by validating the active user session JWT.
+4. Using these two shares, the SDK performs the threshold signature computation inside an isolated iframe sandbox on the client side.
+5. The resulting RLP-encoded, signed Ethereum transaction is returned to the frontend and broadcast to the network.
+6. The user remains entirely unaware of this cryptographic pipeline.
