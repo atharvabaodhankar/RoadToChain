@@ -1,0 +1,49 @@
+---
+title: "Progressive onboarding in dApps"
+description: "Allowing users to navigate and create draft records before silently initializing their wallet credentials."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 5
+moduleName: "Production UX"
+lesson: 2
+difficulty: "advanced"
+estimatedMinutes: 11
+tags: ["ux", "onboarding", "conversion"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+---
+
+# Progressive Onboarding in dApps
+
+One of the greatest mistakes in Web3 design is the **"wallet wall"**: forcing users to connect their wallet before they can see a single pixel of your application. 
+
+Modern consumer Web3 platforms use **Progressive Onboarding** to allow users to experience the value of the app first, delaying authentication until it is strictly necessary.
+
+---
+
+### 1. Delaying the Wallet Wall
+
+The progressive onboarding user flow follows a clear funnel:
+
+1. **Browse Mode (No Wallet):** The user lands on the site and can immediately read posts, view leaderboards, and inspect the interface. They are treated like a standard Web2 guest.
+2. **Draft Mode (Local Identity):** If the user wants to draft a post or customize their feed, the app saves this state in local browser storage (or memory) without prompting any signups.
+3. **Commit Mode (Silent Generation):** When the user takes an active on-chain action (like publishing the post or voting), the app prompts a simple social OAuth login. The EOA is generated in the background, their local drafts are uploaded, and the transaction is executed.
+
+```
+TRADITIONAL BLOCKCHAIN FUNNEL:
+[ Landing Page ] ── Connect Wallet ──> [ MetaMask Install ] ──> [ View Content ] (95% drop-off)
+
+PROGRESSIVE ONBOARDING FUNNEL:
+[ Landing Page ] ──> [ View Content ] ──> [ Draft Post ] ──> [ Google Login ] ──> [ Published ]
+```
+
+---
+
+### 2. The Conversion Benefit
+
+By deferring wallet creation:
+* You capture user intent first. A user who has already spent 2 minutes drafting a post is highly motivated to complete a simple Google signup to publish it.
+* You eliminate the friction of empty states. Users see an active community before being asked to join.
+* You build trust before asking for cryptographic authorization.
