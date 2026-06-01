@@ -1,0 +1,53 @@
+---
+title: "ERC-4337 explained"
+description: "EntryPoint execution, alternative UserOperations mempools, and the low-level account abstraction standard."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 3
+moduleName: "Account Abstraction"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 15
+tags: ["erc4337", "account-abstraction", "diagram"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+---
+
+# ERC-4337 Explained
+
+Implementing smart contract wallets historically required changing the consensus rules of the Ethereum network (which is extremely slow) or running complex, centralized relayers. 
+
+**ERC-4337** solved this by introducing **Account Abstraction without consensus changes**, creating a standard for smart contract execution routing.
+
+---
+
+### 1. The Core Architecture
+
+ERC-4337 introduces four key components to the Web3 transaction pipeline:
+
+1. **UserOperation (UserOp):** A pseudo-transaction object representing the user's intent (like "call this contract with this data"). It is signed by the user's validation key but is not a standard transaction.
+2. **Bundler:** A node that gathers multiple `UserOperation` objects from an alternative mempool (alt-mempool), aggregates them, and bundles them into a single standard EVM transaction.
+3. **EntryPoint Contract:** A singleton, audited smart contract on the blockchain that acts as the coordinator for all ERC-4337 executions. Bundlers call the `handleOps` function on this contract.
+4. **Smart Account:** The user's contract wallet, which must implement the `IAccount` interface. It validates the UserOp signature and executes the internal payload.
+
+<Diagram type="erc4337-flow" caption="The ERC-4337 transaction pipeline: User signers broadcast UserOps to alt-mempools, Bundlers pack them, and EntryPoint contracts handle validation and execution." />
+
+---
+
+### 2. The Two-Phase Execution Loop
+
+When a Bundler submits a bundle to the `EntryPoint` contract, the EntryPoint executes a strict two-phase loop:
+
+#### Phase 1: Validation (`validateUserOp`)
+The EntryPoint calls `validateUserOp` on each Smart Account in the bundle.
+* The Smart Account checks the signature on the UserOp.
+* If a Paymaster is defined, the EntryPoint checks that the Paymaster has deposited enough gas tokens to cover the operation.
+* **Security Rule:** If validation fails, the transaction reverts immediately. Validation code is strictly restricted (no state access outside the wallet, no timestamp lookups) to prevent bundler denial-of-service (DoS) attacks.
+
+#### Phase 2: Execution (`executeUserOp`)
+Once all operations in the bundle are validated, the EntryPoint executes the transaction payload by calling the execution function on each Smart Account.
+* The Smart Account executes the target contract calls.
+* The EntryPoint calculates the exact gas consumed and charges either the Smart Account's deposit or the sponsoring Paymaster.
+* The remainder of the gas is refunded.
