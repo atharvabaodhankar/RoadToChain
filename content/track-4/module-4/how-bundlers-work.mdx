@@ -1,0 +1,73 @@
+---
+title: "How bundlers work"
+description: "Listening to alternative mempools and packing UserOps into valid EVM L1/L2 transactions."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 4
+moduleName: "Paymasters & Gasless UX"
+lesson: 4
+difficulty: "advanced"
+estimatedMinutes: 12
+tags: ["bundlers", "mempool", "fees"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+---
+
+# How Bundlers Work
+
+The **Bundler** is the primary driver of the ERC-4337 transaction engine. It bridges the gap between off-chain UserOperations and on-chain EVM transactions.
+
+---
+
+### 1. The Alternative Mempool (Alt-Mempool)
+
+Standard Ethereum mempools only hold standard transactions signed by EOAs.
+To prevent spamming the L1 network, ERC-4337 defines a decentralized network of Bundlers that share an **Alternative Mempool (Alt-Mempool)**.
+
+1. The client broadcasts the `UserOperation` to a bundler node via the `eth_sendUserOperation` RPC method.
+2. The receiving bundler validates the UserOp locally (verifying the signature and checking if the wallet or Paymaster has deposited gas).
+3. If valid, the bundler propagates the UserOp to other bundler nodes in the alt-mempool.
+
+---
+
+### 2. Bundling and Execution
+
+The bundler is a standard EOA account on the target blockchain network. At regular intervals or when its local queue reaches a threshold, the bundler packages the UserOperations:
+
+1. **Aggregation:** The bundler aggregates multiple UserOps into an array.
+2. **Transaction Construction:** The bundler constructs a standard EVM transaction that targets the `EntryPoint` smart contract:
+   * **Target:** `EntryPointAddress`
+   * **Value:** `0`
+   * **Data:** A call to `entryPoint.handleOps(UserOperation[] ops, address beneficiary)`
+3. **Submission:** The bundler signs the transaction with its own EOA private key and broadcasts it to the standard blockchain mempool.
+
+```
++-------------------------------------------------------------+
+|                      BUNDLER EXECUTION                      |
+|                                                             |
+| Alt-Mempool:                                                |
+| [ UserOp 1 ] [ UserOp 2 ] [ UserOp 3 ]                      |
+|      │            │            │                            |
+|      └────────────┼────────────┘                            |
+|                   ▼                                         |
+|            [ Bundler Node ] ── Aggregates into Array        |
+|                   │                                         |
+|                   ▼                                         |
+|            Submit L1/L2 Tx ──> [ EntryPoint.handleOps() ]   |
++-------------------------------------------------------------+
+```
+
+---
+
+### 3. Bundler Economics
+
+Why do bundlers perform this service? Running node infrastructure and submitting transactions costs gas.
+
+Bundlers make a profit through a gas markup system:
+* Each `UserOperation` specifies a `preVerificationGas` and `maxPriorityFeePerGas` (the tip).
+* The EntryPoint contract calculates the total gas used by the operations during execution and pays the bundler out of the user's Smart Account or Paymaster deposit.
+* The payout is executed in native tokens at the end of the `handleOps` frame:
+  `Payout = GasUsed * GasPrice`
+* If the bundler executes the transaction efficiently, the gas they pay to the network is less than the aggregated fees they collect from the operations, yielding a profit.
