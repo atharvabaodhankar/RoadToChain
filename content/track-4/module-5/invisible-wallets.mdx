@@ -1,0 +1,50 @@
+---
+title: "Invisible wallets and term hiding"
+description: "Designing interfaces that replace Web3 terms ('claim', 'mint', 'sign') with familiar consumer actions ('save', 'post', 'like')."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 5
+moduleName: "Production UX"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 10
+tags: ["ux", "design", "copywriting"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+---
+
+# Invisible Wallets & Term Hiding
+
+Mainstream users do not care about the underlying technology stack of your application. When they use a Web2 app, they don't see buttons like `WRITE_TO_POSTGRESQL` or `INSERT_ROW_IN_REDIS`. They see `Save` and `Publish`.
+
+In early Web3, we failed this copywriting check. We put technical details directly on our buttons.
+
+---
+
+### 1. The Copywriting Shift
+
+To make wallets "invisible," we must translate cryptographic actions into standard web interactions:
+
+| Cryptographic Operation | Traditional Web3 Copy | Modern Web3 Copy |
+| :--- | :--- | :--- |
+| Deploy User Wallet | `Initialize Smart Wallet` | `Creating Profile...` |
+| ERC-20 Token Transfer | `Send 10 USDC` | `Pay $10` |
+| ERC-721 Token Mint | `Mint NFT` | `Save Digital Collectible` |
+| Contract Write call | `Sign hex signature` | `Like` / `Publish` / `Follow` |
+| RPC Connection error | `RPC error -32000` | `Poor network connection` |
+
+By changing the copywriting, you lower the cognitive load on the user. They interact with your app using terms they already understand from platforms like Instagram or Twitter.
+
+---
+
+### 2. The Invisible Signing Sandbox
+
+In Socio3 V2:
+* When a user upvotes, they tap a thumbs-up icon.
+* The button changes state immediately to indicate success.
+* In the background, the app signs the `UserOperation` using the embedded session key and pushes it to the bundler.
+* If the transaction fails on-chain, the frontend UI reverts the button state gracefully and shows a standard error banner.
+
+The user experiences a responsive Web2 platform, despite the app executing transactions on a decentralized ledger.
