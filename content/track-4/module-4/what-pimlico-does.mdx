@@ -1,0 +1,48 @@
+---
+title: "What Pimlico actually does"
+description: "Understanding bundlers and paymasters as off-chain execution infrastructure."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 4
+moduleName: "Paymasters & Gasless UX"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 11
+tags: ["pimlico", "infrastructure", "bundlers"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+---
+
+# What Pimlico Actually Does
+
+To run an ERC-4337 system, you need node infrastructure that operates outside the standard Ethereum mainnet mempool. This is where **Pimlico** comes in.
+
+Pimlico is an infrastructure provider that operates two critical services for Account Abstraction:
+1. **alto-bundler:** A high-speed, open-source Bundler client that listens to the alternative mempool for UserOperations and packages them into blockchain transactions.
+2. **verifying-paymaster:** A service that generates cryptographic sponsorship signatures, allowing web applications to cover their users' gas fees gaslessly.
+
+---
+
+### 1. The Role of the Bundler
+
+Standard RPC nodes (like Infura or Alchemy) do not understand the `UserOperation` object. If you send a UserOp to `eth_sendRawTransaction`, the node will throw a parsing error.
+
+Pimlico's Bundler exposes a set of custom RPC endpoints (defined in the ERC-4337 specification) such as:
+* `eth_sendUserOperation`
+* `eth_estimateUserOperationGas`
+* `eth_getUserOperationReceipt`
+
+When your React app submits a UserOp, it sends it to Pimlico's bundler endpoint. The bundler validates the gas parameters, holds the UserOp in its local queue (alt-mempool), merges it with other UserOps, and broadcasts the bundle as a single standard transaction to the network.
+
+---
+
+### 2. The Paymaster Integration
+
+Pimlico provides the API endpoints that allow developers to configure **sponsorship rules**:
+* **Sponsor All:** The app pays for all transactions matching a specific smart contract method (e.g., liking a post on Socio3 V2).
+* **Token-based payment:** Users pay gas fees using ERC-20 tokens (like USDC) instead of native gas tokens. Pimlico's paymaster automatically swaps the USDC to cover the native gas fee behind the scenes.
+* **Rate Limits:** Restricting gas sponsorship per user or IP address to prevent abuse.
+
+In Socio3 V2, Pimlico acts as the communication layer that enables MetaMask-free, gasless social actions.
