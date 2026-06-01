@@ -1,0 +1,98 @@
+---
+title: "Gas sponsorship mechanics"
+description: "Verifying Paymasters, signing sponsorship payloads, and depositing gas budgets."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 4
+moduleName: "Paymasters & Gasless UX"
+lesson: 2
+difficulty: "advanced"
+estimatedMinutes: 13
+tags: ["paymasters", "gas", "real-code"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+---
+
+# Gas Sponsorship Mechanics
+
+To sponsor a user's transaction, a **Paymaster contract** must intervene during the ERC-4337 execution flow. The EntryPoint contract checks that the Paymaster has deposited sufficient native tokens (e.g. MATIC) on-chain to cover the transaction cost, and then executes the transaction payload.
+
+Let's look at the validation handshake that makes this secure.
+
+---
+
+### 1. The Verifying Paymaster Pattern
+
+How does the Paymaster contract know it should pay for a specific user's action? If it sponsors everything blindly, malicious actors could drain its funds.
+
+To solve this, we use the **Verifying Paymaster** pattern:
+1. The client SDK generates the `UserOperation` payload (excluding gas paymaster signatures).
+2. The client sends the UserOp to the developer's backend server (or directly to a verified API gateway like Pimlico).
+3. The backend validates the request (e.g. checks if the user is logged in, has not exceeded their daily rate limit, and is calling an approved function).
+4. If approved, the backend signs the hash of the UserOp using a **private key controlled by the Paymaster owner**:
+   ```typescript
+   // Backend code generating verification signature
+   const paymasterSigningKey = new ethers.Wallet(process.env.PAYMASTER_PRIVATE_KEY);
+   const userOpHash = entryPoint.getUserOpHash(userOp);
+   const paymasterSignature = await paymasterSigningKey.signMessage(ethers.getBytes(userOpHash));
+   ```
+5. The signature is appended to the `paymasterAndData` field of the `UserOperation`.
+6. When the EntryPoint contract validates the transaction on-chain, it extracts the signature from `paymasterAndData` and validates it against the registered Paymaster signer:
+   ```solidity
+   // Inside the Paymaster smart contract on-chain
+   function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 maxCost)
+       external view returns (bytes memory context, uint256 validationData) {
+       
+       bytes memory paymasterSignature = userOp.paymasterAndData[20:]; // Extract signature
+       address signer = recoverSigner(userOpHash, paymasterSignature);
+       
+       require(signer == registeredSignerAddress, "Invalid paymaster signature");
+       return ("", 0); // Validation success
+   }
+   ```
+
+---
+
+<Diagram type="paymaster-handshake" caption="The Verifying Paymaster verification flow: Client sends UserOp to Backend -> Backend checks limits and signs hash -> EntryPoint validates signature on-chain." />
+
+---
+
+<MistakeCallout>
+  When I first set up a Paymaster on Polygon, I forgot to deposit funds into the EntryPoint contract for my Paymaster address. Even though my backend was generating valid signatures, all client transactions reverted with the error `AA31: paymaster deposit too low`. Remember: a Paymaster must maintain an active deposit of native tokens on the EntryPoint contract to fund executions.
+</MistakeCallout>
+
+---
+
+### 2. Sponsoring Gas in Socio3 V2
+
+In Socio3 V2, the frontend uses Viem's `smartAccountClient` to route actions. The client configuration specifies the paymaster endpoint:
+
+```typescript
+import { createSmartAccountClient } from "permissionless";
+import { privateKeyToSimpleSmartAccount } from "permissionless/accounts";
+import { http } from "viem";
+
+const smartAccount = await privateKeyToSimpleSmartAccount(client, {
+  owner: eoaSigner,
+  entryPoint: ENTRYPOINT_ADDRESS,
+});
+
+const smartAccountClient = createSmartAccountClient({
+  account: smartAccount,
+  chain: polygonAmoy,
+  bundlerTransport: http("https://api.pimlico.io/v2/amoy/rpc?apikey=PIMLICO_KEY"),
+  middleware: {
+    // Redirect transaction gas sponsorship requests to the Pimlico verifying paymaster
+    sponsorUserOperation: async ({ userOperation }) => {
+      const paymasterClient = http("https://api.pimlico.io/v2/amoy/rpc?apikey=PIMLICO_KEY");
+      return paymasterClient.request({
+        method: "pm_sponsorUserOperation",
+        params: [userOperation, { entryPoint: ENTRYPOINT_ADDRESS }],
+      });
+    },
+  },
+});
+```
+This client automatically queries Pimlico's verifying paymaster API, populates the `paymasterAndData` field with the sponsorship signature, and submits it to the bundler.
