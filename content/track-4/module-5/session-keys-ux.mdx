@@ -1,0 +1,58 @@
+---
+title: "Session keys — clickless interaction"
+description: "Pre-authorizing temporary, target-scoped keys to execute actions without constant wallet popups."
+track: 4
+trackName: "The Death of Traditional Web3 UX"
+trackColor: "#f59e0b"
+module: 5
+moduleName: "Production UX"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 12
+tags: ["session-keys", "ux", "security"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+---
+
+# Session Keys: Clickless Interaction
+
+Even with embedded wallets and Paymasters, a user must still approve every single transaction signature by clicking a confirmation button in the frontend client. For actions like playing a game (e.g., moving a character) or engaging in a social feed (e.g., liking multiple posts in quick succession), this constant popping of auth screens makes the app unusable.
+
+We solve this using **Session Keys**.
+
+---
+
+### 1. The Concept of Session Keys
+
+A Session Key is a temporary, restricted key pair generated in the browser that is granted limited access to execute transactions on behalf of the user's Smart Account.
+
+Instead of sharing the main private key:
+1. The client generates a new, ephemeral EOA key pair in memory (the "Session Key").
+2. The user signs a single transaction that authorizes this Session Key on their Smart Account contract.
+3. The authorization defines strict boundaries:
+   * **Expiry Time:** The key is only valid for 1 hour.
+   * **Target Contract:** The key can only call the `Socio3` contract address.
+   * **Allowed Functions:** The key can only call the `upvotePost` function. It cannot transfer assets or call `withdraw`.
+   * **Value Limit:** The key can only execute transactions with 0 native value.
+4. Once authorized, the client can use this Session Key to sign and broadcast UserOperations **automatically** in the background, without showing any popups to the user.
+
+---
+
+### 2. High-Frequency Interaction
+
+With Session Keys, the interaction flow becomes:
+
+```
+INITIAL SESSION SETUP:
+[ User ] ── Approve Session (1 popup) ──> [ Session Key Authorized on Smart Account ]
+
+SUBSEQUENT ACTIONS (Within 1 hour):
+[ User clicks Upvote ] ──> [ App signs UserOp with Session Key in memory ] 
+                                                   │
+                                                   ▼
+                                         [ Submits to Bundler ]
+                                         (No popups! Clickless UX!)
+```
+
+This brings the application UX on par with Web2 apps. The user clicks "Like," the interface updates instantly, and the system executes the transaction in the background. If the session expires, the app prompts the user to renew the authorization.
