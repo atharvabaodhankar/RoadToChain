@@ -1,0 +1,104 @@
+---
+title: "What is a block — data structure deep dive"
+description: "Previous hash, merkle root, timestamp, nonce, transactions. Why the previous hash chains blocks together."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 2
+moduleName: "How Blockchain Actually Works"
+lesson: 1
+difficulty: "beginner"
+estimatedMinutes: 14
+tags: ["blocks", "hashing", "interactive"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Block data visualization panel for the Visual Blockchain Simulator."
+---
+
+# What is a Block? Data Structure Deep Dive
+
+When I first learned about blockchain, I had a very fuzzy mental image of it. I imagined some sort of digital glowing chains physically holding data together. 
+
+The reality is much simpler, and much more beautiful: **A blockchain is just a singly-linked list of records, where each record contains a cryptographic reference to the one before it.**
+
+Let's look inside a single block to see exactly how it is structured.
+
+---
+
+### 1. Anatomy of a Block: The Block Header vs. Block Body
+
+A block is divided into two parts: the **Header** (the metadata that identifies the block) and the **Body** (the actual list of transactions).
+
+```
+ ┌─────────────────────────────────────────────────────────┐
+ │                      BLOCK HEADER                       │
+ ├─────────────────┬───────────────────┬───────────────────┤
+ │  Previous Hash  │    Merkle Root    │     Timestamp     │
+ ├─────────────────┼───────────────────┼───────────────────┤
+ │    Difficulty   │       Nonce       │    Block Number   │
+ └─────────────────┴───────────────────┴───────────────────┘
+ ┌─────────────────────────────────────────────────────────┐
+ │                       BLOCK BODY                        │
+ ├─────────────────────────────────────────────────────────┤
+ │  [Tx 0: Alice -> Bob 5 ETH]                             │
+ │  [Tx 1: Charlie -> Dave 2 ETH]                          │
+ │  ...                                                    │
+ └─────────────────────────────────────────────────────────┘
+```
+
+The header contains the key fields that secure the chain:
+1. **Previous Block Hash:** The 32-byte SHA-256 hash of the header of the *previous* block. This is the link that chains them.
+2. **Merkle Root Hash:** A single cryptographic hash that represents *every* transaction in the block body.
+3. **Timestamp:** The Unix epoch time when the block was mined.
+4. **Nonce (Number used Once):** The random value miners adjust to solve the Proof of Work math puzzle.
+5. **Difficulty Target:** The threshold target the block hash must meet.
+
+---
+
+### 2. Layman Explanation: The Sealed Box Files
+
+Imagine a company keeps its accounting records in a stack of cardboard boxes. 
+
+Every time a box is full, the manager takes a polaroid photo of the *entire contents of the previous box*, along with the box's lid, and sticks that photo onto the *inside lid of the new box*. Then, they close the box, wrap it in security tape, and seal it with a wax stamp.
+
+If a thief sneaks in and tries to change a transaction sheet in Box 3:
+* The contents of Box 3 will change.
+* When you take a photo of Box 3, it won't match the polaroid photo stuck inside Box 4.
+* The seal is broken! You instantly know history has been tampered with.
+
+Because each box contains a photo of the previous one, **changing a single letter in Box 3 requires you to redo the photos, seals, and tape for Box 4, Box 5, Box 6, and every box up to the present.**
+
+---
+
+### 3. Technical Explanation: Merkle Trees & Tamper Resistance
+
+#### The Chained Dependency
+If we express this chain in code, a block hash is computed as:
+```
+BlockHash = SHA256(PreviousHash + MerkleRoot + Timestamp + Nonce)
+```
+Because the `PreviousHash` is an input parameter for the current block's hash calculation, changing Block 1 will alter `BlockHash_1`. Since Block 2 contains `PreviousHash_1` inside its header, Block 2's hash will change. This cascades all the way to the latest block (the "tip" of the chain).
+
+#### The Merkle Root (Efficient Verification)
+Instead of hashing the entire block body (which could be megabytes of transactions), blockchain headers use a **Merkle Tree**:
+1. All transactions in the block are hashed: `H(T0), H(T1), H(T2), H(T3)`.
+2. Hashes are paired and hashed recursively: `H(01) = H(H(T0) + H(T1))` and `H(23) = H(H(T2) + H(T3))`.
+3. This process continues until a single root remains: `MerkleRoot = H(H(01) + H(23))`.
+
+<Diagram type="merkle-tree" caption="A Merkle Tree recursively hashes transaction pairs. The resulting Merkle Root represents all transactions using a single 32-byte hash inside the Block Header." />
+
+This enables a client to prove a transaction `T2` is in the block without downloading all other transactions. They only need the **Merkle Path** (the sibling hashes `H(T3)` and `H(01)`), which scales at $O(\log N)$ complexity rather than $O(N)$!
+
+---
+
+<LessonChallenge>
+  If a block contains 8 transactions, how many levels will the Merkle Tree have, and how many hashing operations are required to compute the Merkle Root?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, you will design the Block Data visualizer. This component renders the block header fields (previous hash, nonce, merkle root) and shows how changing a single character in a block's transaction instantly turns the block background red, indicating the chain link is broken.
+</HeroProject>
