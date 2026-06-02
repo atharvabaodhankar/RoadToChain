@@ -1,0 +1,95 @@
+---
+title: "Centralized vs decentralized systems"
+description: "Single point of failure. Censorship. Downtime. Why decentralization solves specific problems."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 1
+moduleName: "Why Blockchain Exists"
+lesson: 2
+difficulty: "beginner"
+estimatedMinutes: 8
+tags: ["decentralization", "security"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Conceptual foundation for peer-to-peer network nodes and node coordination logic."
+---
+
+# Centralized vs Decentralized Systems
+
+We've established that banks and central entities exist to solve the double-spend problem and act as coordinators of trust. But when we build systems on top of these central coordinators, we inherit all their architectural vulnerabilities: single points of failure, censorship, arbitrary database updates, and server downtime.
+
+Decentralization is the architecture of distributing control, data, and power across a P2P network so that no single node can dictate the state of the system.
+
+---
+
+### 1. The Single Point of Failure (SPOF)
+
+In traditional systems design, a **Single Point of Failure (SPOF)** is any component whose failure crashes the entire system.
+
+In a centralized system, the server room or database cluster is the ultimate SPOF. If Facebook's BGP routing configuration breaks, the entire network goes dark for 6 hours globally. If Amazon Web Services (AWS) US-East-1 region experiences a power outage, half the internet stops working.
+
+Decentralized architectures don't have a center. Every node on the network is a server, validator, and database. If 500 Ethereum nodes crash, the remaining thousands keep validating blocks, processing transactions, and serving network requests without a single millisecond of downtime.
+
+---
+
+### 2. Layman Explanation: The Town Crier vs The Town Board
+
+Imagine a medieval town where the king appoints a single **Town Crier** to announce all tax payments, land transfers, and laws.
+* If the Town Crier gets sick, no laws are announced.
+* If the Town Crier takes a bribe, he can announce that Bob owns Charlie's house.
+* If the Town Crier doesn't like Bob, he can refuse to announce Bob's transactions, effectively locking Bob out of the economy.
+
+Now, imagine the town replaces the Crier with a **Town Board**. Every citizen carries a chisel and a stone tablet. Every time a transaction occurs, the buyer and seller carve it onto a giant public board in the center of the town, and everyone copies the line onto their own stone tablets at home.
+* If one citizen goes on holiday, the town board keeps working.
+* If one citizen tries to change his tablet at home to claim he owns Charlie's house, he will be laughed out of town because his tablet doesn't match anyone else's.
+* No single person can censor Bob because Bob can carve his transaction on the public board for everyone to copy.
+
+---
+
+### 3. Technical Explanation: Topology and the Security Boundary
+
+Architectures are defined by their network topologies:
+
+* **Centralized:** All nodes connect to a single hub. If the hub is compromised or offline, all nodes lose connection. The security boundary is the firewall of the hub.
+* **Decentralized:** Multiple hubs coordinate clusters of nodes. This provides more resilience but still leaves major central bottlenecks.
+* **Distributed / Peer-to-Peer (P2P):** Every node connects directly to multiple other nodes. There are no hubs. If any link or node breaks, messages route around them.
+
+In a P2P blockchain network:
+1. **Gossip Protocol:** Transactions travel using a gossip protocol. When you submit a transaction, your wallet sends it to three peer nodes. Those nodes verify it and gossip it to their peers, propagating it across the globe in seconds.
+2. **Data Replication:** Every full node keeps a complete, independent copy of the state database. There is no master server to sync from.
+3. **Sybil Resistance:** To prevent an attacker from creating 10,000 fake nodes to overwrite consensus, P2P networks use Proof of Work (PoW) or Proof of Stake (PoS). Creating nodes is cheap; acquiring mining hardware or staking capital is extremely expensive.
+
+<Diagram type="network-topology" caption="Centralized systems concentrate state in a single coordinator. Distributed systems replicate state across an open P2P mesh network." />
+
+---
+
+### 4. What Decentralization Solves (and What it Costs)
+
+Decentralization is not a magic wand; it is a fundamental architectural trade-off:
+
+| Benefit | How Blockchain Solves It | The Engineering Cost |
+| :--- | :--- | :--- |
+| **Censorship Resistance** | No central authority can block a transaction if it has a valid signature and pays gas. | **High Latency:** Every node must validate every transaction. It takes seconds/minutes to settle, not milliseconds. |
+| **High Availability** | 100% uptime. The network runs as long as at least one node is online. | **Redundancy Overhead:** Storing the same transaction on 10,000+ disks is incredibly wasteful and expensive. |
+| **Immutable History** | Transactions chiseled on-chain cannot be reversed without reorganizing consensus. | **Irreversibility:** If you lose your keys or send funds to the wrong address, there is no support desk to restore it. |
+
+---
+
+<RealityCheck>
+  Decentralization is a terrible choice for systems that require high-throughput data processing, like video streaming, gaming databases, or messaging feeds. You should only pay the speed and cost penalty of decentralization when **censorship resistance** or **trustless auditability** are your primary design goals.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Suppose you are building a ridesharing app like Uber. Sketch the differences between a centralized server architecture (handling matchmaking, payments, and mapping) and a decentralized P2P version. Which parts are easier to build centrally, and what fails if the central server goes down?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator project, you will build an interactive node propagation visualizer. You will animate how a transaction gossips across a P2P network of nodes and how they independently compile it into blocks, visualizing decentralized topology in real time.
+</HeroProject>
