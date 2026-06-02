@@ -1,0 +1,92 @@
+---
+title: "Consensus — how strangers agree"
+description: "Byzantine fault tolerance for humans. Why miners/validators exist. The economic incentive design."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 2
+moduleName: "How Blockchain Actually Works"
+lesson: 3
+difficulty: "beginner"
+estimatedMinutes: 15
+tags: ["consensus", "economics"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Network consensus model for node synchronization inside the Visual Blockchain Simulator."
+---
+
+# Consensus: How Strangers Agree
+
+How do thousands of independent computers around the globe — run by people who don't know each other, don't trust each other, and have different incentives — agree on a single database state?
+
+This is not just a computer programming problem. It is a fundamental coordination problem known in computer science as the **Byzantine Generals Problem**.
+
+Let's look at how consensus algorithms solve this coordination challenge.
+
+---
+
+### 1. The Core Problem: The Byzantine Generals Problem
+
+Imagine a group of Byzantine generals surrounding an enemy city. They can only communicate via messengers.
+* If all generals attack at the same time, they win.
+* If only some attack and others retreat, they fail.
+* However, some generals might be traitors, trying to coordinate a failed attack.
+* Even honest messengers can be captured or killed on the way.
+
+How do the honest generals coordinate a single plan of action when they cannot trust the messengers or each other?
+
+In computer networks, "generals" are nodes, and "traitors" are compromised or malicious nodes sending fake messages (like fake transactions or blocks). **Byzantine Fault Tolerance (BFT)** is the ability of a network to reach consensus even if some nodes are cheating or offline.
+
+---
+
+### 2. Layman Explanation: The Distributed Pub Quiz
+
+Imagine a group of 100 students participating in a trivia quiz, but they are all in separate rooms and can only send written notes to each other. There is no quiz master.
+
+If the question is: *"In what year was Bitcoin launched?"*, different rooms might write different answers. One room might try to cheat and shout the wrong year to confuse the others.
+
+To coordinate, they agree on a rule:
+Every time a question is asked, they must work on a difficult crossword puzzle. The first room to solve it gets to write down their trivia answer. They slide their solution and answer under the doors of other rooms.
+
+The other rooms check the crossword (which takes a second). If it's correct and the trivia answer is valid, they copy the trivia answer down and start working on the next crossword.
+
+Because solving the crossword requires real work (crossword-solving speed is like computing power), a single student cannot fake answers easily. Even if a few students are traitors, they cannot solve crosswords fast enough to outpace the collective honest students in the other rooms.
+
+---
+
+### 3. Technical Explanation: The Mechanics of Consensus
+
+A blockchain consensus algorithm must solve two key issues:
+
+1. **State Agreement:** Deciding which block of transactions is the official next link in the chain.
+2. **Double-Spend Prevention:** Ensuring that if Alice tries to send $10 to Bob and Charlie simultaneously, only one transaction is chiseled into the official state.
+
+In blockchain systems, this is solved by combining **Sybil Resistance** and **Chain Selection**:
+
+#### Sybil Protection: The Stake or Work requirement
+Nodes cannot participate simply by creating an IP address (which is cheap). They must prove:
+* **Proof of Work (PoW):** Controlling mining hardware (real-world computational power).
+* **Proof of Stake (PoS):** Locking up native tokens (real-world capital).
+
+#### Consensus Progression
+Every block cycle:
+1. **Leader Election:** A node is chosen (stochastically or via puzzle solving) to propose the next block.
+2. **Block Proposal:** The leader packages mempool transactions, computes the Merkle Root, and broadcasts the new block.
+3. **Independent Verification:** Every node validates the signatures, block parameters, and transaction balances. If any transaction is invalid, the block is ignored.
+4. **State Finalization:** Once nodes accept the block, they update their state database and build the next block on top of it.
+
+<Diagram type="byzantine-consensus" caption="Consensus protocols ensure all nodes independently validate blocks and follow the longest chain to prevent double-spending without a central coordinator." />
+
+---
+
+<LessonChallenge>
+  If a network has 100 validator nodes, and 30 of them go offline due to a global internet routing issue, can the remaining 70 nodes continue finalizing blocks? What ratio of honest nodes is typically required to survive a Byzantine fault?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, we build a consensus propagation simulator. You will write the animation logic that shows a new block travelling from a validator node to other nodes, demonstrating how they verify the block hashes and update their local heights to match.
+</HeroProject>

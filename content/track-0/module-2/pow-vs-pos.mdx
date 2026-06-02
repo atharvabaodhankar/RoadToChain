@@ -1,0 +1,97 @@
+---
+title: "PoW vs PoS — why Ethereum switched"
+description: "Energy cost of mining. Proof of Stake economics. Validators, slashing, finality."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 2
+moduleName: "How Blockchain Actually Works"
+lesson: 4
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["consensus", "ethereum"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Prerequisite for understanding network upgrades and validator staking systems."
+---
+
+# PoW vs PoS: Why Ethereum Switched
+
+In September 2022, Ethereum executed one of the most complex software upgrades in history: **The Merge**. 
+
+The network completely swapped its consensus engine from Proof of Work (PoW) to Proof of Stake (PoS) while processing billions of dollars in live transactions, without a single millisecond of downtime.
+
+What is the difference between these two consensus mechanisms, and why did Ethereum make the switch?
+
+---
+
+### 1. Proof of Work (PoW): The Computational Arms Race
+
+In Proof of Work, the security of the network is tied to **computational hardware**. 
+* Nodes (miners) compete to solve a hashing puzzle.
+* The probability of mining a block is proportional to your hash rate (how many calculations your hardware can run per second).
+* The incentive is earning newly minted block rewards and transaction fees.
+
+#### The Problem: Energy and Hardware Centralization
+Because mining is a winner-take-all lottery, miners pool their resources and build massive industrial warehouses filled with specialized ASIC mining computers.
+1. **Environmental Impact:** PoW mining consumes massive amounts of electricity. At its peak, Ethereum mining consumed as much energy as a small country.
+2. **Centralization Risk:** ASICs are expensive and hard to manufacture. A few massive mining pools located in regions with cheap electricity controlled the majority of the network's hashing power.
+
+---
+
+### 2. Proof of Stake (PoS): The Financial Security Model
+
+In Proof of Stake, the security of the network is tied to **financial capital**.
+* There are no miners. Instead, we have **Validators**.
+* To become a validator on Ethereum, you must deposit (stake) **32 ETH** into a smart contract as collateral.
+* The probability of being chosen to propose a block is proportional to your staked capital.
+* The incentive is earning validator yields (interest on staked ETH) and transaction priority fees.
+
+#### The Breakthrough: Slashing (Negative Incentives)
+In PoW, if you try to cheat (e.g. mine an invalid block), the only punishment is wasting electricity. You keep your hardware.
+
+In PoS, if you try to cheat (e.g. sign two conflicting blocks to double-spend), the smart contract executes a penalty called **Slashing**. The protocol burns a portion of your 32 ETH and kicks you off the network. PoS introduces a direct financial death penalty for bad behavior.
+
+---
+
+### 3. Layman Explanation: The Miner vs. The Shareholder
+
+Imagine a city trying to secure its borders:
+
+* **Proof of Work is like hiring mercenaries.** The mercenaries must constantly practice target shooting, burning through millions of rounds of ammunition every day (electricity) to show they are prepared. If a mercenary decides to turn traitor, you can only hope the other mercenaries shoot him. He keeps his gun either way.
+
+* **Proof of Stake is like requiring security guards to buy land in the city.** To get the job, a guard must buy $50,000 worth of real estate in the city and lock it in escrow. If the guard does a good job, he gets rent yield (block rewards). If the guard opens the city gates to a robber, the city council immediately confiscates his land and burns down his house (slashing). The guard is heavily incentivized to keep the city secure because he owns a piece of it.
+
+---
+
+### 4. Technical Comparison: PoW vs. PoS
+
+Let's look at the parameters of Ethereum's consensus switch:
+
+| Metric | Proof of Work (Before Merge) | Proof of Stake (After Merge) |
+|:---|:---|:---|
+| **Energy Consumption** | ~112 TWh/year | ~0.0026 TWh/year (99.95% reduction) |
+| **Minimum Hardware** | High-end GPU rigs or ASICs | A standard consumer laptop or NUC |
+| **Prerequisite Capital** | High cost of mining rigs | 32 ETH (or smaller via pools like RocketPool) |
+| **Malicious Action Penalty** | Wasted electricity | Slashing (losing up to your entire 32 ETH stake) |
+| **Consensus Speed** | ~13–15 seconds average block time | 12-second fixed slot intervals |
+
+---
+
+<RealityCheck>
+  Many critics argue that Proof of Stake is plutocratic: "the rich get richer" because validators with more ETH earn more yield. This is true, but Proof of Work has the same issue: large industrial miners get volume discounts on hardware and electricity, giving them higher profit margins than individual miners.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  If a validator node crashes due to a power outage, are they immediately slashed and their 32 ETH burned? Or is there a different penalty for just being offline? Research the difference between "slashing" and "inactivity leak."
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, we build a consensus comparison dashboard. Understanding the validator staking contract logic helps you appreciate how smart contracts can manage consensus security without external physical components.
+</HeroProject>
