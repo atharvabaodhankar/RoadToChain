@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 import TrackProgressBar from "@/components/layout/TrackProgressBar";
 import LessonStatusBadge from "@/components/layout/LessonStatusBadge";
+import ContentGating from "@/components/layout/ContentGating";
 
 
 interface Props {
@@ -162,92 +163,92 @@ export default async function TrackPage({ params }: Props) {
 
       {/* ── Modules List ────────────────────────────────────────── */}
       <main className="px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl space-y-12">
-          {track.modules.map((mod) => (
-            <div key={mod.id} className="relative">
-              {/* Module Header */}
-              <div className="flex items-start gap-4 border-b border-border pb-4">
-                <div className="font-mono text-sm font-bold text-accent">
-                  {mod.number}
+        <ContentGating
+          trackId={track.id}
+          trackNumber={track.number}
+          trackName={track.name}
+          prerequisiteTrackNumber={prevTrack?.number}
+          prerequisiteTrackName={prevTrack?.name}
+        >
+          <div className="mx-auto max-w-4xl space-y-12">
+            {track.modules.map((mod) => (
+              <div key={mod.id} className="relative">
+                {/* Module Header */}
+                <div className="flex items-start gap-4 border-b border-border pb-4">
+                  <div className="font-mono text-sm font-bold text-accent">
+                    {mod.number}
+                  </div>
+                  <div>
+                    <h3 className="font-sans text-base font-semibold tracking-tight text-text">
+                      {mod.name}
+                    </h3>
+                    <p className="mt-1 text-xs leading-relaxed text-muted">
+                      {mod.description}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-sans text-base font-semibold tracking-tight text-text">
-                    {mod.name}
-                  </h3>
-                  <p className="mt-1 text-xs leading-relaxed text-muted">
-                    {mod.description}
-                  </p>
-                </div>
-              </div>
 
-              {/* Module Lessons Grid */}
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {mod.lessons.map((lesson) => {
-                  const moduleSlug = `module-${mod.number.split(".")[1]}`;
-                  // Check dynamically if the MDX file exists on disk
-                  const filePath = path.join(
-                    process.cwd(),
-                    "content",
-                    track.slug,
-                    moduleSlug,
-                    `${lesson.slug}.mdx`
-                  );
-                  const isImplemented = fs.existsSync(filePath);
+                {/* Module Lessons Grid */}
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {mod.lessons.map((lesson) => {
+                    const moduleSlug = `module-${mod.number.split(".")[1]}`;
+                    // Check dynamically if the MDX file exists on disk
+                    const filePath = path.join(
+                      process.cwd(),
+                      "content",
+                      track.slug,
+                      moduleSlug,
+                      `${lesson.slug}.mdx`
+                    );
+                    const isImplemented = fs.existsSync(filePath);
 
-                  const href = `/learn/${track.slug}/${moduleSlug}/${lesson.slug}`;
+                    const href = `/learn/${track.slug}/${moduleSlug}/${lesson.slug}`;
 
-                  return (
-                    <div
-                      key={lesson.slug}
-                      className={`group relative rounded-xl border p-4 transition-all duration-200 ${
-                        isImplemented
-                          ? "border-border bg-bg2 hover:border-border2 hover:bg-bg3 cursor-pointer"
-                          : "border-border/40 bg-bg/50 opacity-60 cursor-not-allowed"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-sans text-xs font-semibold text-text group-hover:text-[#a78bfa] transition-colors leading-snug">
-                          {lesson.title}
-                        </h4>
-                        {isImplemented ? (
-                          <LessonStatusBadge
-                            trackSlug={track.slug}
-                            moduleSlug={moduleSlug}
-                            lessonSlug={lesson.slug}
-                          />
-                        ) : (
-                          <span className="rounded bg-bg4 px-1.5 py-0.5 font-mono text-[9px] text-dim border border-border/50 shrink-0">
-                            Upcoming
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-muted line-clamp-2">
-                        {lesson.description}
-                      </p>
+                    return (
+                      <Link
+                        key={lesson.slug}
+                        href={href}
+                        className="group relative rounded-xl border p-4 transition-all duration-200 border-border bg-bg2 hover:border-border2 hover:bg-bg3 cursor-pointer block"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-sans text-xs font-semibold text-text group-hover:text-[#a78bfa] transition-colors leading-snug">
+                            {lesson.title}
+                          </h4>
+                          {isImplemented ? (
+                            <LessonStatusBadge
+                              trackSlug={track.slug}
+                              moduleSlug={moduleSlug}
+                              lessonSlug={lesson.slug}
+                            />
+                          ) : (
+                            <span className="rounded bg-bg4 px-1.5 py-0.5 font-mono text-[9px] text-dim border border-border/50 shrink-0">
+                              Upcoming
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-[11px] leading-relaxed text-muted line-clamp-2">
+                          {lesson.description}
+                        </p>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3">
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1 font-mono text-[10px] text-dim">
-                            <Clock className="h-3 w-3" /> {lesson.estimatedMinutes}m
+                        <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3">
+                          <div className="flex items-center gap-3">
+                            <span className="flex items-center gap-1 font-mono text-[10px] text-dim">
+                              <Clock className="h-3 w-3" /> {lesson.estimatedMinutes}m
+                            </span>
+                          </div>
+
+                          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-accent">
+                            {isImplemented ? "Read" : "Preview"} <ArrowRight className="h-3 w-3" />
                           </span>
                         </div>
-
-                        {isImplemented && (
-                          <Link
-                            href={href}
-                            className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-accent"
-                          >
-                            Read <ArrowRight className="h-3 w-3" />
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ContentGating>
       </main>
 
       {/* ── Navigation Footer ────────────────────────────────────── */}

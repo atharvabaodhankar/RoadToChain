@@ -3,13 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, Lock, Unlock, LogIn, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/context/ProgressContext";
 
 export default function Nav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "LearnBlockchain";
+  const { 
+    user, 
+    loading, 
+    signInWithGoogle, 
+    logout, 
+    walkaroundMode, 
+    toggleWalkaroundMode,
+    isFirebaseConfigured
+  } = useProgress();
 
   const links = [
     { name: "Curriculum", href: "/curriculum" },
@@ -41,7 +51,7 @@ export default function Nav() {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-bg/85 backdrop-blur-md transition-all duration-300">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-1.5 font-mono text-sm font-semibold tracking-tight text-text">
+          <Link href="/" className="flex items-center gap-1.5 font-mono text-sm font-semibold tracking-tight text-text shrink-0">
             <span>{siteName}</span>
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
@@ -64,8 +74,72 @@ export default function Nav() {
             ))}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden items-center gap-4 md:flex">
+          {/* Desktop controls (Walkaround toggle, login/logout, CTA) */}
+          <div className="hidden items-center gap-3 md:flex">
+            {/* Walkaround Mode Toggle */}
+            <button
+              onClick={toggleWalkaroundMode}
+              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-mono text-[9px] uppercase font-bold tracking-tight border transition-all cursor-pointer ${
+                walkaroundMode
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.05)]"
+                  : "bg-bg3 border-border text-dim hover:text-text hover:border-border2"
+              }`}
+              title="Toggle Walkaround Mode to unlock all tracks and preview empty lessons"
+            >
+              {walkaroundMode ? (
+                <>
+                  <Unlock className="h-3 w-3 text-emerald-400 animate-pulse" />
+                  <span>Walkaround: ON</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="h-3 w-3 text-dim" />
+                  <span>Walkaround: OFF</span>
+                </>
+              )}
+            </button>
+
+            {/* Google Authentication Pill */}
+            {loading ? (
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-bg3 border border-border">
+                <Loader2 className="h-3 w-3 animate-spin text-muted" />
+              </div>
+            ) : user ? (
+              <div className="flex items-center gap-2 rounded-md border border-border bg-bg2/80 pl-2 pr-1 py-1 font-mono text-xs text-text shadow-sm">
+                {user.photoURL ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || "User"}
+                    className="h-5.5 w-5.5 rounded-full border border-border object-cover"
+                  />
+                ) : (
+                  <div className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-text">
+                    {user.displayName ? user.displayName.substring(0, 2).toUpperCase() : "U"}
+                  </div>
+                )}
+                <span className="hidden lg:inline text-[9px] text-muted max-w-[80px] truncate">
+                  {user.displayName || "Guest"}
+                </span>
+                <button
+                  onClick={logout}
+                  className="rounded p-1 text-dim hover:text-red-400 hover:bg-bg3 transition-colors cursor-pointer"
+                  title="Logout"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={signInWithGoogle}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg2 px-2.5 py-1.5 font-mono text-[9px] uppercase font-semibold text-muted hover:text-text hover:bg-bg3 transition-colors cursor-pointer"
+                title={isFirebaseConfigured ? "Sign in with Google" : "Firebase not configured (using localStorage)"}
+              >
+                <LogIn className="h-3 w-3" />
+                <span>Sign In</span>
+              </button>
+            )}
+
             <Link
               href="/learn"
               className="inline-flex items-center gap-1 rounded-[7px] bg-accent px-3 py-1.5 font-mono text-xs font-medium text-text transition-all hover:bg-accent2"
@@ -108,7 +182,64 @@ export default function Nav() {
                   {link.name}
                 </Link>
               ))}
+
               <hr className="border-border" />
+
+              {/* Mobile controls */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={() => {
+                    toggleWalkaroundMode();
+                    setIsOpen(false);
+                  }}
+                  className={`flex items-center justify-center gap-1.5 rounded-md p-2 border transition-all ${
+                    walkaroundMode
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                      : "bg-bg3 border-border text-muted"
+                  }`}
+                >
+                  {walkaroundMode ? (
+                    <>
+                      <Unlock className="h-3.5 w-3.5 text-emerald-400" />
+                      <span className="font-mono text-[10px]">WALKAROUND: ON</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-3.5 w-3.5 text-muted" />
+                      <span className="font-mono text-[10px]">WALKAROUND: OFF</span>
+                    </>
+                  )}
+                </button>
+
+                {loading ? (
+                  <div className="flex items-center justify-center rounded-md border border-border bg-bg3 p-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted" />
+                  </div>
+                ) : user ? (
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-md border border-border bg-bg3 p-2 font-mono text-[10px] text-text hover:bg-bg4"
+                  >
+                    <LogOut className="h-3.5 w-3.5 text-muted" />
+                    <span>LOG OUT</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      signInWithGoogle();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-md border border-border bg-bg3 p-2 font-mono text-[10px] text-text hover:bg-bg4"
+                  >
+                    <LogIn className="h-3.5 w-3.5 text-muted" />
+                    <span>SIGN IN</span>
+                  </button>
+                )}
+              </div>
+
               <Link
                 href="/learn"
                 onClick={() => setIsOpen(false)}

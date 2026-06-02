@@ -1,13 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLessonData, getAllLessonPaths } from "@/lib/content";
+import { getLessonData } from "@/lib/content";
 import { tracks } from "@/lib/curriculum";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Clock, Tag } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Tag, Hammer, Compass, AlertCircle } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
-import fs from "fs";
-import path from "path";
 
 // Import custom MDX components
 import Diagram from "@/components/mdx/Diagram";
@@ -33,31 +31,6 @@ interface Props {
     moduleSlug: string;
     lessonSlug: string;
   }>;
-}
-
-export async function generateStaticParams() {
-  const paths = getAllLessonPaths();
-  return paths.map((p) => ({
-    trackSlug: p.track,
-    moduleSlug: p.module,
-    lessonSlug: p.slug,
-  }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { trackSlug, moduleSlug, lessonSlug } = await params;
-  const data = await getLessonData(trackSlug, moduleSlug, lessonSlug);
-
-  if (!data) {
-    return {
-      title: "Lesson Not Found",
-    };
-  }
-
-  return {
-    title: `${data.frontmatter.title} — LearnBlockchain`,
-    description: data.frontmatter.description,
-  };
 }
 
 import React from "react";
@@ -142,15 +115,53 @@ const mdxComponents = {
   },
 };
 
-export default async function LessonPage({ params }: Props) {
-  const { trackSlug, moduleSlug, lessonSlug } = await params;
-  const data = await getLessonData(trackSlug, moduleSlug, lessonSlug);
+export async function generateStaticParams() {
+  const paths: Array<{ trackSlug: string; moduleSlug: string; lessonSlug: string }> = [];
+  for (const track of tracks) {
+    for (const mod of track.modules) {
+      const moduleSlug = `module-${mod.number.split(".")[1]}`;
+      for (const les of mod.lessons) {
+        paths.push({
+          trackSlug: track.slug,
+          moduleSlug: moduleSlug,
+          lessonSlug: les.slug,
+        });
+      }
+    }
+  }
+  return paths;
+}
 
-  if (!data) {
-    notFound();
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { trackSlug, moduleSlug, lessonSlug } = await params;
+  const currentTrack = tracks.find((t) => t.slug === trackSlug);
+  if (!currentTrack) {
+    return { title: "Track Not Found" };
   }
 
-  // Find current track and lesson info for navigation
+  const moduleNum = parseInt(moduleSlug.split("-")[1], 10);
+  const currentModule = currentTrack.modules.find(
+    (m) => parseInt(m.number.split(".")[1], 10) === moduleNum
+  );
+  if (!currentModule) {
+    return { title: "Module Not Found" };
+  }
+
+  const currentLesson = currentModule.lessons.find((l) => l.slug === lessonSlug);
+  if (!currentLesson) {
+    return { title: "Lesson Not Found" };
+  }
+
+  return {
+    title: `${currentLesson.title} — LearnBlockchain`,
+    description: currentLesson.description,
+  };
+}
+
+export default async function LessonPage({ params }: Props) {
+  const { trackSlug, moduleSlug, lessonSlug } = await params;
+  
+  // Find current track and lesson info from static curriculum
   const currentTrack = tracks.find((t) => t.slug === trackSlug);
   if (!currentTrack) {
     notFound();
@@ -160,8 +171,20 @@ export default async function LessonPage({ params }: Props) {
   const currentModule = currentTrack.modules.find(
     (m) => parseInt(m.number.split(".")[1], 10) === moduleNum
   );
+  if (!currentModule) {
+    notFound();
+  }
 
-  // Collect all implemented lessons in order across the track to determine next/prev
+  const currentLesson = currentModule.lessons.find((l) => l.slug === lessonSlug);
+  if (!currentLesson) {
+    notFound();
+  }
+
+  // Load implementation data if it exists on disk
+  const data = await getLessonData(trackSlug, moduleSlug, lessonSlug);
+  const isImplemented = !!data;
+
+  // Collect ALL curriculum lessons in order across the track to determine next/prev
   const allTrackLessons: Array<{
     title: string;
     trackSlug: string;
@@ -172,18 +195,12 @@ export default async function LessonPage({ params }: Props) {
   for (const mod of currentTrack.modules) {
     const mSlug = `module-${mod.number.split(".")[1]}`;
     for (const les of mod.lessons) {
-      // Dynamic filesystem check to see if the lesson is implemented
-      const filePath = path.join(process.cwd(), "content", currentTrack.slug, mSlug, `${les.slug}.mdx`);
-      const isImplemented = fs.existsSync(filePath);
-
-      if (isImplemented) {
-        allTrackLessons.push({
-          title: les.title,
-          trackSlug: currentTrack.slug,
-          moduleSlug: mSlug,
-          lessonSlug: les.slug,
-        });
-      }
+      allTrackLessons.push({
+        title: les.title,
+        trackSlug: currentTrack.slug,
+        moduleSlug: mSlug,
+        lessonSlug: les.slug,
+      });
     }
   }
 
@@ -204,7 +221,7 @@ export default async function LessonPage({ params }: Props) {
             <ArrowLeft className="h-3.5 w-3.5" /> Back to {currentTrack.number}
           </Link>
           <div className="font-mono text-xs text-dim">
-            Track {currentTrack.number} · {currentModule?.number} · Lesson {data.frontmatter.lesson}
+            Track {currentTrack.number} · {currentModule?.number} · Lesson {currentLesson.slug === lessonSlug ? currentModule.lessons.indexOf(currentLesson) + 1 : 1}
           </div>
         </div>
       </div>
@@ -221,22 +238,27 @@ export default async function LessonPage({ params }: Props) {
                 backgroundColor: `${currentTrack.color}10`,
               }}
             >
-              {data.frontmatter.difficulty}
+              {currentTrack.difficulty}
             </span>
             <span className="flex items-center gap-1 font-mono text-[10px] text-dim">
-              <Clock className="h-3.5 w-3.5" /> {data.frontmatter.estimatedMinutes}m read
+              <Clock className="h-3.5 w-3.5" /> {currentLesson.estimatedMinutes}m read
             </span>
+            {!isImplemented && (
+              <span className="rounded bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] font-semibold text-amber-400 border border-amber-500/20 uppercase shrink-0">
+                Preview Mode
+              </span>
+            )}
           </div>
 
           <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
-            {data.frontmatter.title}
+            {currentLesson.title}
           </h1>
           <p className="mt-2 text-sm text-muted max-w-2xl leading-relaxed">
-            {data.frontmatter.description}
+            {currentLesson.description}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-1.5">
-            {data.frontmatter.tags.map((tag) => (
+            {currentLesson.tags.map((tag) => (
               <span
                 key={tag}
                 className="inline-flex items-center gap-1 rounded bg-bg3 px-2 py-0.5 font-mono text-[10px] text-muted border border-border"
@@ -250,19 +272,91 @@ export default async function LessonPage({ params }: Props) {
 
       {/* ── Main Content Area ──────────────────────────────────── */}
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-p:leading-relaxed prose-p:text-text2 prose-a:text-[#a78bfa] prose-strong:text-text prose-code:font-mono prose-code:text-[#f472b6] prose-code:bg-bg2 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:border prose-code:border-border/60">
-          <MDXRemote
-            source={data.content}
-            components={mdxComponents}
-            options={{
-              mdxOptions: {
-                rehypePlugins: [
-                  [rehypePrettyCode, { theme: "github-dark", keepBackground: true }]
-                ]
-              }
-            }}
-          />
-        </div>
+        {isImplemented && data ? (
+          <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-p:leading-relaxed prose-p:text-text2 prose-a:text-[#a78bfa] prose-strong:text-text prose-code:font-mono prose-code:text-[#f472b6] prose-code:bg-bg2 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:border prose-code:border-border/60">
+            <MDXRemote
+              source={data.content}
+              components={mdxComponents}
+              options={{
+                mdxOptions: {
+                  rehypePlugins: [
+                    [rehypePrettyCode, { theme: "github-dark", keepBackground: true }]
+                  ]
+                }
+              }}
+            />
+          </div>
+        ) : (
+          /* ── Premium Placeholder / Upcoming Page ──────────────── */
+          <div className="space-y-8 animate-fade-in">
+            <div className="relative rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 md:p-8 overflow-hidden backdrop-blur-sm">
+              <div 
+                className="absolute inset-0 pointer-events-none opacity-5"
+                style={{
+                  background: `radial-gradient(circle at 70% 30%, ${currentTrack.color} 0%, transparent 60%)`,
+                }}
+              />
+              <div className="relative z-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400 shrink-0">
+                  <Hammer className="h-6 w-6 stroke-[1.8] animate-pulse" />
+                </div>
+                <div className="space-y-3">
+                  <h3 className="font-sans text-lg font-bold text-text tracking-tight flex items-center gap-2">
+                    Lesson Under Construction
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted">
+                    This lesson details have been defined in the curriculum blueprint, but the full interactive content and simulators are currently being engineered.
+                  </p>
+                  <p className="text-xs text-dim leading-relaxed">
+                    You can read the lesson summary below, or mark this lesson as complete to advance through the track overview and continue your walkaround.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="font-sans text-base font-bold text-text flex items-center gap-2 border-b border-border/40 pb-2">
+                <Compass className="h-4 w-4 text-accent" /> Lesson Learning Path
+              </h3>
+              
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="bg-bg2 border border-border/60 rounded-xl p-5 space-y-2">
+                  <div className="font-mono text-[10px] uppercase font-bold text-accent">Core Concept</div>
+                  <h4 className="font-sans text-xs font-semibold text-text">{currentLesson.title}</h4>
+                  <p className="text-xs text-muted leading-relaxed">{currentLesson.description}</p>
+                </div>
+
+                <div className="bg-bg2 border border-border/60 rounded-xl p-5 space-y-3">
+                  <div className="font-mono text-[10px] uppercase font-bold text-dim">Features Included</div>
+                  <div className="space-y-2 text-xs text-muted">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${currentLesson.hasDiagram ? "bg-emerald-500" : "bg-zinc-700"}`} />
+                      <span>{currentLesson.hasDiagram ? "Visual Architecture Diagrams" : "Conceptual Layout"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${currentLesson.hasMistake ? "bg-amber-500" : "bg-zinc-700"}`} />
+                      <span>{currentLesson.hasMistake ? "Top Production Mistakes Autopsy" : "Standard Pitfalls List"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${currentLesson.hasProject ? "bg-purple-500" : "bg-zinc-700"}`} />
+                      <span>{currentLesson.hasProject ? "Hands-on Capstone Code Integration" : "Practical Reference Code"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-bg3/40 p-5 space-y-3">
+                <h4 className="font-sans text-xs font-semibold text-text flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5 text-accent" /> Developer Walkaround Tips
+                </h4>
+                <p className="text-[11px] leading-relaxed text-muted">
+                  Use the navigation below to skip to subsequent lessons, or check other tracks in the sidebar list. You can toggle **Walkaround Mode** in the navigation bar to bypass completion prerequisites.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <LessonCompleteButton
           trackSlug={trackSlug}
           moduleSlug={moduleSlug}
