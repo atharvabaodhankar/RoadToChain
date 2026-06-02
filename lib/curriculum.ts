@@ -1024,41 +1024,51 @@ export const tracks: Track[] = [
     id: 4,
     slug: "track-4",
     number: "T4",
-    name: "Modern Web3 UX & Account Abstraction",
-    tagline: "How production apps onboard real users.",
-    description: "No MetaMask required. No seed phrases. No gas friction. Built from shipping erc4337-kit, ZKredential, and ProofOfExistence.",
+    name: "The Death of Traditional Web3 UX",
+    tagline: "Why MetaMask, seed phrases, and gas fees killed Web3 UX — and how we fix it.",
+    description: "Create seamless mobile and desktop onboarding flows using Privy embedded wallets, Pimlico Paymasters, gas sponsorship, and ERC-4337 smart accounts.",
     color: "#f59e0b",
     difficulty: "advanced",
     prerequisites: [2],
-    estimatedHours: 9,
-    moduleCount: 4,
-    lessonCount: 16,
+    estimatedHours: 8,
+    moduleCount: 5,
+    lessonCount: 19,
     heroProject: {
-      name: "Socio3 Evolution",
-      description: "Takes the Socio3 Classic app from T2 and evolves it: MetaMask popups become Google login, manual network switching disappears, users pay zero gas."
+      name: "Socio3 V2",
+      description: "Rebuild the Socio3 Classic social network with Privy embedded social authentication, Pimlico gas sponsorship, and useroperation batching."
     },
     isSignature: true,
     modules: [
       {
         id: "m4-1",
         number: "M4.1",
-        name: "Account Abstraction Foundations",
-        description: "Why MetaMask UX fails, ERC-4337, alt-mempools, UserOps, Smart Accounts vs EOAs.",
+        name: "Why Web3 UX Failed",
+        description: "Seed phrases, browser extensions, mobile sandbox deep links, and network switching friction.",
         lessons: [
           {
-            slug: "why-metamask-ux-fails",
-            title: "Why MetaMask UX fails real users",
-            description: "Seed phrases, popups, network mismatching, conversion barriers.",
-            tags: ["ux", "wallets", "mistake"],
+            slug: "why-seed-phrases-fail",
+            title: "Why seed phrases fail real users",
+            description: "Writing down 12 words is conversion suicide. Why users reject the physical security and mental load of custody.",
+            tags: ["ux", "security", "friction"],
             hasDiagram: false,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "why-metamask-confusion",
+            title: "Why MetaMask confused everyone",
+            description: "How browser extensions fail, and why non-technical users confuse local key managers with the blockchain networks.",
+            tags: ["ux", "metamask", "faucets", "mistake"],
+            hasDiagram: true,
             hasMistake: true,
             hasProject: false,
             estimatedMinutes: 12
           },
           {
             slug: "why-web3-mobile-onboarding-sucks",
-            title: "Why Web3 mobile onboarding sucks — and the Privy solution",
-            description: "In-app browser issues, deep linking wallet failures, and how embedded wallets + social logins provide the ultimate mobile onboarding flow.",
+            title: "Why Web3 mobile onboarding sucks",
+            description: "In-app browser sandboxes, deep link handshake drops, and the user journey of mobile wallets.",
             tags: ["ux", "mobile", "wallets", "mistake"],
             hasDiagram: true,
             hasMistake: true,
@@ -1066,118 +1076,199 @@ export const tracks: Track[] = [
             estimatedMinutes: 14
           },
           {
-            slug: "erc4337-abstractions",
-            title: "ERC-4337 — account abstraction without protocol change",
-            description: "EntryPoint contracts, UserOperations, and alternative mempools.",
-            tags: ["erc4337", "account-abstraction", "diagram"],
-            hasDiagram: true,
+            slug: "why-network-switching-pain",
+            title: "Why network switching screws up UX",
+            description: "The technical friction of switching networks and chain IDs, and why users shouldn't know what chain they are using.",
+            tags: ["ux", "networks", "chain-ids"],
+            hasDiagram: false,
             hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 14
-          },
-          {
-            slug: "smart-accounts-vs-eoas",
-            title: "Smart accounts vs EOAs",
-            description: "Custom gas limits, batching, session keys, multi-sigs.",
-            tags: ["smart-accounts", "eoas", "diagram"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 13
-          },
-          {
-            slug: "useroperation-anatomy",
-            title: "UserOperation anatomy",
-            description: "Sender, nonce, gas limits, paymasterAndData. What each field does.",
-            tags: ["userop", "erc4337", "diagram"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 15
+            estimatedMinutes: 10
           }
         ]
       },
       {
         id: "m4-2",
         number: "M4.2",
-        name: "Bundlers & Paymasters",
-        description: "Alt mempool routing, gas sponsorship (verifying/deposit), and Pimlico configs.",
+        name: "Embedded Wallets",
+        description: "What Privy is, sharded HSM keys, social login OAuth mapping, and background EOA creation.",
         lessons: [
           {
-            slug: "how-bundlers-work",
-            title: "How bundlers work",
-            description: "UserOp validation, Alt mempool routing, bundler economics.",
-            tags: ["bundlers", "infrastructure", "diagram"],
+            slug: "why-privy-exists",
+            title: "Why Privy exists",
+            description: "The historical shift from external wallets to developer-managed, application-embedded authentication.",
+            tags: ["wallets", "privy", "ux"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "what-privy-does",
+            title: "What Privy actually does",
+            description: "Securing sharded private keys using Hardware Security Modules (HSMs) without web app custody.",
+            tags: ["privy", "security", "mpc"],
             hasDiagram: true,
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 12
           },
           {
-            slug: "verifying-paymasters",
-            title: "Verifying paymaster — sponsor specific users",
-            description: "Gas sponsorship signatures, anti-replay rules.",
-            tags: ["paymasters", "gas", "real-code"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 14
-          }
-        ]
-      },
-      {
-        id: "m4-3",
-        number: "M4.3",
-        name: "Embedded Wallets & Social Logins",
-        description: "Google logins, Privy setup, Permissionless.js, embedded signers, and async race hooks.",
-        lessons: [
-          {
-            slug: "embedded-wallets-why",
-            title: "Why embedded wallets exist",
-            description: "Social login onboarding, Privy silently generated keys.",
-            tags: ["wallets", "social-login"],
+            slug: "eoa-creation-flow",
+            title: "EOA creation mechanics",
+            description: "How Privy silently generates cryptographically secure local keys and stores them securely inside browser storage.",
+            tags: ["wallets", "eoa", "cryptography"],
             hasDiagram: false,
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 11
           },
           {
-            slug: "privy-setup-react",
-            title: "Privy setup and configuration",
-            description: "App IDs, providers, and social login flow overrides.",
-            tags: ["privy", "react", "real-code"],
+            slug: "social-login-integration",
+            title: "Social login OAuth integration",
+            description: "Integrating Google and Apple social sign-in with Privy and validating JWT tokens in React.",
+            tags: ["auth", "react", "oauth", "project"],
             hasDiagram: false,
             hasMistake: false,
+            hasProject: true,
+            estimatedMinutes: 13,
+            isRealProject: true
+          }
+        ]
+      },
+      {
+        id: "m4-3",
+        number: "M4.3",
+        name: "Account Abstraction",
+        description: "EOA limits, Smart Accounts, ERC-4337, and the Socio3 V2 architecture.",
+        lessons: [
+          {
+            slug: "why-eoas-are-limiting",
+            title: "Why EOAs are limiting",
+            description: "Why single private-key accounts cannot handle gas sponsorship, batched transactions, or conditional access keys.",
+            tags: ["eoas", "security", "limitations"],
+            hasDiagram: false,
+            hasMistake: true,
             hasProject: false,
-            estimatedMinutes: 13
+            estimatedMinutes: 11
+          },
+          {
+            slug: "smart-accounts-explained",
+            title: "Smart Accounts & Socio3 V2",
+            description: "Turning smart contracts into wallets. How Smart Accounts decouple authorization from account state.",
+            tags: ["smart-accounts", "socio3", "architecture"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
+          },
+          {
+            slug: "erc-4337-explained",
+            title: "ERC-4337 explained",
+            description: "EntryPoint execution, alternative UserOperations mempools, and the low-level account abstraction standard.",
+            tags: ["erc4337", "account-abstraction", "diagram"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 15
           }
         ]
       },
       {
         id: "m4-4",
         number: "M4.4",
-        name: "Session Keys & NPM Publishing",
-        description: "Granular action permissions, mobile deep links, and publishing custom developer kits.",
+        name: "Paymasters & Gasless UX",
+        description: "Bundlers, Paymasters, gas sponsorship, and UserOperation field structures.",
         lessons: [
           {
-            slug: "session-keys-ux",
-            title: "Session keys — persist actions without signing every time",
-            description: "Time-bound, target-scoped smart account keys.",
-            tags: ["ux", "security"],
+            slug: "what-pimlico-does",
+            title: "What Pimlico actually does",
+            description: "Understanding bundlers and paymasters as off-chain execution infrastructure.",
+            tags: ["pimlico", "infrastructure", "bundlers"],
             hasDiagram: false,
             hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 11
+          },
+          {
+            slug: "gas-sponsorship-mechanics",
+            title: "Gas sponsorship mechanics",
+            description: "Verifying Paymasters, signing sponsorship payloads, and depositing gas budgets.",
+            tags: ["paymasters", "gas", "real-code"],
+            hasDiagram: true,
+            hasMistake: true,
             hasProject: false,
             estimatedMinutes: 13
           },
           {
-            slug: "erc4337-kit-package",
-            title: "erc4337-kit — the npm package",
-            description: "How to ship custom React components as reusable npm modules.",
-            tags: ["npm", "real-code"],
+            slug: "useroperations-anatomy",
+            title: "UserOperations field anatomy",
+            description: "Breaking down sender, nonce, callData, paymasterAndData, and gas limits in a UserOp.",
+            tags: ["userop", "erc4337", "diagram"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 14
+          },
+          {
+            slug: "how-bundlers-work",
+            title: "How bundlers work",
+            description: "Listening to alternative mempools and packing UserOps into valid EVM L1/L2 transactions.",
+            tags: ["bundlers", "mempool", "fees"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
+          }
+        ]
+      },
+      {
+        id: "m4-5",
+        number: "M4.5",
+        name: "Production UX",
+        description: "Session keys, progressive onboarding, invisible wallets, and consumer web3 adoption.",
+        lessons: [
+          {
+            slug: "session-keys-ux",
+            title: "Session keys — clickless interaction",
+            description: "Pre-authorizing temporary, target-scoped keys to execute actions without constant wallet popups.",
+            tags: ["session-keys", "ux", "security"],
             hasDiagram: false,
             hasMistake: false,
             hasProject: false,
-            estimatedMinutes: 15
+            estimatedMinutes: 12
+          },
+          {
+            slug: "progressive-onboarding",
+            title: "Progressive onboarding in dApps",
+            description: "Allowing users to navigate and create draft records before silently initializing their wallet credentials.",
+            tags: ["ux", "onboarding", "conversion"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 11
+          },
+          {
+            slug: "invisible-wallets",
+            title: "Invisible wallets and term hiding",
+            description: "Designing interfaces that replace Web3 terms ('claim', 'mint', 'sign') with familiar consumer actions ('save', 'post', 'like').",
+            tags: ["ux", "design", "copywriting"],
+            hasDiagram: false,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
+          {
+            slug: "consumer-web3-realities",
+            title: "Consumer Web3 realities",
+            description: "How Socio3 V2, ZKredential, and other production apps scaled to mainstream audiences.",
+            tags: ["case-study", "scaling", "real-life"],
+            hasDiagram: false,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 14,
+            isRealProject: true
           }
         ]
       }
