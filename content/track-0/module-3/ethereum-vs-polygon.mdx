@@ -1,0 +1,101 @@
+---
+title: "Ethereum vs Polygon vs Base — when to deploy where"
+description: "Gas costs, finality, ecosystem, liquidity. How L2s work conceptually."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 3
+moduleName: "Networks & Storage"
+lesson: 9
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["networks", "L2"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Prerequisite for choosing contract deployment environments."
+---
+
+# Ethereum vs Polygon vs Base: When to Deploy Where
+
+When I deployed my first smart contract on Ethereum Mainnet, a simple ERC-20 token contract cost me $85.00 in gas fees. I made a tiny typo in the contract name, had to re-deploy, and spent another $90.00. I had spent nearly $180.00 just to deploy a basic demo.
+
+That was my introduction to L1 scaling bottlenecks.
+
+In production, you must match your application's user experience with the right chain environment: **Ethereum L1**, **Polygon (Sidechain/L2)**, or **Base/Optimism (L2 Rollups)**.
+
+---
+
+### 1. The Scaling Problem: The Blockchain Trilemma
+
+Coined by Vitalik Buterin, the **Blockchain Trilemma** states that a blockchain can only achieve two of these three properties at once:
+1. **Decentralization:** Open to anyone to run a node.
+2. **Security:** Defended against 51% attacks.
+3. **Scalability:** Able to process thousands of transactions per second.
+
+Ethereum Mainnet (L1) prioritizes **Decentralization** and **Security**. Because it has thousands of validators validating blocks, it is highly secure and decentralized — but it can only process ~15–30 transactions per second. When too many users try to write transactions, gas fees skyrocket.
+
+To scale, we build **Layer 2 (L2) networks** on top of Ethereum.
+
+---
+
+### 2. Layman Explanation: The Train vs. The Bus
+
+Imagine you and 50 other people want to travel from Mumbai to Pune.
+
+* **Ethereum L1 is like private cars.** Everyone drives their own car (transaction) on the highway. This is highly secure and customizable, but the highway gets congested. Because space is limited, the toll fee (gas) spikes. Only rich drivers can afford to use the highway.
+
+* **Layer 2 Rollups (like Base or Arbitrum) are like a chartered bus.** Instead of 50 people driving 50 cars, they all get on one bus. The bus driver drives down the highway, pays a single toll fee, and splits the cost among all 50 passengers. The passengers get to their destination just as safely, but for a fraction of the price.
+
+L2s bundle (rollup) hundreds of transactions together, compress them, and settle them on Ethereum L1 in a single transaction, splitting Ethereum's gas fee among all users.
+
+---
+
+### 3. Technical Comparison: Sidechains vs. Rollups
+
+L2s scale Ethereum using different architectural approaches:
+
+#### Sidechains (like Polygon PoS)
+Polygon PoS is a separate, independent blockchain running in parallel to Ethereum. It has its own consensus mechanism (validators) and bridge contract to Ethereum.
+* **Pros:** Extremely cheap gas (often < $0.01), very fast.
+* **Cons:** Does not inherit Ethereum's security directly. If Polygon's validators collude, they can freeze or steal bridged funds.
+
+#### Optimistic Rollups (like Base, Optimism, Arbitrum)
+Rollups execute transactions off-chain but post the compressed transaction data directly onto Ethereum L1.
+* **Optimistic Rollups:** They assume transactions are valid by default. However, there is a **7-day challenge window** where anyone can submit a cryptographic proof (fraud proof) showing a transaction was fraudulent. Bridging funds back to L1 takes 7 days to finalize.
+
+#### zkRollups (like Polygon zkEVM, Linea)
+* Use Zero-Knowledge proofs (Validity Proofs) to mathematically prove transactions are valid *before* posting them to L1.
+* **Pros:** Near-instant finality, inherits L1 security 100%.
+* **Cons:** High computational cost to generate ZK proofs.
+
+---
+
+### 4. Selection Guide: Where to Deploy?
+
+When starting a project, select your network based on use case:
+
+| Use Case | Recommended Chain | Rationale |
+|:---|:---|:---|
+| **High-value DeFi, Institutional Assets** | Ethereum L1 | Maximum security, deep liquidity, zero bridge risk. |
+| **Micro-transactions, Social Media dApps** | Base / Polygon PoS | Gas must be fractions of a cent; high transaction volume. |
+| **Enterprise Supply Chain, Game NFTs** | Polygon zkEVM / Base | Combines low costs with cryptographic validity proof safety. |
+
+---
+
+<RealityCheck>
+  Many developers deploy on L2 and think their app is 100% secure. But L2 networks are still early and run by coordinators called **Sequencers**. Currently, most sequencers are run by a single entity (like Coinbase running Base), representing a temporary centralization point.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Visit L2Fees (l2fees.info) and compare the cost of sending ETH and swapping tokens on Ethereum L1 vs Base, Arbitrum, and Loopring. Note down the percentage savings.
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, we build the chain selector config. Testing transactions across simulated L1 and L2 endpoints will show you how gas parameters shift dynamically, reinforcing your deployment architecture decisions.
+</HeroProject>

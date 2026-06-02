@@ -1,0 +1,83 @@
+---
+title: "Base fee + priority fee — EIP-1559 explained"
+description: "How gas pricing actually works post-London upgrade. Why base fee burns. Why priority fee goes to validators."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 5
+moduleName: "Gas & Transactions"
+lesson: 2
+difficulty: "beginner"
+estimatedMinutes: 12
+tags: ["gas", "economics"]
+hasDiagram: true
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Gas dynamics display panel in the Visual Blockchain Simulator."
+---
+
+# Base Fee + Priority Fee: EIP-1559 Explained
+
+Before August 2021, sending a transaction on Ethereum felt like participating in a blind auction. You had to guess how much gas to bid. 
+* Bid too low? Your transaction sat pending for hours.
+* Bid too high? You overpaid by hundreds of dollars, and the miner pocketed the difference.
+
+This changed with the **London Hard Fork** and the introduction of **EIP-1559**. EIP-1559 completely restructured how Ethereum calculates and handles transaction fees, introducing the concept of a **Base Fee** and a **Priority Fee**.
+
+---
+
+### 1. The Anatomy of EIP-1559 Gas Fees
+
+Under EIP-1559, your transaction gas fee is split into two distinct parts:
+
+```
+Total Gas Fee = Gas Units Used × (Base Fee + Priority Fee)
+```
+
+1. **Base Fee (Burned):** The minimum gas price required to be included in the block. This is calculated dynamically by the protocol based on block congestion. **Crucially, the Base Fee is burned (permanently destroyed), removing ETH from circulation.**
+2. **Priority Fee (Tip to Validator):** An optional tip you pay directly to the validator to prioritize your transaction over others in the mempool.
+
+You also specify a **Max Fee per Gas** — the absolute maximum gas price you are willing to pay. If the actual fee (`Base Fee + Priority Fee`) is lower than your Max Fee, the difference is refunded to your wallet!
+
+---
+
+### 2. Layman Explanation: The Airport Cab Ride
+
+Imagine you want to catch a cab from the airport during rush hour:
+
+* **The Base Fee is the standard meter fare set by the city council.** If the airport is packed with travelers, the council dynamically increases the meter fare (surge pricing) to manage demand. If the airport is empty, the meter fare drops. The taxi company doesn't keep this money; it goes to maintain the city's roads (burned).
+
+* **The Priority Fee is the cash tip you wave to the taxi driver.** If there are 100 people waiting and only 5 cabs, you wave a $10 bill (priority fee) to the driver. The driver will pick you up first. The driver keeps this tip.
+
+* **The Max Fee is the absolute maximum budget in your pocket.** You tell your friend: *"I have $50 max. If the meter + tip is $40, I'll pay it and keep the remaining $10. If the meter is $60, I won't get in the cab."*
+
+---
+
+### 3. Technical Explanation: Dynamic Block Sizes & Elastic Fees
+
+EIP-1559 introduced **elastic block sizes** to stabilize gas fees:
+* Ethereum's target block size is **15 million gas units**.
+* However, blocks can expand up to a hard cap of **30 million gas units** during high congestion.
+
+#### The Pricing Formula
+The protocol adjusts the Base Fee automatically after every block:
+* If a block is **more than 50% full** (gas used > 15M), the Base Fee for the next block is **increased** (up to a maximum +12.5% increment).
+* If a block is **less than 50% full** (gas used < 15M), the Base Fee is **decreased** (up to -12.5%).
+* If the block is exactly 50% full, the Base Fee remains unchanged.
+
+This creates a predictable pricing mechanism. If there is no sudden spike in demand, the Base Fee changes smoothly, allowing wallets like MetaMask to calculate the exact fee required for inclusion in the next block with 100% accuracy.
+
+<Diagram type="eip-1559-pricing" caption="EIP-1559 dynamically adjusts block sizes. If gas exceeds the 15M target, the Base Fee increases and is burned. The Priority Fee serves as a validator tip." />
+
+---
+
+<LessonChallenge>
+  If Block A is 100% full (30 million gas used), what is the maximum percentage increase in the Base Fee for Block B? If block demand suddenly falls to zero, how many blocks will it take to drop the Base Fee back to its minimum?
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, we build an EIP-1559 gas price simulator. You will write the javascript logic that expands block capacities and burns base fees dynamically as transaction volume changes, illustrating the deflationary mechanics of Ethereum.
+</HeroProject>
