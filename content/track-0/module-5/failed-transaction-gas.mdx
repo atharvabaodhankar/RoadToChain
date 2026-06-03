@@ -1,0 +1,108 @@
+---
+title: "Why you pay gas even when the transaction fails"
+description: "EVM still executed. The gas meter ran. Analogous to a taxi meter running."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 5
+moduleName: "Gas & Transactions"
+lesson: 3
+difficulty: "beginner"
+estimatedMinutes: 10
+tags: ["gas", "debugging", "mistake"]
+hasDiagram: false
+hasMistake: true
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Transaction failure state handlers in the Visual Blockchain Simulator."
+---
+
+# Why You Pay Gas Even When a Transaction Fails
+
+One of the most frustrating experiences for a beginner in Web3 is looking at block explorer logs and seeing this:
+
+```
+Status: Fail
+Error: Execution reverted
+Gas Fee: $4.50 (Paid)
+```
+
+Your transaction failed. You didn't swap your tokens, you didn't buy your NFT, and you didn't transfer any funds. Yet, the blockchain still took your gas fee! 
+
+It feels like a scam. But when you look at the mechanics of the EVM, you realize that paying for failed transactions is a fundamental requirement for network security.
+
+---
+
+### 1. The Core Concept: The EVM is a State Machine
+
+A smart contract is code deployed to the blockchain. When you interact with it, your transaction triggers the **Ethereum Virtual Machine (EVM)** to run that contract's code on a validator node.
+
+The validator node starts execution and counts the **Opcodes** (add, multiply, storage write, etc.). Each opcode has a fixed gas cost. 
+
+If your transaction runs 70% of the code, and then hits a line that says `require(balance >= amount, "Insufficient funds")` when your balance is too low, the transaction **Reverts**. 
+* **State changes are rolled back:** The token balances do not change.
+* **Gas is NOT refunded:** The validator has already spent computing power to run the first 70% of the code. They must be compensated for that work.
+
+---
+
+### 2. Layman Explanation: The Taxi Ride to a Closed Restaurant
+
+Imagine you hop into a taxi and tell the driver: *"Take me to the Italian restaurant on 5th Street."*
+
+The driver starts the engine, drives through traffic, burns fuel, and arrives at the restaurant. When you get out, you see a sign on the door: *Closed for renovation.*
+
+You cannot turn to the taxi driver and say: *"The restaurant is closed, so I didn't get to eat dinner. I'm not paying you for the ride."*
+
+The driver will rightly point out:
+* The taxi engine ran.
+* Fuel was burned.
+* The driver's time was spent.
+* The taxi meter ran.
+
+You pay for the **journey**, not the **outcome**. On the blockchain, gas is the ticket price for the EVM journey.
+
+---
+
+### 3. The Security Angle: Preventing Denial of Service (DoS)
+
+If failed transactions were free, the blockchain would be extremely easy to crash.
+
+An attacker could write a malicious smart contract with an infinite loop:
+```solidity
+// A malicious contract that runs forever
+function attack() public {
+    while (true) {
+        // Runs infinite computations
+    }
+    // Eventually fails or reverts
+    require(false, "Revert!");
+}
+```
+
+If failed transactions cost nothing, the attacker could spam the network with millions of these transaction calls. Every validator node in the world would spend 100% of their CPU power running the infinite loops. The network would freeze, and the attacker would pay **$0.00**.
+
+By charging gas up to the point of failure, the attacker's wallet is drained of money with every single spam attempt, making Denial of Service attacks economically impossible.
+
+---
+
+<RealityCheck>
+  There is one scenario where you do NOT pay gas for a failed transaction: **if you submit a transaction that is invalid on its face** (e.g. your signature is wrong, or your wallet has less balance than the gas fees). In this case, nodes reject the transaction immediately before adding it to a block. No EVM code is run, and no gas is charged.
+</RealityCheck>
+
+---
+
+<MistakeCallout>
+  Submitted a transaction to buy a popular NFT project during a hype launch. The transaction was reverted with "Sold Out" after 15 seconds. Lost $45 in gas fees because the EVM had to execute the contract code to check the supply before reverting. Could have avoided this by checking the contract's mint status using a free view call (eth_call) before submitting the write transaction.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Read a transaction receipt of a reverted transaction on Etherscan. Locate the "Gas Limit" and the "Gas Used." Note down whether the transaction consumed all the gas allocated by the limit, or only the gas used up to the revert statement.
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, we code transaction failure alerts. You will implement the state handler that subtracts gas fees from the user's simulated wallet when a transaction hits an invalid require check, reinforcing how gas security operates.
+</HeroProject>

@@ -1,0 +1,88 @@
+---
+title: "Why Polygon is cheaper than Ethereum"
+description: "Block space supply and demand. L1 vs L2 economics. Why gas price is not fixed."
+track: 0
+trackName: "Blockchain Foundations"
+trackColor: "#7c3aed"
+module: 5
+moduleName: "Gas & Transactions"
+lesson: 4
+difficulty: "beginner"
+estimatedMinutes: 11
+tags: ["gas", "networks"]
+hasDiagram: false
+hasMistake: false
+hasProject: false
+realProjectSource: ""
+heroProjectContribution: "Prerequisite for optimizing contract gas fees and understanding multi-chain gas markets."
+---
+
+# Why Polygon is Cheaper Than Ethereum
+
+When developers first build on EVM-compatible chains, they are shocked by the differences in gas fees. A simple token transfer that costs $1.50 in gas on Ethereum Mainnet costs less than $0.005 on Polygon.
+
+Why is the price difference so massive? Both networks use the same Ethereum Virtual Machine, both execute the same bytecode, and both process transactions similarly.
+
+The difference comes down to two major factors: **Block Space Supply and Demand**, and **Consensus Architecture**.
+
+---
+
+### 1. The Core Driver: Block Space Supply and Demand
+
+Ultimately, gas prices are driven by a simple economic metric: **Block Space**. 
+
+A blockchain can only fit a limited amount of data (gas units) inside each block.
+* **Ethereum Block Space:** Blocks are limited to a target size of 15 million gas units, produced every 12 seconds.
+* **Polygon Block Space:** Blocks are produced every 2 seconds, and can support up to 30 million gas units.
+
+Polygon produces **six times as many blocks** as Ethereum in the same timeframe, and each block has double the capacity. This means Polygon offers **at least 12 times more block space supply** than Ethereum.
+
+Since gas is priced via an auction model, Ethereum's limited block space supply causes gas prices to spike when demand is high. Polygon's massive supply means blocks are rarely full, keeping fees at their absolute minimum.
+
+---
+
+### 2. Layman Explanation: The Real Estate Market
+
+Imagine two real estate markets:
+
+* **Ethereum is Manhattan.** It is a small island with limited space (block size). Everyone wants to live there because it is the center of global wealth and security (L1 liquidity). Because supply is fixed and demand is massive, real estate prices (gas) are astronomical. Only wealthy corporations and whales can afford to buy property (transact).
+
+* **Polygon is the Suburbs.** There is vast amounts of open land (large block sizes) and homes are built rapidly (2-second block times). Because space is abundant, anyone can buy a home for a fraction of the cost. It is fast, easy, and cheap. 
+
+However, the suburbs rely on Manhattan for its global financial institutions and courts. Similarly, Polygon PoS relies on Ethereum L1 for its primary bridging vaults and settlement.
+
+---
+
+### 3. Technical Explanation: L1 vs L2 Consensus Costs
+
+Aside from supply and demand, the physical cost of running validator nodes differs:
+
+#### Ethereum L1 Nodes
+* Ethereum has **10,000+ active validator nodes** running worldwide.
+* Every validator must execute and verify every transaction in every block to maintain consensus.
+* The computational energy and bandwidth cost of synchronizing 10,000 nodes is substantial.
+
+#### Polygon PoS Nodes
+* Polygon PoS uses a delegated Proof of Stake model with **only 100 validators**.
+* With only 100 validators, coordinating consensus is much faster and requires significantly less network synchronization overhead.
+* **The Security Trade-off:** With only 100 validators, Polygon PoS is more centralized than Ethereum. If 51 of those validators colluded, they could control the network. On Ethereum, controlling consensus requires attacking thousands of validators.
+
+Polygon is cheaper because it trades off a degree of decentralization (100 validators vs 10,000+) to achieve massive throughput and low latency.
+
+---
+
+<RealityCheck>
+  Many dApp users choose Polygon because of the cheap gas, but bridging assets from Ethereum to Polygon can still be very expensive. Since bridging requires a transaction on Ethereum L1 (to deposit funds into the bridge contract), you will pay Ethereum's L1 gas fees to move your funds onto Polygon in the first place.
+</RealityCheck>
+
+---
+
+<LessonChallenge>
+  Use a gas tracker (like gasnow or PolygonScan Gas Tracker) to compare the current gas price in Gwei on Ethereum and Polygon. Note down the difference. Note that while Ethereum gas is paid in ETH, Polygon gas is paid in its native MATIC/POL token.
+</LessonChallenge>
+
+---
+
+<HeroProject name="Visual Blockchain Simulator" track="0">
+  In the Visual Blockchain Simulator, we build a multi-chain gas selector. Coding this visualizer will show you how choosing Polygon PoS lowers simulated gas estimates to fractions of a cent, preparing you for real multi-chain product launches.
+</HeroProject>
