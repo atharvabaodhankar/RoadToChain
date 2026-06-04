@@ -27,18 +27,20 @@ Instead of matching individual buyers and sellers, Uniswap pools tokens together
 
 ---
 
-### 1. The Math: Constant Product ($x \cdot y = k$)
+### 1. The Math: Constant Product (x * y = k)
 
-A Uniswap pool contains balances of two tokens, which we will call $x$ and $y$ (for example, ETH and USDC).
+A Uniswap pool contains balances of two tokens, which we will call x and y (for example, ETH and USDC).
 
 The fundamental invariant governing the pool is:
 
-$$x \cdot y = k$$
+```text
+x * y = k
+```
 
 Where:
-* $x$ is the reserve balance of Token A (ETH).
-* $y$ is the reserve balance of Token B (USDC).
-* $k$ is a constant invariant. This value must remain unchanged during swaps (ignoring fees).
+* **x** is the reserve balance of Token A (ETH).
+* **y** is the reserve balance of Token B (USDC).
+* **k** is a constant invariant. This value must remain unchanged during swaps (ignoring fees).
 
 ```
    TRADITIONAL ORDER BOOK MATCHING:
@@ -58,12 +60,15 @@ Where:
 ```
 
 When a trader swaps Token A for Token B:
-1. They deposit a quantity $\Delta x$ into the contract.
-2. The reserve of Token A becomes $x + \Delta x$.
-3. To keep $k$ constant, the contract computes the new reserve of Token B ($y - \Delta y$) such that:
-   $$(x + \Delta x) \cdot (y - \Delta y) = k$$
-4. Rearranging the formula, the trader receives $\Delta y$ tokens:
-   $$\Delta y = y - \frac{k}{x + \Delta x} = \frac{y \cdot \Delta x}{x + \Delta x}$$
+1. They deposit a quantity **delta_x** into the contract.
+2. The reserve of Token A becomes **x + delta_x**.
+3. To keep **k** constant, the contract computes the new reserve of Token B (**y - delta_y**) such that:
+   
+   `(x + delta_x) * (y - delta_y) = k`
+
+4. Rearranging the formula, the trader receives **delta_y** tokens:
+   
+   `delta_y = y - (k / (x + delta_x)) = (y * delta_x) / (x + delta_x)`
 
 This ensures that as a token becomes scarcer in the pool, its relative price automatically increases, creating a natural supply-and-demand curve inside the code.
 
@@ -96,7 +101,7 @@ Uniswap V2 is designed around two primary contracts: the **Factory** and the **P
 
 ### 3. Price Slippage and Arbitrage Boundaries
 
-Because Uniswap prices assets based purely on internal ratios ($x / y$), it does not use a pricing oracle. The pool has no idea what the "real" price of ETH is in the outside world (e.g. on Binance).
+Because Uniswap prices assets based purely on internal ratios (x / y), it does not use a pricing oracle. The pool has no idea what the "real" price of ETH is in the outside world (e.g. on Binance).
 
 If a trader makes a massive purchase of ETH from the pool, they push the reserve ratio out of balance, resulting in **Price Slippage**. The price of ETH inside the pool rises far above the external market rate.
 
@@ -112,14 +117,14 @@ Arbitrage is not an exploit; it is the **design boundary** that forces decentral
 
 <MistakeCallout>
   **The Low Liquidity Sandbox Trap:**
-  During testing, I set up a mock swap pool for a custom token and deposited only $50 worth of tokens. I then attempted to execute a swap for $30. Because the pool liquidity was extremely low, my swap represented a massive percentage of the pool reserves. The transaction succeeded, but the constant product math caused a 90% price slippage. I received only $3 worth of output tokens. Always verify pool depth and implement slippage tolerances in your client-side routers!
+  During testing, I set up a mock swap pool for a custom token and deposited only $50 worth of tokens. I then attempted to execute a swap for $30. Because the pool liquidity was extremely low, my swap represented a percentage of the pool reserves that was too large. The transaction succeeded, but the constant product math caused a 90% price slippage. I received only $3 worth of output tokens. Always verify pool depth and implement slippage tolerances in your client-side routers!
 </MistakeCallout>
 
 ---
 
 <LessonChallenge>
-  Suppose an ETH/USDC pool has 10 ETH ($x$) and 20,000 USDC ($y$).
-  1. What is the value of the invariant $k$?
+  Suppose an ETH/USDC pool has 10 ETH (x) and 20,000 USDC (y).
+  1. What is the value of the invariant k?
   2. If a trader swaps 2 ETH into the pool, how much USDC will they receive? (Assume zero swap fees).
-  3. Calculate the new reserves and verify that the product remains $k$.
+  3. Calculate the new reserves and verify that the product remains k.
 </LessonChallenge>
