@@ -23,7 +23,25 @@ Implementing smart contract wallets historically required changing the consensus
 
 ---
 
-### 1. The Core Architecture
+### 1. Layman Explanation: The Corporate Travel Assistant
+
+To understand how ERC-4337 works under the hood, let's look at a corporate expense analogy.
+
+Imagine you are a busy company executive who needs to travel frequently:
+
+* **The Traditional EOA Way:** Every time you want to book a flight, secure a hotel, or buy a coffee, you have to personally pull out your wallet, swipe your credit card, enter your PIN, and manually collect the receipt. If you lose your physical card, you are completely locked out of your corporate funds. Furthermore, you must carry local currency (gas) for every minor purchase en route.
+* **The ERC-4337 Way:** You don't carry a physical credit card. Instead, you have an **Executive Assistant** (your **Smart Account** contract). When you want to book a trip, you don't execute the transaction yourself. You write a **signed request slip** (a **UserOperation**) detailing your intent: *"I authorize booking flight #104."* You hand this slip to your assistant.
+
+Behind the scenes:
+1. Your assistant doesn't call the airline directly. They hand your request slip (and request slips from other executives) to a **Consolidated Travel Agency** (the **Bundler**).
+2. The agency aggregates all these slips from the alternative mailroom (the **alt-mempool**), packages them into a single massive itinerary, and pays the airline in bulk using one corporate check (a standard EVM transaction).
+3. The check is processed by the **Company Finance Department** (the **EntryPoint** contract), which verifies that the signature on each request slip is valid, and that the department has enough budget (the **Paymaster**) deposited to sponsor the trip so you don't pay out of pocket.
+
+This is exactly how ERC-4337 operates: you sign a simple intention offline, the network infrastructure bundles and executes it for you, and a sponsor pays your gas fees.
+
+---
+
+### 2. The Core Architecture
 
 ERC-4337 introduces four key components to the Web3 transaction pipeline:
 
@@ -36,7 +54,7 @@ ERC-4337 introduces four key components to the Web3 transaction pipeline:
 
 ---
 
-### 2. The Two-Phase Execution Loop
+### 3. The Two-Phase Execution Loop
 
 When a Bundler submits a bundle to the `EntryPoint` contract, the EntryPoint executes a strict two-phase loop:
 

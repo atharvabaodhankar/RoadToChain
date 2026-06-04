@@ -49,7 +49,7 @@ export const tracks: Track[] = [
     prerequisites: [],
     estimatedHours: 7,
     moduleCount: 5,
-    lessonCount: 16,
+    lessonCount: 22,
     heroProject: {
       name: "Visual Blockchain Simulator",
       description: "Students build a transaction flow simulator, block visualizer, node propagation animation, and gas simulation system — using vanilla JS + SVG."
@@ -159,82 +159,22 @@ export const tracks: Track[] = [
         description: "Mainnet vs testnet. Ethereum vs Polygon vs L2s. RPC explained. Where blockchain data actually lives.",
         lessons: [
           {
-            slug: "why-web3-needs-wallets",
-            title: "Why Web3 needs wallets — identity without a server",
-            description: "Why a faucet asks for an address, why an address requires a wallet, and why a wallet is not a bank account. The rubber stamp vs library card mental model.",
-            tags: ["wallets", "identity", "faucets", "beginner"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 10
-          },
-          {
-            slug: "how-testnets-feel-in-real-life",
-            title: "How testnets feel in real life — the student struggle",
-            description: "The raw friction of getting test ETH: Gitcoin gates, wrong network confusion, mainnet ETH requirements. The exact steps from zero to deployed on Sepolia.",
-            tags: ["testnet", "faucets", "metamask", "real-life"],
-            hasDiagram: true,
-            hasMistake: true,
-            hasProject: false,
-            estimatedMinutes: 11
-          },
-          {
-            slug: "data-location",
-            title: "Where does blockchain data actually live?",
-            description: "Nodes. Full nodes vs light nodes vs archive nodes. Why 'the blockchain' is millions of computers.",
-            tags: ["nodes", "storage"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 10
-          },
-          {
             slug: "mainnet-vs-testnet",
             title: "Mainnet vs testnet — NOT the same thing",
-            description: "Different chain IDs, RPCs, contract addresses. Why testnet ETH has no value.",
-            tags: ["networks", "mistake"],
-            hasDiagram: false,
+            description: "Why ETH costs $3,000 but Sepolia ETH is free. Chain IDs, faucets, token economics, and why Polygon is cheap. The value mental model every beginner needs.",
+            tags: ["networks", "economics", "mistake"],
+            hasDiagram: true,
             hasMistake: true,
             hasProject: false,
             estimatedMinutes: 12
           },
           {
-            slug: "why-sepolia-eth-is-worthless",
-            title: "Why Sepolia ETH is worthless — testnet economics",
-            description: "Testnet coins have no economic value. Understanding why they are strictly for testing.",
-            tags: ["networks", "testnet", "economics"],
-            hasDiagram: false,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 8
-          },
-          {
-            slug: "who-creates-faucet-tokens",
-            title: "Who creates faucet tokens and where do they come from?",
-            description: "Faucets as infrastructure gateways. How testnet coins are minted and distributed.",
-            tags: ["networks", "faucets", "security"],
+            slug: "rpc-explained",
+            title: "RPC explained — your app's phone line to the blockchain",
+            description: "ABI as translator, RPC as phone line, EVM as execution environment. The three invisible layers between your code and the blockchain.",
+            tags: ["rpc", "infrastructure", "abi", "evm"],
             hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 10
-          },
-          {
-            slug: "transaction-anatomy",
-            title: "Anatomy of a transaction",
-            description: "EVM transaction payload, fields, signatures, gas fees, and network propagation.",
-            tags: ["gas", "transactions", "interactive"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
-          },
-          {
-            slug: "what-rpc-actually-does",
-            title: "What RPC actually does — your app's phone line to the blockchain",
-            description: "JSON-RPC spec. eth_call, eth_blockNumber. Why you need Alchemy or QuickNode.",
-            tags: ["rpc", "infrastructure", "interactive"],
-            hasDiagram: true,
-            hasMistake: false,
+            hasMistake: true,
             hasProject: false,
             estimatedMinutes: 12
           },
@@ -256,6 +196,16 @@ export const tracks: Track[] = [
         name: "Wallets & Identity",
         description: "Private keys, public keys, seed phrases, signing — the cryptographic identity system.",
         lessons: [
+          {
+            slug: "why-web3-needs-wallets",
+            title: "Why Web3 needs wallets — identity without a server",
+            description: "Why a faucet asks for an address, why an address requires a wallet, and why a wallet is not a bank account. The rubber stamp vs library card mental model.",
+            tags: ["wallets", "identity", "faucets", "beginner"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
           {
             slug: "keys-and-addresses",
             title: "Private keys, public keys, addresses",
@@ -305,6 +255,16 @@ export const tracks: Track[] = [
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 13
+          },
+          {
+            slug: "transaction-anatomy",
+            title: "Anatomy of a transaction",
+            description: "EVM transaction payload, fields, signatures, gas fees, and network propagation.",
+            tags: ["gas", "transactions", "interactive"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
           }
         ]
       },
@@ -370,7 +330,7 @@ export const tracks: Track[] = [
     prerequisites: [0],
     estimatedHours: 13,
     moduleCount: 5,
-    lessonCount: 23,
+    lessonCount: 22,
     heroProject: {
       name: "Evolutionary Voting System",
       description: "Intentionally starts with a broken architecture (voter data stored on-chain), hits gas failures in practice, and evolves through optimization to a production-grade contract."
@@ -508,16 +468,7 @@ export const tracks: Track[] = [
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 11
-          },
-          {
-            slug: "what-rpc-actually-does",
-            title: "What RPC actually does — your app's phone line to the blockchain",
-            description: "JSON-RPC spec. eth_call, eth_blockNumber. Why you need Alchemy or QuickNode.",
-            tags: ["rpc", "providers", "nodes"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
+
           },
           {
             slug: "how-evm-executes-code",
@@ -662,7 +613,7 @@ export const tracks: Track[] = [
     prerequisites: [0, 1],
     estimatedHours: 12,
     moduleCount: 5,
-    lessonCount: 16,
+    lessonCount: 14,
     heroProject: {
       name: "ChainElect — Socio3 Classic → Evolution",
       description: "Start with the naive React+MetaMask+direct-contract architecture. Watch it break at scale. Evolve it through backend introduction, Redis caching, and The Graph indexing until it becomes production-grade."
@@ -755,6 +706,16 @@ export const tracks: Track[] = [
         name: "Why Backend Suddenly Appeared",
         description: "The Pinata API key was in the browser JS bundle. Someone DM'd me the key. This is the story of why every serious Web3 dApp needs a backend — and what the backend's actual job is.",
         lessons: [
+          {
+            slug: "data-location",
+            title: "Where does blockchain data actually live?",
+            description: "The 3-layer hybrid architecture. Frontend, backend, and blockchain — what runs where, and why beginners think the blockchain does everything.",
+            tags: ["nodes", "storage", "architecture"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 10
+          },
           {
             slug: "the-day-i-realized-frontend-is-not-enough",
             title: "The day I realized the frontend is not enough",
@@ -1066,6 +1027,16 @@ export const tracks: Track[] = [
             estimatedMinutes: 12
           },
           {
+            slug: "what-privy-does",
+            title: "What Privy actually does",
+            description: "Securing sharded private keys using Hardware Security Modules (HSMs) without web app custody.",
+            tags: ["privy", "security", "mpc"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
+          },
+          {
             slug: "why-web3-mobile-onboarding-sucks",
             title: "Why Web3 mobile onboarding sucks",
             description: "In-app browser sandboxes, deep link handshake drops, and the user journey of mobile wallets.",
@@ -1102,16 +1073,6 @@ export const tracks: Track[] = [
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 10
-          },
-          {
-            slug: "what-privy-does",
-            title: "What Privy actually does",
-            description: "Securing sharded private keys using Hardware Security Modules (HSMs) without web app custody.",
-            tags: ["privy", "security", "mpc"],
-            hasDiagram: true,
-            hasMistake: false,
-            hasProject: false,
-            estimatedMinutes: 12
           },
           {
             slug: "eoa-creation-flow",
