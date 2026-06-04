@@ -1,0 +1,138 @@
+---
+title: "ChainCure autopsy — role permissions and trust boundaries"
+description: "A postmortem on ChainCure: how a single compromised key halted a pharmaceutical supply chain, and how to design multi-signature role constraints."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 5
+moduleName: "Architecture Autopsies"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 14
+tags: ["autopsy", "chaincure", "access-control", "multisig", "security"]
+hasDiagram: true
+hasMistake: true
+hasProject: true
+realProjectSource: "ChainCure"
+heroProjectContribution: "Security audits and cryptographic boundaries for multi-actor supply chain tracking systems."
+---
+
+# ChainCure Autopsy: Role Permissions and Trust Boundaries
+
+When building **ChainCure**, a pharmaceutical tracking platform, our goal was to secure a complex supply chain with five distinct actors: Manufacturers, Distributors, Warehouses, Pharmacies, and Regulators.
+
+We set up a smart contract using standard OpenZeppelin role-based access control (RBAC). Only accounts designated with `DISTRIBUTOR_ROLE` could sign off on shipments, and only `MANUFACTURER_ROLE` could register new drug batches.
+
+It seemed secure on paper.
+
+Then, a regional distributor's laptop was infected with malware. The distributor's private key was leaked from their hard drive. 
+
+Before the admin could revoke the role, the attacker used the compromised distributor key to flag thousands of authentic shipments as "counterfeit" on-chain, triggering automated safety holds that froze pharmacy deliveries across the region.
+
+This is the autopsy of how role-based permissions fail under key compromises, and how to design multi-signature cryptographic boundaries for enterprise supply chains.
+
+---
+
+### 1. The Single Point of Failure (SPOF) in RBAC
+
+In standard role-based access control, checking authorization is binary:
+
+```solidity
+// ❌ Naive authorization check
+function verifyShipment(uint256 batchId, bool isAuthentic) public {
+    require(hasRole(DISTRIBUTOR_ROLE, msg.sender), "Not authorized");
+    batches[batchId].isAuthentic = isAuthentic; // Single-key compromise target!
+}
+```
+
+This architecture assumes that the key holder is always the authorized entity. But a blockchain cannot verify who physically pressed the button. It only verifies if the signature matches the public key address.
+
+If a single key has the authority to make critical state changes (like marking a drug batch as counterfeit or authorizing a recall), that key becomes a high-value target. A single compromise cascades into a full system failure.
+
+---
+
+### 2. The Solution: Multi-Signature Handshakes and Threshold Authorization
+
+To prevent a single compromised key from halting the system, we refactored the contract to require **threshold cryptographic signatures** for high-risk operations. 
+
+Instead of executing actions directly, actors sign a payload offline. These signatures are submitted to the contract, which uses `ecrecover` or OpenZeppelin's `ECDSA.recover` to verify that multiple authorized parties approved the change.
+
+```
+SINGLE-KEY FLOW (Vulnerable):
+[ Compromised Distributor ] ──▶ verifyShipment() ──▶ State Mutated (System Halted)
+
+THRESHOLD MULTI-SIG FLOW (Secure):
+[ Distributor 1 Signature ] ─┐
+                             ├──► verifyShipmentWithSignatures() ──► Check Threshold ──► State Mutated
+[ Distributor 2 Signature ] ─┘    (Requires 2-of-3 signatures / Single compromise fails)
+```
+
+Here is the implementation of the threshold multi-signature validation:
+
+```solidity
+contract SecureChainCure {
+    using ECDSA for bytes32;
+
+    mapping(address => bool) public isAuthorizedDistributor;
+    uint256 public constant REQUIRED_SIGNATURES = 2;
+    mapping(uint256 => uint256) public txNonces; // Prevent replay attacks
+
+    // Requires multiple distributor signatures to flag a counterfeit report
+    function reportCounterfeit(
+        uint256 batchId,
+        bool isAuthentic,
+        uint256 nonce,
+        bytes[] memory signatures
+    ) public {
+        require(signatures.length >= REQUIRED_SIGNATURES, "Insufficient signatures");
+        require(nonce == txNonces[batchId], "Invalid nonce");
+        txNonces[batchId]++;
+
+        // Reconstruct the signed message hash
+        bytes32 messageHash = keccak256(abi.encodePacked(batchId, isAuthentic, nonce));
+        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+
+        address lastSigner = address(0);
+        uint256 validSignatures = 0;
+
+        for (uint256 i = 0; i < signatures.length; i++) {
+            address signer = ethSignedMessageHash.recover(signatures[i]);
+            
+            // Prevent duplicate signatures from the same address
+            require(signer > lastSigner, "Signatures must be ordered to prevent duplicates");
+            lastSigner = signer;
+
+            if (isAuthorizedDistributor[signer]) {
+                validSignatures++;
+            }
+        }
+
+        require(validSignatures >= REQUIRED_SIGNATURES, "Threshold not met");
+        
+        // Execute the state change
+        batches[batchId].isAuthentic = isAuthentic;
+    }
+}
+```
+
+---
+
+### 3. Key Takeaway: System Boundaries
+
+When designing enterprise blockchain systems:
+1. **Never authorize critical mutations via a single key.** Identify high-risk actions (recalls, fund movements, role assignments) and enforce threshold confirmations.
+2. **Handle nonces carefully.** Nonce validation prevents replay attacks where an attacker copies valid signatures and submits them multiple times.
+3. **Decouple identity validation.** The blockchain verifies signatures, not people. Combine on-chain cryptographic checks with physical-world validations.
+
+---
+
+<MistakeCallout>
+  **The Replay Signature Vulnerability:**
+  During early multi-sig trials, I didn't include nonces or batch IDs in the signed hash. When a distributor signed a message saying "Approve transaction," an attacker intercepted the signature and submitted it to a different batch. The contract validated the signature, recognized the distributor address, and approved the second batch automatically. Always include unique nonces, contract addresses, and chain IDs inside the signed hashing logic!
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Look at the role privileges in your system. Identify which roles can execute actions that are impossible or highly expensive to reverse (like pausing a contract or moving funds). Implement a multi-sig helper function inside your contract to protect these critical execution boundaries.
+</LessonChallenge>

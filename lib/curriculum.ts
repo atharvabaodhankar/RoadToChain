@@ -33,6 +33,7 @@ export type Track = {
   lessonCount: number;
   heroProject: { name: string; description: string };
   isSignature: boolean;
+  isWIP?: boolean;
   modules: Module[];
 };
 
@@ -258,7 +259,7 @@ export const tracks: Track[] = [
           },
           {
             slug: "transaction-anatomy",
-            title: "Anatomy of a transaction",
+            title: "Anatomy of a transaction [Optional Deep Dive]",
             description: "EVM transaction payload, fields, signatures, gas fees, and network propagation.",
             tags: ["gas", "transactions", "interactive"],
             hasDiagram: true,
@@ -613,7 +614,7 @@ export const tracks: Track[] = [
     prerequisites: [0, 1],
     estimatedHours: 12,
     moduleCount: 5,
-    lessonCount: 14,
+    lessonCount: 15,
     heroProject: {
       name: "ChainElect — Socio3 Classic → Evolution",
       description: "Start with the naive React+MetaMask+direct-contract architecture. Watch it break at scale. Evolve it through backend introduction, Redis caching, and The Graph indexing until it becomes production-grade."
@@ -758,6 +759,16 @@ export const tracks: Track[] = [
             isRealProject: true
           },
           {
+            slug: "how-to-set-up-redis-with-nextjs",
+            title: "Setting up Redis caching in Next.js",
+            description: "How to initialize Upstash Redis, set up a Next.js API route to cache slow IPFS requests, and build a resilient fallback handler.",
+            tags: ["redis", "nextjs", "caching", "performance", "project"],
+            hasDiagram: false,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 12
+          },
+          {
             slug: "cache-invalidation-in-web3",
             title: "Cache invalidation in Web3 — when does truth change?",
             description: "Immutable content-addressed caching vs mutable on-chain state. TTL-based vs event-driven invalidation. The hybrid cache strategy for a voting dApp.",
@@ -822,7 +833,7 @@ export const tracks: Track[] = [
     prerequisites: [2],
     estimatedHours: 9,
     moduleCount: 5,
-    lessonCount: 11,
+    lessonCount: 14,
     heroProject: {
       name: "ProofChain",
       description: "Production-grade proof-of-existence system: file hashing on the frontend, IPFS storage, on-chain hash registry, event indexing, hybrid architecture."
@@ -892,6 +903,16 @@ export const tracks: Track[] = [
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 13
+          },
+          {
+            slug: "how-uniswap-actually-works",
+            title: "How Uniswap actually works — AMM system design",
+            description: "Deep dive into the Automated Market Maker (AMM) system architecture, the constant product formula (x * y = k), liquidity pool states, and arbitrage boundaries.",
+            tags: ["uniswap", "amm", "system-design", "math", "liquidity"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: false,
+            estimatedMinutes: 15
           }
         ]
       },
@@ -968,14 +989,34 @@ export const tracks: Track[] = [
         description: "Dissecting the lifecycle transformations of five production dApps.",
         lessons: [
           {
-            slug: "system-evolution-autopsy",
-            title: "System evolution — autopsy of five Web3 architectures",
-            description: "Tracing ChainElect, ProofChain, Socio3 V1, Socio3 V2, and ChainCure from naive prototypes to robust, production-grade infrastructures.",
-            tags: ["autopsy", "case-studies", "evolution", "architecture"],
+            slug: "chainelect-autopsy",
+            title: "ChainElect autopsy — gas limits and storage bottlenecks",
+            description: "A postmortem on ChainElect: how a naive smart contract architecture hit the Block Gas Limit, how on-chain storage traversals fail, and how to pack slots for efficiency.",
+            tags: ["autopsy", "chainelect", "gas", "storage", "optimization"],
             hasDiagram: true,
             hasMistake: true,
             hasProject: true,
-            estimatedMinutes: 18
+            estimatedMinutes: 14
+          },
+          {
+            slug: "socio3-autopsy",
+            title: "Socio3 autopsy — from naive RPC to decoupled production stack",
+            description: "A postmortem on Socio3: tracing how direct JSON-RPC queries froze the browser at 1,000 posts, and how we rebuilt it using Privy, ERC-4337, The Graph, and Redis.",
+            tags: ["autopsy", "socio3", "rpc", "the-graph", "caching", "ux"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 16
+          },
+          {
+            slug: "chaincure-autopsy",
+            title: "ChainCure autopsy — role permissions and trust boundaries",
+            description: "A postmortem on ChainCure: how a single compromised key halted a pharmaceutical supply chain, and how to design multi-signature role constraints.",
+            tags: ["autopsy", "chaincure", "access-control", "multisig", "security"],
+            hasDiagram: true,
+            hasMistake: true,
+            hasProject: true,
+            estimatedMinutes: 14
           }
         ]
       }
@@ -1007,16 +1048,6 @@ export const tracks: Track[] = [
         description: "Seed phrases, browser extensions, mobile sandbox deep links, and network switching friction.",
         lessons: [
           {
-            slug: "why-seed-phrases-fail",
-            title: "Why seed phrases fail real users",
-            description: "Writing down 12 words is conversion suicide. Why users reject the physical security and mental load of custody.",
-            tags: ["ux", "security", "friction"],
-            hasDiagram: false,
-            hasMistake: true,
-            hasProject: false,
-            estimatedMinutes: 10
-          },
-          {
             slug: "why-metamask-confusion",
             title: "Why MetaMask confused everyone",
             description: "How browser extensions fail, and why non-technical users confuse local key managers with the blockchain networks.",
@@ -1027,14 +1058,14 @@ export const tracks: Track[] = [
             estimatedMinutes: 12
           },
           {
-            slug: "what-privy-does",
-            title: "What Privy actually does",
-            description: "Securing sharded private keys using Hardware Security Modules (HSMs) without web app custody.",
-            tags: ["privy", "security", "mpc"],
-            hasDiagram: true,
-            hasMistake: false,
+            slug: "why-seed-phrases-fail",
+            title: "Why seed phrases fail real users",
+            description: "Writing down 12 words is conversion suicide. Why users reject the physical security and mental load of custody.",
+            tags: ["ux", "security", "friction"],
+            hasDiagram: false,
+            hasMistake: true,
             hasProject: false,
-            estimatedMinutes: 12
+            estimatedMinutes: 10
           },
           {
             slug: "why-web3-mobile-onboarding-sucks",
@@ -1055,6 +1086,16 @@ export const tracks: Track[] = [
             hasMistake: false,
             hasProject: false,
             estimatedMinutes: 10
+          },
+          {
+            slug: "what-privy-does",
+            title: "What Privy actually does",
+            description: "Securing sharded private keys using Hardware Security Modules (HSMs) without web app custody.",
+            tags: ["privy", "security", "mpc"],
+            hasDiagram: true,
+            hasMistake: false,
+            hasProject: false,
+            estimatedMinutes: 12
           }
         ]
       },
@@ -1239,9 +1280,9 @@ export const tracks: Track[] = [
     id: 5,
     slug: "track-5",
     number: "T5",
-    name: "Zero Knowledge & Privacy Engineering",
-    tagline: "Prove you know something without revealing it.",
-    description: "zkSNARKs, Circom, Groth16, Poseidon — explained from first principles with a real deployed proof system behind every lesson.",
+    name: "Zero Knowledge & Privacy Engineering [WIP]",
+    tagline: "[Work in Progress] Prove you know something without revealing it.",
+    description: "[Work in Progress] This track is currently being written. Understand zkSNARKs, Circom, Groth16, and Poseidon from first principles.",
     color: "#ec4899",
     difficulty: "advanced",
     prerequisites: [1, 2],
@@ -1253,6 +1294,7 @@ export const tracks: Track[] = [
       description: "Based on ZKredential — MIT hackathon top-15. Circom circuits, Groth16 proofs, Poseidon hashing, ERC-5192 Sbound NFTs, Polygon Amoy."
     },
     isSignature: true,
+    isWIP: true,
     modules: [
       {
         id: "m5-1",
