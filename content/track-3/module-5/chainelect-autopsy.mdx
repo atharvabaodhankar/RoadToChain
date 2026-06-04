@@ -1,0 +1,134 @@
+---
+title: "ChainElect autopsy — gas limits and storage bottlenecks"
+description: "A postmortem on ChainElect: how a naive smart contract architecture hit the Block Gas Limit, how on-chain storage traversals fail, and how to pack slots for efficiency."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 5
+moduleName: "Architecture Autopsies"
+lesson: 1
+difficulty: "advanced"
+estimatedMinutes: 14
+tags: ["autopsy", "chainelect", "gas", "storage", "optimization"]
+hasDiagram: true
+hasMistake: true
+hasProject: true
+realProjectSource: "ChainElect"
+heroProjectContribution: "The final system audit and optimization guidelines for the ChainElect contract."
+---
+
+# ChainElect Autopsy: Gas Limits and Storage Bottlenecks
+
+I was sitting in my bedroom, checking the live dashboard of my first real-world deployment: **ChainElect**, a decentralized voting contract designed for a university student body election. Everything was working perfectly for the first 50 votes.
+
+Then, at 200 votes, the frontend began to lag.
+At 400 votes, the "View Leaderboard" button took 8 seconds to load.
+At 700 votes, the entire voting process froze. Every transaction submitted by a student reverted with an obscure error: `Out of Gas`.
+
+We had to halt the election. 
+
+This postmortem analyzes the exact structural flaws of the first version of ChainElect, how on-chain storage traversals hit the Ethereum virtual machine's physical limits, and the exact design patterns required to build gas-resilient state layers.
+
+---
+
+### 1. The Naive Design
+
+In the initial design of ChainElect, I treated Solidity storage like a relational database. I wanted to check if a user had voted and display the list of all candidates dynamically.
+
+Here was the structural layout of the naive contract:
+
+```solidity
+// ❌ Naive voting architecture
+contract NaiveChainElect {
+    struct Voter {
+        address voterAddress;
+        bool hasVoted;
+        string voterName; // Storing variable-length strings on-chain
+    }
+
+    Voter[] public voters; // Dynamic array to store voters
+    
+    // To calculate the total vote count, we iterated through the array
+    function countVotes() public view returns (uint256) {
+        uint256 total = 0;
+        for (uint256 i = 0; i < voters.length; i++) { // O(N) gas loop!
+            if (voters[i].hasVoted) {
+                total++;
+            }
+        }
+        return total;
+    }
+}
+```
+
+---
+
+### 2. The Clinical Failure: The Block Gas Limit
+
+Every block on Ethereum or Polygon has a **Block Gas Limit** (e.g., 30 million gas on Ethereum). This is the maximum cumulative amount of computational gas that can be spent within a single block. 
+
+When a transaction exceeds this limit, the EVM terminates execution and reverts all changes, but still charges the sender for the gas consumed up to that point.
+
+Our contract hit two separate gas ceilings:
+
+#### 1. The Dynamic Loop Gas Trap
+The `countVotes()` function executed an $O(N)$ loop over the `voters` array. When called from a read function (`view`), it was free. But we also called it inside the state-changing `vote()` function to check quorum thresholds:
+
+```solidity
+function vote(uint256 candidateId) public {
+    require(countVotes() < quorumLimit, "Quorum reached");
+    // ...
+}
+```
+
+As the `voters` array grew:
+- At 50 voters: loop consumed 45,000 gas.
+- At 400 voters: loop consumed 360,000 gas.
+- At 700 voters: loop exceeded the transaction gas limit, causing every call to `vote()` to revert.
+
+#### 2. On-Chain String Storage
+Storing `string voterName` inside the struct was a disaster. In Solidity, strings are dynamic arrays of bytes. Storing a string requires writing data across multiple 32-byte storage slots. Writing to a cold storage slot (using the `SSTORE` opcode) costs **20,000 gas**. 
+
+Storing 30-character voter names cost more than the entire voting logic combined.
+
+---
+
+### 3. The Remediated Architecture
+
+To solve these scaling failures, we decoupled reads from writes and restructured our storage:
+
+```
+NAIVE WRITE PATH:
+[ User ] ──► write voter name ──► SSTORE name string ──► O(N) validation loop (REVERT)
+
+OPTIMIZED WRITE PATH:
+[ User ] ──► check mapping ──► SSTORE uint256 slot ──► Increment counter O(1) (SUCCESS)
+```
+
+1. **O(1) Access Mappings:** We replaced the dynamic array search with a mapping and a single state variable tracker:
+   ```solidity
+   mapping(address => bool) public hasVoted;
+   uint256 public totalVotes; // Constant-time increment
+   ```
+2. **Metadata Offshoring:** We moved the voter's name off-chain (IPFS) and stored only the 32-byte content hash reference or validated the user session via an API proxy layer.
+3. **Storage Slot Packing:** We arranged state variables sequentially to pack multiple variables into a single 32-byte slot:
+   ```solidity
+   // Packed into a single 32-byte slot (20 bytes address + 1 byte bool = 21 bytes)
+   struct OptimizedVoter {
+       address voterAddress; 
+       bool hasVoted;
+   }
+   ```
+
+---
+
+<MistakeCallout>
+  **The View Loop Illusion:**
+  It is a common mistake to think: "If a function is marked `view`, its gas cost doesn't matter." While true for standard client reads, if a `view` function is called by a *state-changing* transaction (e.g. inside another contract or as a requirement check), the gas cost of the `view` loop is fully added to the transaction execution cost. Never put $O(N)$ dynamic loops inside checking logic.
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Take a look at your current smart contracts. Search for any `for` loops that iterate over dynamic arrays. Rewrite the contract using a mapping or state counter to eliminate the loop entirely. Calculate the gas savings using a mock test deployment.
+</LessonChallenge>

@@ -1,0 +1,125 @@
+---
+title: "How Uniswap actually works — AMM system design"
+description: "Deep dive into the Automated Market Maker (AMM) system architecture, the constant product formula (x * y = k), liquidity pool states, and arbitrage boundaries."
+track: 3
+trackName: "Blockchain System Design"
+trackColor: "#22c55e"
+module: 2
+moduleName: "Data Flow Design"
+lesson: 3
+difficulty: "advanced"
+estimatedMinutes: 15
+tags: ["uniswap", "amm", "system-design", "math", "liquidity"]
+hasDiagram: true
+hasMistake: true
+hasProject: false
+---
+
+# How Uniswap Actually Works: AMM System Design
+
+Traditional financial systems rely on an **Order Book** model. Buyers submit bid orders ("I want to buy 1 ETH for $3,000") and sellers submit ask orders. A centralized matching engine matches these bids and asks in real-time.
+
+On a public blockchain, running a matching engine is impossible. The computational complexity of maintaining an order book — with constant updates, cancellations, and matching runs — would consume gigabytes of gas, freezing the network.
+
+**Uniswap** bypassed this entire order book model by inventing the **Automated Market Maker (AMM)** system design. 
+
+Instead of matching individual buyers and sellers, Uniswap pools tokens together in smart contracts (Liquidity Pools) and allows traders to swap directly against the contract using a simple mathematical invariant: **Constant Product Formula**.
+
+---
+
+### 1. The Math: Constant Product ($x \cdot y = k$)
+
+A Uniswap pool contains balances of two tokens, which we will call $x$ and $y$ (for example, ETH and USDC).
+
+The fundamental invariant governing the pool is:
+
+$$x \cdot y = k$$
+
+Where:
+* $x$ is the reserve balance of Token A (ETH).
+* $y$ is the reserve balance of Token B (USDC).
+* $k$ is a constant invariant. This value must remain unchanged during swaps (ignoring fees).
+
+```
+   TRADITIONAL ORDER BOOK MATCHING:
+   [ Buyer Bid ] ──┐
+                   ├──► [ Matching Engine ] ──► Settlement on Ledger
+   [ Seller Ask ] ─┘    (Centralized server / High gas cost on-chain)
+
+   UNISWAP LIQUIDITY POOL (AMM):
+                        [ Trader ]
+                            │
+              Swap dX ETH   │   Get dY USDC
+                            ▼
+                  +───────────────────+
+                  |  UNI-V2 POOL      |
+                  |  ETH (x)  USDC (y)|  <── Invariant: x * y = k
+                  +───────────────────+
+```
+
+When a trader swaps Token A for Token B:
+1. They deposit a quantity $\Delta x$ into the contract.
+2. The reserve of Token A becomes $x + \Delta x$.
+3. To keep $k$ constant, the contract computes the new reserve of Token B ($y - \Delta y$) such that:
+   $$(x + \Delta x) \cdot (y - \Delta y) = k$$
+4. Rearranging the formula, the trader receives $\Delta y$ tokens:
+   $$\Delta y = y - \frac{k}{x + \Delta x} = \frac{y \cdot \Delta x}{x + \Delta x}$$
+
+This ensures that as a token becomes scarcer in the pool, its relative price automatically increases, creating a natural supply-and-demand curve inside the code.
+
+---
+
+### 2. The Architecture: Factories and Pairs
+
+Uniswap V2 is designed around two primary contracts: the **Factory** and the **Pair** (Pool).
+
+```
+            +──────────────────────────────────────+
+            |          UNISWAP V2 FACTORY          |
+            |                                      |
+            |   createPair(tokenA, tokenB) ────────┼────────┐
+            +──────────────────────────────────────+        │
+                                                            ▼ (Deploys new clone)
+                                           +─────────────────────────────────+
+                                           |        UNISWAP V2 PAIR          |
+                                           |                                 |
+                                           |   Reserves: x, y                |
+                                           |   swap(amountOutA, amountOutB)  |
+                                           |   mint() / burn()               |
+                                           +─────────────────────────────────+
+```
+
+* **The Factory Contract:** Serves as the registry. It keeps a mapping of token pairs to their deployed pool contract addresses. If you want to swap a new ERC-20 token, you call `createPair()` on the factory, which deploys a new pool contract using deterministic `CREATE2` opcodes.
+* **The Pair Contract:** The actual custody engine. It holds the physical reserves of the two tokens and exposes functions for swapping, depositing liquidity (`mint`), and withdrawing liquidity (`burn`).
+
+---
+
+### 3. Price Slippage and Arbitrage Boundaries
+
+Because Uniswap prices assets based purely on internal ratios ($x / y$), it does not use a pricing oracle. The pool has no idea what the "real" price of ETH is in the outside world (e.g. on Binance).
+
+If a trader makes a massive purchase of ETH from the pool, they push the reserve ratio out of balance, resulting in **Price Slippage**. The price of ETH inside the pool rises far above the external market rate.
+
+This creates an **Arbitrage opportunity**:
+1. Arbitrage bots spot the price discrepancy.
+2. They buy ETH cheaper on Binance.
+3. They swap it for USDC in the Uniswap pool, pocketing the difference.
+4. This action pushes the reserves back into balance, aligning the pool price with global market value.
+
+Arbitrage is not an exploit; it is the **design boundary** that forces decentralized AMMs to track real-world asset prices.
+
+---
+
+<MistakeCallout>
+  **The Low Liquidity Sandbox Trap:**
+  During testing, I set up a mock swap pool for a custom token and deposited only $50 worth of tokens. I then attempted to execute a swap for $30. Because the pool liquidity was extremely low, my swap represented a massive percentage of the pool reserves. The transaction succeeded, but the constant product math caused a 90% price slippage. I received only $3 worth of output tokens. Always verify pool depth and implement slippage tolerances in your client-side routers!
+</MistakeCallout>
+
+---
+
+<LessonChallenge>
+  Suppose an ETH/USDC pool has 10 ETH ($x$) and 20,000 USDC ($y$).
+  1. What is the value of the invariant $k$?
+  2. If a trader swaps 2 ETH into the pool, how much USDC will they receive? (Assume zero swap fees).
+  3. Calculate the new reserves and verify that the product remains $k$.
+</LessonChallenge>
