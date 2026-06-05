@@ -194,11 +194,10 @@ export default function HomePage() {
 
               {/* Offset Cinematic Headline Block */}
               <div className="relative">
-                {/* Repositioned & interactive handwritten comments floating on left boundaries */}
                 <motion.div
                   animate={{ y: phase === 1 ? [0, -4, 0] : 0 }}
                   transition={{ duration: 5.2, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
-                  className="absolute -top-14 left-4 font-mono text-[10px] sm:text-[11px] text-amber-500 font-semibold hidden md:block select-none cursor-pointer opacity-[0.15] hover:opacity-90 hover:text-amber-400 transition-all duration-300"
+                  className="absolute -top-14 left-4 font-mono text-[10px] sm:text-[11px] text-amber-500 font-semibold hidden md:block select-none cursor-pointer opacity-50 dark:opacity-[0.15] hover:opacity-90 hover:text-amber-400 transition-all duration-300"
                   style={{ transform: "rotate(-3deg)" }}
                 >
                   {"// \"this confused me for weeks\""}
@@ -207,7 +206,7 @@ export default function HomePage() {
                 <motion.div
                   animate={{ y: phase === 1 ? [0, -3, 0] : 0 }}
                   transition={{ duration: 5.8, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
-                  className="absolute -bottom-14 left-32 font-mono text-[10px] sm:text-[11px] text-purple-400 font-semibold hidden md:block select-none cursor-pointer opacity-[0.15] hover:opacity-90 hover:text-purple-300 transition-all duration-300"
+                  className="absolute -bottom-14 left-32 font-mono text-[10px] sm:text-[11px] text-purple-400 font-semibold hidden md:block select-none cursor-pointer opacity-50 dark:opacity-[0.15] hover:opacity-90 hover:text-purple-300 transition-all duration-300"
                   style={{ transform: "rotate(-1.5deg)" }}
                 >
                   {"// \"why does failed tx still cost money 😭\""}
@@ -215,13 +214,13 @@ export default function HomePage() {
 
                 {/* Massive bold staggered editorial statement */}
                 <h1 className="flex flex-col text-left font-sans tracking-tight">
-                  <span className="text-6xl sm:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter">
+                  <span className="text-6xl sm:text-7xl lg:text-8xl font-black text-text leading-[0.9] tracking-tighter">
                     Web3 explained
                   </span>
-                  <span className="font-mono text-accent italic font-normal tracking-wide text-3xl sm:text-4xl mt-4 pl-8 block text-[#a78bfa] transition-colors duration-300">
+                  <span className="font-mono text-accent italic font-normal tracking-wide text-3xl sm:text-4xl mt-4 pl-8 block transition-colors duration-300">
                     by someone
                   </span>
-                  <span className="text-[#fafafa] font-bold text-5xl sm:text-6.5xl lg:text-7xl mt-3 block leading-[0.95] tracking-tighter">
+                  <span className="text-text font-bold text-5xl sm:text-6.5xl lg:text-7xl mt-3 block leading-[0.95] tracking-tighter">
                     who{" "}
                     <span className="relative inline-block text-purple-400 hover:text-cyan-400 transition-colors duration-500 cursor-pointer">
                       recently
@@ -257,7 +256,7 @@ export default function HomePage() {
               </div>
 
               {/* Monospace details telemetry footer */}
-              <div className="mt-12 font-mono text-[10px] text-dim flex flex-wrap gap-x-6 gap-y-2 border-t border-border/40 pt-5 opacity-[0.20] hover:opacity-[0.60] transition-opacity duration-300">
+              <div className="mt-12 font-mono text-[10px] text-dim flex flex-wrap gap-x-6 gap-y-2 border-t border-border/40 pt-5 opacity-60 dark:opacity-[0.20] hover:opacity-100 dark:hover:opacity-[0.60] transition-opacity duration-300">
                 <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> PEERS_ONLINE: 40_LIVE</span>
                 <span>LATENCY: 42ms</span>
                 <span>GAS_EST: 18_GWEI</span>
@@ -272,14 +271,14 @@ export default function HomePage() {
               <motion.div
                 animate={{ y: phase === 1 ? [0, 4, 0] : 0 }}
                 transition={{ duration: 4.5, repeat: phase === 1 ? Infinity : 0, ease: "easeInOut" }}
-                className="absolute -top-10 -left-12 font-mono text-[10px] sm:text-[11px] text-red-400 font-semibold hidden lg:block select-none cursor-pointer opacity-[0.15] hover:opacity-90 hover:text-red-300 transition-all duration-300 z-20"
+                className="absolute -top-10 -left-12 font-mono text-[10px] sm:text-[11px] text-red-400 font-semibold hidden lg:block select-none cursor-pointer opacity-50 dark:opacity-[0.15] hover:opacity-100 hover:text-red-300 transition-all duration-300 z-20"
                 style={{ transform: "rotate(2deg)" }}
               >
                 {"// \"why tf do we need MetaMask?\""}
               </motion.div>
 
               {/* Glassmorphic systems dashboard wrapper */}
-              <div className="w-full max-w-md rounded-2xl border border-border/40 bg-[#070708]/95 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-border/80 hover:shadow-accent-glow group">
+              <div data-theme="dark" className="dark w-full max-w-md rounded-2xl border border-border/40 bg-[#070708]/95 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-border/80 hover:shadow-accent-glow group">
                 
                 {/* Background grid texture inside component */}
                 <div className="absolute inset-0 bg-grid-engineering opacity-25 pointer-events-none" />
@@ -587,7 +586,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-8 overflow-hidden rounded-xl border border-border bg-[#111113]"
+            className="dark mt-8 overflow-hidden rounded-xl border border-border bg-[#111113]"
+            data-theme="dark"
           >
             {/* Code Header */}
             <div className="flex items-center justify-between border-b border-border bg-[#0d0d0e] px-4 py-3">

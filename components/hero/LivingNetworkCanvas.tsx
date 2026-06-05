@@ -399,8 +399,7 @@ export default function LivingNetworkCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-45"
-      style={{ mixBlendMode: "screen" }}
+      className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-60 dark:opacity-45 mix-blend-normal dark:mix-blend-screen"
     />
   );
 }
