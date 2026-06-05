@@ -25,6 +25,15 @@ import TransactionVisualizer from "@/components/simulators/TransactionVisualizer
 import WalletSigningSimulator from "@/components/simulators/WalletSigningSimulator";
 import DeploymentSimulator from "@/components/simulators/DeploymentSimulator";
 import ArchitectureExplorer from "@/components/simulators/ArchitectureExplorer";
+// Track 0 interactive diagram system
+import TrustProblemDiagram from "@/components/diagrams/TrustProblemDiagram";
+import DoubleSpendSimulator from "@/components/diagrams/DoubleSpendSimulator";
+import TransactionJourneyVisualizer from "@/components/diagrams/TransactionJourneyVisualizer";
+import WhereIsBlockchainStored from "@/components/diagrams/WhereIsBlockchainStored";
+import MainnetVsTestnetExplorer from "@/components/diagrams/MainnetVsTestnetExplorer";
+import WalletRealityCheck from "@/components/diagrams/WalletRealityCheck";
+import RPCPhoneLineDiagram from "@/components/diagrams/RPCPhoneLineDiagram";
+import GasCostVisualizer from "@/components/diagrams/GasCostVisualizer";
 import React from "react";
 
 interface Props {
@@ -94,6 +103,15 @@ const mdxComponents = {
   WalletSigningSimulator,
   DeploymentSimulator,
   ArchitectureExplorer,
+  // Track 0 diagram system
+  TrustProblemDiagram,
+  DoubleSpendSimulator,
+  TransactionJourneyVisualizer,
+  WhereIsBlockchainStored,
+  MainnetVsTestnetExplorer,
+  WalletRealityCheck,
+  RPCPhoneLineDiagram,
+  GasCostVisualizer,
   // Custom code block renderer to replace standard markdown pre blocks
   pre: (props: React.ComponentPropsWithoutRef<"pre">) => {
     const codeEl = props.children;
