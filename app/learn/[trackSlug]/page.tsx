@@ -172,7 +172,7 @@ export default async function TrackPage({ params }: Props) {
         >
           <div className="mx-auto max-w-4xl space-y-12">
             {track.modules.map((mod) => (
-              <div key={mod.id} className="relative">
+              <div key={mod.id} id={`module-${mod.number.split(".")[1]}`} className="relative scroll-mt-20">
                 {/* Module Header */}
                 <div className="flex items-start gap-4 border-b border-border pb-4">
                   <div className="font-mono text-sm font-bold text-accent">

@@ -318,9 +318,19 @@ export default async function LessonPage({ params }: Props) {
             <article className="flex-1 max-w-[720px] min-w-0">
               {/* Breadcrumbs */}
               <div className="flex items-center gap-1.5 font-mono text-[10px] text-dim mb-4 select-none">
-                <span>{currentTrack.number}</span>
+                <Link
+                  href={`/learn/${trackSlug}`}
+                  className="hover:text-text hover:underline transition-colors cursor-pointer"
+                >
+                  {currentTrack.number}
+                </Link>
                 <span>/</span>
-                <span>{currentModule.number}</span>
+                <Link
+                  href={`/learn/${trackSlug}#module-${currentModule.number.split(".")[1]}`}
+                  className="hover:text-text hover:underline transition-colors cursor-pointer"
+                >
+                  {currentModule.number}
+                </Link>
                 <span>/</span>
                 <span className="text-muted truncate max-w-[150px]">{currentLesson.title}</span>
               </div>

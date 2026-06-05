@@ -26,7 +26,7 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
   const styleClass = getTrackColor(track);
 
   return (
-    <div className={`my-8 rounded-xl border p-5 ${styleClass}`}>
+    <div className={`not-prose my-8 rounded-xl border p-5 ${styleClass}`}>
       <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 fill-current" />
@@ -38,7 +38,7 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
           {name}
         </span>
       </div>
-      <div className="text-sm leading-relaxed text-muted">
+      <div className="text-sm leading-relaxed text-text dark:text-zinc-200 font-sans [&_p]:text-inherit [&_p]:my-1.5 first:[&_p]:mt-0 last:[&_p]:mb-0 [&_strong]:font-bold [&_strong]:text-text dark:[&_strong]:text-white">
         {children}
       </div>
     </div>
