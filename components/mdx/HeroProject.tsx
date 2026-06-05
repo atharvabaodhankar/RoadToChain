@@ -38,7 +38,10 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
           {name}
         </span>
       </div>
-      <div className="text-sm leading-relaxed text-text dark:text-zinc-200 font-sans [&_p]:text-inherit [&_p]:my-1.5 first:[&_p]:mt-0 last:[&_p]:mb-0 [&_strong]:font-bold [&_strong]:text-text dark:[&_strong]:text-white">
+      <div
+        className="text-sm leading-relaxed font-sans [&_p]:!text-zinc-800 dark:[&_p]:!text-zinc-200 [&_p]:my-1.5 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_strong]:!font-bold [&_strong]:!text-zinc-900 dark:[&_strong]:!text-zinc-100 [&_a]:underline [&_ul]:!text-zinc-800 dark:[&_ul]:!text-zinc-200 [&_li]:!text-zinc-800 dark:[&_li]:!text-zinc-200"
+        style={{ color: "inherit" }}
+      >
         {children}
       </div>
     </div>

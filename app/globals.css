@@ -124,6 +124,15 @@ body {
   letter-spacing: -0.02em;
 }
 
+/* Force not-prose callout children to use their own color — override typography plugin */
+.prose .not-prose p,
+.prose .not-prose li,
+.prose .not-prose ul,
+.prose .not-prose ol {
+  color: inherit !important;
+  margin: 0;
+}
+
 /* Pulse animation for hero status badge dot */
 @keyframes pulseGlow {
   0%, 100% {

@@ -497,7 +497,6 @@ export default function HomePage() {
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {tracks.map((track, i) => {
-              const isLast = i === tracks.length - 1;
               return (
                 <motion.div
                   key={track.id}
@@ -506,7 +505,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: i * 0.06, ease: "easeOut" }}
                   whileHover={{ y: -2 }}
-                  className={`group relative flex flex-col gap-3 rounded-xl border border-border bg-bg2 p-5 transition-all duration-200 hover:border-border2 hover:bg-bg3 ${isLast ? "sm:col-span-2" : ""}`}
+                  className="group relative flex flex-col gap-3 rounded-xl border border-border bg-bg2 p-5 transition-all duration-200 hover:border-border2 hover:bg-bg3"
                 >
                   {/* Accent Bar */}
                   <div
