@@ -79,30 +79,6 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
 
   return (
     <div className="relative min-h-screen bg-bg text-text selection:bg-accent/30 overflow-x-hidden font-sans">
-      
-      {/* ── GLOBAL ATMOSPHERE SYSTEM (Morphing Backgrounds) ──────────────── */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Dynamic radial gradients cross-fading smoothly */}
-        {trackColors.map((color, idx) => (
-          <div 
-            key={idx}
-            className="absolute inset-0 transition-opacity duration-[1200ms] ease-in-out"
-            style={{
-              background: `radial-gradient(circle at 60% 40%, ${color} 0%, transparent 65%)`,
-              opacity: activeTrackId === idx ? 0.25 : 0
-            }}
-          />
-        ))}
-        
-        {/* Tech Grid Pattern */}
-        <div className="absolute inset-0 bg-grid-engineering opacity-70" />
-        
-        {/* Futuristic Flow Grid */}
-        <div className="absolute inset-0 bg-grid-flow opacity-15" />
-        
-        {/* Subtle Ambient Scanline Overlays */}
-        <div className="absolute inset-0 scanline-overlay opacity-[0.03]" />
-      </div>
 
       {/* ── HERO HEADER SECTION ────────────────────────────────────────── */}
       <section className="relative z-10 border-b border-border px-4 pt-32 pb-20 sm:px-6 lg:px-8 max-w-7xl mx-auto">

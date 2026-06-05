@@ -7,14 +7,12 @@ interface MistakeCalloutProps {
 
 export default function MistakeCallout({ children }: MistakeCalloutProps) {
   return (
-    <div className="my-6 rounded-lg border-l-[3px] border-orange-500 bg-orange-500/5 p-4 text-orange-200">
-      <div className="flex items-center gap-2 mb-2">
-        <AlertTriangle className="h-4 w-4 text-orange-400" />
-        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-orange-400">
-          ⚠ MISTAKE I MADE
-        </span>
+    <div className="my-6 rounded-lg border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/20 p-4 text-amber-900 dark:text-amber-200">
+      <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
+        <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+        <span>Common Mistake</span>
       </div>
-      <div className="text-sm font-mono leading-relaxed pl-1 text-orange-300/90 italic">
+      <div className="text-sm leading-relaxed text-amber-800/90 dark:text-amber-200/90 font-sans">
         {children}
       </div>
     </div>

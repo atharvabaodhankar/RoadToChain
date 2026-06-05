@@ -2,14 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Menu, X, ArrowRight, Lock, Unlock, LogIn, LogOut, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, ArrowRight, Lock, Unlock, LogIn, LogOut, Loader2, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProgress } from "@/app/context/ProgressContext";
 
 export default function Nav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const activeTheme = document.documentElement.getAttribute("data-theme") as "light" | "dark" || "light";
+    setTheme(activeTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    if (nextTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "LearnBlockchain";
   const { 
     user, 
@@ -96,6 +115,19 @@ export default function Nav() {
                   <Lock className="h-3 w-3 text-dim" />
                   <span>Walkaround: OFF</span>
                 </>
+              )}
+            </button>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="inline-flex items-center justify-center rounded-md bg-bg3 border border-border text-muted hover:text-text hover:border-border2 transition-all cursor-pointer h-7 w-7"
+              title={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+            >
+              {theme === "light" ? (
+                <Moon className="h-3.5 w-3.5" />
+              ) : (
+                <Sun className="h-3.5 w-3.5" />
               )}
             </button>
 
@@ -186,13 +218,30 @@ export default function Nav() {
               <hr className="border-border" />
 
               {/* Mobile controls */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-3 gap-2">
+                {/* Theme Toggle */}
+                <button
+                  onClick={() => {
+                    toggleTheme();
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center justify-center rounded-md border border-border bg-bg3 p-2 text-muted hover:text-text"
+                  title="Toggle Light/Dark Theme"
+                >
+                  {theme === "light" ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
+                </button>
+
+                {/* Walkaround Mode Toggle */}
                 <button
                   onClick={() => {
                     toggleWalkaroundMode();
                     setIsOpen(false);
                   }}
-                  className={`flex items-center justify-center gap-1.5 rounded-md p-2 border transition-all ${
+                  className={`flex items-center justify-center gap-1 rounded-md p-2 border transition-all ${
                     walkaroundMode
                       ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
                       : "bg-bg3 border-border text-muted"
@@ -201,12 +250,12 @@ export default function Nav() {
                   {walkaroundMode ? (
                     <>
                       <Unlock className="h-3.5 w-3.5 text-emerald-400" />
-                      <span className="font-mono text-[10px]">WALKAROUND: ON</span>
+                      <span className="font-mono text-[9px] uppercase font-bold">ON</span>
                     </>
                   ) : (
                     <>
                       <Lock className="h-3.5 w-3.5 text-muted" />
-                      <span className="font-mono text-[10px]">WALKAROUND: OFF</span>
+                      <span className="font-mono text-[9px] uppercase font-bold">OFF</span>
                     </>
                   )}
                 </button>
@@ -221,10 +270,10 @@ export default function Nav() {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-md border border-border bg-bg3 p-2 font-mono text-[10px] text-text hover:bg-bg4"
+                    className="flex items-center justify-center gap-1 rounded-md border border-border bg-bg3 p-2 font-mono text-[9px] text-text hover:bg-bg4"
                   >
                     <LogOut className="h-3.5 w-3.5 text-muted" />
-                    <span>LOG OUT</span>
+                    <span>OUT</span>
                   </button>
                 ) : (
                   <button
@@ -232,10 +281,10 @@ export default function Nav() {
                       signInWithGoogle();
                       setIsOpen(false);
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-md border border-border bg-bg3 p-2 font-mono text-[10px] text-text hover:bg-bg4"
+                    className="flex items-center justify-center gap-1 rounded-md border border-border bg-bg3 p-2 font-mono text-[9px] text-text hover:bg-bg4"
                   >
                     <LogIn className="h-3.5 w-3.5 text-muted" />
-                    <span>SIGN IN</span>
+                    <span>IN</span>
                   </button>
                 )}
               </div>
