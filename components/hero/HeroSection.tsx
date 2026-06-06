@@ -158,9 +158,11 @@ const CONFUSION_CARDS: ConfusionCard[] = [
 
 const getCardStyle = (offset: number) => {
   const transition = "all 0.7s cubic-bezier(0.25, 1, 0.5, 1)";
+  const transformOrigin = "top center";
   if (offset === 0) {
     return {
       transform: "translateY(48px) scale(1) rotate(0deg)",
+      transformOrigin,
       zIndex: 30,
       opacity: 1,
       pointerEvents: "auto" as const,
@@ -169,6 +171,7 @@ const getCardStyle = (offset: number) => {
   } else if (offset === 1) {
     return {
       transform: "translateY(24px) scale(0.97) rotate(1.2deg)",
+      transformOrigin,
       zIndex: 20,
       opacity: 0.9,
       pointerEvents: "auto" as const,
@@ -177,6 +180,7 @@ const getCardStyle = (offset: number) => {
   } else if (offset === 2) {
     return {
       transform: "translateY(0px) scale(0.94) rotate(-0.8deg)",
+      transformOrigin,
       zIndex: 10,
       opacity: 0.65,
       pointerEvents: "auto" as const,
@@ -185,6 +189,7 @@ const getCardStyle = (offset: number) => {
   } else if (offset === 3) {
     return {
       transform: "translateY(-12px) scale(0.91) rotate(0deg)",
+      transformOrigin,
       zIndex: 0,
       opacity: 0,
       pointerEvents: "none" as const,
@@ -194,6 +199,7 @@ const getCardStyle = (offset: number) => {
     // offset === 4 (Exiting card)
     return {
       transform: "translateX(-110%) translateY(48px) scale(0.97) rotate(-4deg)",
+      transformOrigin,
       zIndex: 40,
       opacity: 0,
       pointerEvents: "none" as const,
@@ -226,8 +232,8 @@ function ConfusionArchive() {
             style={styleObj}
             className={`absolute top-0 left-0 right-0 h-[165px] text-left rounded-lg border p-4 transition-all select-none overflow-hidden ${
               isActive
-                ? "border-accent/40 bg-bg dark:bg-bg2 shadow-[0_8px_30px_rgba(0,0,0,0.015)]"
-                : "border-border/25 bg-bg/95 dark:bg-bg2/95 cursor-pointer hover:border-border/45"
+                ? "border-accent/40 bg-bg dark:bg-bg2 shadow-[0_20px_50px_rgba(0,0,0,0.035)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
+                : "border-border/25 bg-bg/95 dark:bg-bg2/95 shadow-[0_4px_12px_rgba(0,0,0,0.005)] cursor-pointer hover:border-border/45"
             }`}
           >
             {/* Card Header (Tab Area) */}
