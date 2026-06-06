@@ -324,14 +324,10 @@ export default function HeroSection() {
               Web3
             </span>
 
-            {/* explained — indented with margin, no translate */}
+            {/* explained — premium editorial serif style */}
             <span
-              className="hero-reveal hero-delay-1 font-serif font-bold italic"
+              className="hero-reveal hero-delay-1 font-serif font-light italic text-[40px] md:text-[72px] text-accent"
               style={{
-                fontSize: "clamp(2rem, 4.5vw, 3.8rem)",
-                color: "var(--accent)",
-               
-               
                 paddingLeft: "0.75rem",
                 lineHeight: 1.1,
               }}

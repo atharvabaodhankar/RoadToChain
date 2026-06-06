@@ -23,6 +23,8 @@
   --color-track-5: var(--track-5);
   --color-track-6: var(--track-6);
   --color-track-7: var(--track-7);
+
+  --font-serif: var(--font-serif);
 }
 
 :root {
@@ -62,6 +64,7 @@
   --dg-warning: #d97706;
   --dg-blue: #2563eb;
   --dg-teal: #0d9488;
+  
 }
 
 [data-theme="dark"] {
