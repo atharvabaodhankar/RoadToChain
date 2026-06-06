@@ -15,6 +15,7 @@ import HeroProject from "@/components/mdx/HeroProject";
 import LessonChallenge from "@/components/mdx/LessonChallenge";
 import KeyConfusion from "@/components/mdx/KeyConfusion";
 import CodeBlock from "@/components/mdx/CodeBlock";
+import LessonImage from "@/components/mdx/LessonImage";
 import ReadingProgressBar from "@/components/layout/ReadingProgressBar";
 import LessonCompleteButton from "@/components/layout/LessonCompleteButton";
 import TableOfContents from "@/components/layout/TableOfContents";
@@ -112,6 +113,7 @@ const mdxComponents = {
   WalletRealityCheck,
   RPCPhoneLineDiagram,
   GasCostVisualizer,
+  LessonImage,
   // Custom code block renderer to replace standard markdown pre blocks
   pre: (props: React.ComponentPropsWithoutRef<"pre">) => {
     const codeEl = props.children;

@@ -46,7 +46,7 @@ export default function TrustProblemDiagram() {
       </div>
 
       {/* Diagram grid */}
-      <div className="grid grid-cols-2 divide-x" style={{ divideColor: "var(--dg-border)" }}>
+      <div className="grid grid-cols-2 divide-x divide-border">
 
         {/* LEFT — Centralized */}
         <div

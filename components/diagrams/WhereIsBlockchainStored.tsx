@@ -50,7 +50,7 @@ export default function WhereIsBlockchainStored() {
         </span>
       </div>
 
-      <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x" style={{ divideColor: "var(--dg-border)" }}>
+      <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
         {/* LEFT: Misconception */}
         <div className="p-5">
           <div className="font-mono text-[9px] uppercase tracking-widest mb-4 text-center" style={{ color: "var(--dg-danger)" }}>
