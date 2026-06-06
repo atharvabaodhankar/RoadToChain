@@ -111,30 +111,7 @@ const stackItems = [
 // ─── Learning Path Nodes ──────────────────────────────────────────────────────
 const pathNodes = ["Learn", "Build", "Break", "Debug", "Improve", "Deploy"];
 
-// Dynamic live logs arrays based on phase states
-const CONFUSION_LOGS = [
-  { type: "warn", icon: "✖", text: "FAIL: EVM execution frame reverted" },
-  { type: "warn", icon: "⚠", text: "RPC_ERR: connection timeout (12000ms)" },
-  { type: "warn", icon: "✖", text: "tx failed: invalid transaction nonce" },
-  { type: "warn", icon: "⚠", text: "MetaMask: user rejected transaction" },
-  { type: "warn", icon: "✖", text: "gas: insufficient balance for state fee" }
-];
-
-const FORMING_LOGS = [
-  { type: "sync", icon: "⚙", text: "EVM: parsing SmartAccount ABI..." },
-  { type: "sync", icon: "⚡", text: "RPC: handshake request dispatched" },
-  { type: "sync", icon: "⚡", text: "mempool: propagating signed UserOp" },
-  { type: "sync", icon: "⚙", text: "consensus: syncing network status" },
-  { type: "sync", icon: "⚙", text: "proving: generating SNARK witness" }
-];
-
-const MASTERY_LOGS = [
-  { type: "ok", icon: "✓", text: "State root commitment successfully finalized" },
-  { type: "ok", icon: "✓", text: "EVM: payload execution succeeded in frame" },
-  { type: "ok", icon: "✓", text: "consensus: reached 2/3+ precommit votes" },
-  { type: "ok", icon: "✓", text: "gas sponsored via paymaster contract" },
-  { type: "ok", icon: "✓", text: "proof validated (904 circuit constraints)" }
-];
+// ─── HomePage ─────────────────────────────────────────────────────────────
 
 export default function HomePage() {
 

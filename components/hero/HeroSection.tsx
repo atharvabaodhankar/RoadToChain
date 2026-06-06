@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+
 
 // ─── Ambient Particle Canvas ─────────────────────────────────────────────────
 function AmbientParticleCanvas() {
@@ -102,6 +103,186 @@ function AmbientParticleCanvas() {
   );
 }
 
+// ─── Confusion Archive Data & Component ───────────────────────────────────────
+interface ConfusionCard {
+  id: string;
+  shortLabel: string;
+  question: string;
+  assumption: string;
+  reality: string;
+  concepts: string[];
+}
+
+const CONFUSION_CARDS: ConfusionCard[] = [
+  {
+    id: "01",
+    shortLabel: "NETWORK",
+    question: "Who runs blockchain?",
+    assumption: "Google has blockchain servers",
+    reality: "Distributed node network.",
+    concepts: ["Nodes", "Consensus"],
+  },
+  {
+    id: "02",
+    shortLabel: "STORAGE",
+    question: "Where are coins stored?",
+    assumption: "Inside MetaMask",
+    reality: "Stored as blockchain state.",
+    concepts: ["Private Keys", "Ownership"],
+  },
+  {
+    id: "03",
+    shortLabel: "GAS COST",
+    question: "Why does failed transaction cost money?",
+    assumption: "It didn't work.",
+    reality: "Validators still executed computation.",
+    concepts: ["Gas", "EVM Execution"],
+  },
+  {
+    id: "04",
+    shortLabel: "TESTNETS",
+    question: "Why fake ETH exists?",
+    assumption: "Real ETH should be enough.",
+    reality: "Testnets remove financial risk.",
+    concepts: ["Testnets", "Deployment"],
+  },
+  {
+    id: "05",
+    shortLabel: "HYBRID ARCH",
+    question: "Can blockchain replace backend?",
+    assumption: "Everything can be on-chain.",
+    reality: "Modern systems are hybrid.",
+    concepts: ["Limits", "Hybrid Arch"],
+  },
+];
+
+const getCardStyle = (offset: number) => {
+  const transition = "all 0.7s cubic-bezier(0.25, 1, 0.5, 1)";
+  if (offset === 0) {
+    return {
+      transform: "translateY(48px) scale(1) rotate(0deg)",
+      zIndex: 30,
+      opacity: 1,
+      pointerEvents: "auto" as const,
+      transition,
+    };
+  } else if (offset === 1) {
+    return {
+      transform: "translateY(24px) scale(0.97) rotate(1.2deg)",
+      zIndex: 20,
+      opacity: 0.9,
+      pointerEvents: "auto" as const,
+      transition,
+    };
+  } else if (offset === 2) {
+    return {
+      transform: "translateY(0px) scale(0.94) rotate(-0.8deg)",
+      zIndex: 10,
+      opacity: 0.65,
+      pointerEvents: "auto" as const,
+      transition,
+    };
+  } else if (offset === 3) {
+    return {
+      transform: "translateY(-12px) scale(0.91) rotate(0deg)",
+      zIndex: 0,
+      opacity: 0,
+      pointerEvents: "none" as const,
+      transition,
+    };
+  } else {
+    // offset === 4 (Exiting card)
+    return {
+      transform: "translateX(-110%) translateY(48px) scale(0.97) rotate(-4deg)",
+      zIndex: 40,
+      opacity: 0,
+      pointerEvents: "none" as const,
+      transition,
+    };
+  }
+};
+
+function ConfusionArchive() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % CONFUSION_CARDS.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [activeIndex]);
+
+  return (
+    <div className="relative w-full max-w-lg lg:max-w-xl h-[215px] select-none overflow-visible">
+      {CONFUSION_CARDS.map((card, idx) => {
+        const isActive = idx === activeIndex;
+        const offset = (idx - activeIndex + CONFUSION_CARDS.length) % CONFUSION_CARDS.length;
+        const styleObj = getCardStyle(offset);
+
+        return (
+          <div
+            key={card.id}
+            onClick={() => setActiveIndex(idx)}
+            style={styleObj}
+            className={`absolute top-0 left-0 right-0 h-[165px] text-left rounded-lg border p-4 transition-all select-none overflow-hidden ${
+              isActive
+                ? "border-accent/40 bg-bg dark:bg-bg2 shadow-[0_8px_30px_rgba(0,0,0,0.015)]"
+                : "border-border/25 bg-bg/95 dark:bg-bg2/95 cursor-pointer hover:border-border/45"
+            }`}
+          >
+            {/* Card Header (Tab Area) */}
+            <div className="flex items-center justify-between h-5">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[9px] font-bold text-accent/80 opacity-70 tracking-wider">
+                  {card.id} // {card.shortLabel}
+                </span>
+              </div>
+              {isActive ? (
+                <span className="inline-flex items-center gap-1 font-mono text-[8px] font-bold tracking-wider text-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse-dot" />
+                  SOLVED
+                </span>
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/35" />
+              )}
+            </div>
+
+            {/* Card Content Details */}
+            <div
+              className={`mt-2 border-t border-border/15 pt-2.5 transition-opacity duration-500 ${
+                isActive ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <h4 className="font-semibold text-[13.5px] tracking-tight text-text leading-tight">
+                {card.question}
+              </h4>
+
+              <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-border/15">
+                <div>
+                  <div className="font-mono text-[8.5px] font-bold tracking-wider text-red-500/70 mb-1 uppercase">
+                    Mistaken Assumption
+                  </div>
+                  <p className="text-[11.5px] text-muted italic leading-normal">
+                    &ldquo;{card.assumption}&rdquo;
+                  </p>
+                </div>
+                <div>
+                  <div className="font-mono text-[8.5px] font-bold tracking-wider text-emerald-500/70 mb-1 uppercase">
+                    Reality
+                    </div>
+                  <p className="text-[11.5px] text-text leading-normal font-medium">
+                    {card.reality}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Main HeroSection ─────────────────────────────────────────────────────────
 export default function HeroSection() {
   return (
@@ -127,128 +308,117 @@ export default function HeroSection() {
         }}
       />
 
-      {/* ── Content ── */}
-      <div className="relative z-10 w-full max-w-5xl">
+      {/* ── Content Grid ── */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        
+        {/* Left Column (Editorial Content) */}
+        <div className="lg:col-span-6 flex flex-col justify-center">
+          {/* ── Headline ── */}
+          <h1 className="flex flex-col tracking-tight animate-none" style={{ lineHeight: 1.05 }}>
 
-        {/* Floating annotation — top, decorative only */}
-        <p
-          aria-hidden="true"
-          className="absolute -top-8 left-0 font-mono text-[11px] hidden md:block select-none pointer-events-none"
-          style={{ color: "#f59e0b", opacity: 0.32, transform: "rotate(-2deg)" }}
-        >
-          {`// "this confused me for weeks"`}
-        </p>
-
-        {/* ── Headline ── */}
-        <h1 className="flex flex-col tracking-tight" style={{ lineHeight: 1.05 }}>
-
-          {/* Web3 */}
-          <span
-            className="hero-reveal font-extrabold"
-            style={{ fontSize: "clamp(3rem, 8vw, 6.5rem)", color: "var(--text)" }}
-          >
-            Web3
-          </span>
-
-          {/* explained — indented with margin, no translate */}
-          <span
-            className="hero-reveal hero-delay-1 font-medium italic"
-            style={{
-              fontSize: "clamp(2.2rem, 5.5vw, 4.8rem)",
-              color: "var(--accent)",
-              marginLeft: "clamp(1.5rem, 4vw, 4rem)",
-              borderLeft: "4px solid var(--accent)",
-              paddingLeft: "0.75rem",
-              lineHeight: 1.1,
-            }}
-          >
-            explained
-          </span>
-
-          {/* by someone who */}
-          <span
-            className="hero-reveal hero-delay-2 font-light"
-            style={{
-              fontSize: "clamp(1.8rem, 4.5vw, 3.8rem)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.1,
-            }}
-          >
-            by someone who
-          </span>
-
-          {/* recently got it. */}
-          <span
-            className="hero-reveal hero-delay-3 font-black tracking-tight"
-            style={{
-              fontSize: "clamp(3rem, 8.5vw, 6.5rem)",
-              color: "var(--text)",
-              lineHeight: 1.05,
-              paddingBottom: "0.1em", /* prevent descender clip */
-            }}
-          >
-            recently{" "}
-            <span style={{ color: "var(--accent)" }}>got it.</span>
-          </span>
-        </h1>
-
-        {/* ── Subtext ── */}
-        <p
-          className="hero-reveal hero-delay-4 text-base leading-relaxed max-w-lg"
-          style={{
-            color: "var(--text-secondary)",
-            marginTop: "2rem",
-            paddingLeft: "1.25rem",
-            borderLeft: "1px solid var(--border2)",
-          }}
-        >
-          8 progressive engineering tracks. Over 40 deep-dive modules.
-          No superficial hand-waving. Every real system failure is fully documented.
-        </p>
-
-        {/* ── CTAs ── */}
-        <div
-          className="hero-reveal hero-delay-4 flex flex-col sm:flex-row gap-4"
-          style={{ marginTop: "2.5rem" }}
-        >
-          <Link
-            href="/learn/track-0"
-            className="group relative overflow-hidden inline-flex items-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              backgroundColor: "var(--accent)",
-              boxShadow: "0 4px 20px color-mix(in srgb, var(--accent) 25%, transparent)",
-            }}
-          >
+            {/* Web3 */}
             <span
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
-            />
-            <span className="relative flex items-center gap-2">
-              Begin Track 0 <ArrowRight className="h-4 w-4" />
+              className="hero-reveal font-extrabold"
+              style={{ fontSize: "clamp(2.8rem, 6.2vw, 5.2rem)", color: "var(--text)" }}
+            >
+              Web3
             </span>
-          </Link>
 
-          <Link
-            href="/curriculum"
-            className="inline-flex items-center justify-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-bg3"
+            {/* explained — indented with margin, no translate */}
+            <span
+              className="hero-reveal hero-delay-1 font-serif font-bold italic"
+              style={{
+                fontSize: "clamp(2rem, 4.5vw, 3.8rem)",
+                color: "var(--accent)",
+               
+               
+                paddingLeft: "0.75rem",
+                lineHeight: 1.1,
+              }}
+            >
+              explained
+            </span>
+
+            {/* by someone who */}
+            <span
+              className="hero-reveal hero-delay-2 font-light"
+              style={{
+                fontSize: "clamp(1.6rem, 3.5vw, 3.0rem)",
+                color: "var(--text-secondary)",
+                lineHeight: 1.1,
+              }}
+            >
+              by someone who
+            </span>
+
+            {/* recently got it. */}
+            <span
+              className="hero-reveal hero-delay-3 font-black tracking-tight"
+              style={{
+                fontSize: "clamp(2.8rem, 6.8vw, 5.2rem)",
+                color: "var(--text)",
+                lineHeight: 1.05,
+                paddingBottom: "0.1em", /* prevent descender clip */
+              }}
+            >
+              recently{" "}
+              <span style={{ color: "var(--accent)" }}>got it.</span>
+            </span>
+          </h1>
+
+          {/* ── Subtext ── */}
+          <p
+            className="hero-reveal hero-delay-4 text-base leading-relaxed max-w-lg"
             style={{
-              border: "1px solid var(--border2)",
               color: "var(--text-secondary)",
+              marginTop: "2rem",
+              paddingLeft: "1.25rem",
+              borderLeft: "1px solid var(--border2)",
             }}
           >
-            Explore Curriculum
-          </Link>
+            8 progressive engineering tracks. Over 40 deep-dive modules.
+            No superficial hand-waving. Every real system failure is fully documented.
+          </p>
+
+          {/* ── CTAs ── */}
+          <div
+            className="hero-reveal hero-delay-4 flex flex-col sm:flex-row gap-4"
+            style={{ marginTop: "2.5rem" }}
+          >
+            <Link
+              href="/learn/track-0"
+              className="group relative overflow-hidden inline-flex items-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
+              style={{
+                backgroundColor: "var(--accent)",
+                boxShadow: "0 4px 20px color-mix(in srgb, var(--accent) 25%, transparent)",
+              }}
+            >
+              <span
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
+              />
+              <span className="relative flex items-center gap-2">
+                Begin Track 0 <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
+
+            <Link
+              href="/curriculum"
+              className="inline-flex items-center justify-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-bg3"
+              style={{
+                border: "1px solid var(--border2)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              Explore Curriculum
+            </Link>
+          </div>
         </div>
 
-        {/* Floating annotation — bottom, decorative only */}
-        <p
-          aria-hidden="true"
-          className="absolute -bottom-8 left-32 font-mono text-[11px] hidden lg:block select-none pointer-events-none"
-          style={{ color: "var(--text-dim)", opacity: 0.28, transform: "rotate(-1deg)" }}
-        >
-          {`// "why does failed tx still cost money 😭"`}
-        </p>
-
+        {/* Right Column (Confusion Archive Board) */}
+        <div className="lg:col-span-6 relative w-full flex justify-center lg:justify-end hero-reveal hero-delay-3">
+          <ConfusionArchive />
+        </div>
       </div>
     </section>
   );
