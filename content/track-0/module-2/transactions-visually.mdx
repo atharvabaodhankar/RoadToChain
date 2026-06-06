@@ -87,7 +87,7 @@ Here is the exact lifecycle of a transaction as it travels through the network:
 3. **Mempool Selection:** Miners/Validators select transactions from their mempools. Since block space is limited, they sort them by gas price to maximize profit.
 4. **Execution:** The validator runs the transaction against the current state database. If successful, state changes are written into a new block, which is appended to the chain.
 
-<Diagram type="mempool-visualizer" caption="Transactions wait in the Mempool database of validator nodes. Validators select and order transactions based on gas bid priority to pack into the next block." />
+<TransactionJourneyVisualizer />
 
 ---
 

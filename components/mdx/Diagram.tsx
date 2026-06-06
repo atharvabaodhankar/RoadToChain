@@ -3,7 +3,7 @@
 import React from "react";
 
 interface DiagramProps {
-  type: "trust-model" | "transaction-lifecycle" | "metamask-keys" | "gas-meter" | "aa-comparison" | "zk-constraints" | "signing-flow" | "key-derivation" | "hybrid-architecture" | "abi-translator" | "rpc-pipeline" | "evm-execution" | "mobile-wallet-pain" | "value-mental-model";
+  type: "trust-model" | "transaction-lifecycle" | "metamask-keys" | "gas-meter" | "aa-comparison" | "zk-constraints" | "signing-flow" | "key-derivation" | "hybrid-architecture" | "abi-translator" | "rpc-pipeline" | "evm-execution" | "mobile-wallet-pain" | "value-mental-model" | "merkle-tree" | "byzantine-consensus" | "eip-1559-pricing";
   caption?: string;
 }
 
@@ -792,6 +792,145 @@ export default function Diagram({ type, caption }: DiagramProps) {
             {/* Bottom insight */}
             <rect x="150" y="350" width="600" height="22" rx="6" fill="#0a0a1a" stroke="rgba(124,58,237,0.1)" />
             <text x="450" y="365" textAnchor="middle" fill="#a78bfa" fontFamily="var(--font-geist-sans)" fontSize="10">Same code. Same tools. Same MetaMask UI. Completely different economic reality.</text>
+          </svg>
+        );
+
+      case "merkle-tree":
+        return (
+          <svg viewBox="0 0 800 320" className="w-full h-auto bg-bg border border-border rounded-xl">
+            <text x="400" y="35" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="11" letterSpacing="0.05em">MERKLE TREE DATA STRUCT (TRANSACTION HASHING)</text>
+            
+            {/* Merkle Root */}
+            <g>
+              <rect x="330" y="60" width="140" height="40" rx="6" fill="var(--dg-card2)" stroke="var(--dg-accent)" strokeWidth="1.5" />
+              <text x="400" y="78" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="11" fontWeight="bold">Merkle Root</text>
+              <text x="400" y="93" textAnchor="middle" fill="var(--dg-accent)" fontFamily="var(--font-geist-mono)" fontSize="9">Hash(H01 + H23)</text>
+            </g>
+
+            {/* Connecting lines Level 2 -> Level 1 */}
+            <line x1="400" y1="100" x2="230" y2="135" stroke="var(--dg-border)" strokeWidth="1" />
+            <line x1="400" y1="100" x2="570" y2="135" stroke="var(--dg-border)" strokeWidth="1" />
+
+            {/* Parent Hashes */}
+            <g>
+              <rect x="160" y="135" width="140" height="40" rx="6" fill="var(--dg-card)" stroke="var(--dg-border)" strokeWidth="1" />
+              <text x="230" y="153" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="10" fontWeight="bold">Hash 01</text>
+              <text x="230" y="167" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="8.5">Hash(H0 + H1)</text>
+            </g>
+
+            <g>
+              <rect x="500" y="135" width="140" height="40" rx="6" fill="var(--dg-card)" stroke="var(--dg-border)" strokeWidth="1" />
+              <text x="570" y="153" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="10" fontWeight="bold">Hash 23</text>
+              <text x="570" y="167" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="8.5">Hash(H2 + H3)</text>
+            </g>
+
+            {/* Connecting lines Level 1 -> Level 0 */}
+            <line x1="230" y1="175" x2="110" y2="210" stroke="var(--dg-border)" strokeWidth="1" />
+            <line x1="230" y1="175" x2="290" y2="210" stroke="var(--dg-border)" strokeWidth="1" />
+            <line x1="570" y1="175" x2="480" y2="210" stroke="var(--dg-border)" strokeWidth="1" />
+            <line x1="570" y1="175" x2="660" y2="210" stroke="var(--dg-border)" strokeWidth="1" />
+
+            {/* Transaction Hashes */}
+            {[
+              { x: 50, label: "Hash 0", desc: "Hash(Tx 0)", active: false },
+              { x: 230, label: "Hash 1", desc: "Hash(Tx 1)", active: false },
+              { x: 410, label: "Hash 2", desc: "Hash(Tx 2)", active: true },
+              { x: 590, label: "Hash 3", desc: "Hash(Tx 3)", active: false },
+            ].map((node, i) => (
+              <g key={i} transform={`translate(${node.x}, 210)`}>
+                <rect width="120" height="35" rx="4" fill="var(--dg-card)" stroke={node.active ? "var(--dg-accent)" : "var(--dg-border)"} strokeWidth={node.active ? 1.5 : 1} />
+                <text x="60" y="17" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="9.5" fontWeight="bold">{node.label}</text>
+                <text x="60" y="28" textAnchor="middle" fill={node.active ? "var(--dg-accent)" : "var(--dg-text-faint)"} fontFamily="var(--font-geist-mono)" fontSize="8">{node.desc}</text>
+                
+                {/* Arrow to raw transaction */}
+                <line x1="60" y1="35" x2="60" y2="55" stroke="var(--dg-border)" strokeWidth="1" strokeDasharray="2,2" />
+                <text x="60" y="65" textAnchor="middle" fill="var(--dg-text-faint)" fontFamily="var(--font-geist-mono)" fontSize="8">Tx {i}</text>
+              </g>
+            ))}
+          </svg>
+        );
+
+      case "byzantine-consensus":
+        return (
+          <svg viewBox="0 0 800 320" className="w-full h-auto bg-bg border border-border rounded-xl">
+            <text x="400" y="35" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="11" letterSpacing="0.05em">BYZANTINE GENERALS PROBLEM IN BLOCKCHAIN CONSENSUS</text>
+            
+            {/* Proposer / Commander Node */}
+            <g transform="translate(330, 60)">
+              <rect width="140" height="50" rx="8" fill="var(--dg-card)" stroke="var(--dg-accent)" strokeWidth="1.5" />
+              <text x="70" y="22" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-sans)" fontSize="11" fontWeight="bold">Leader Node</text>
+              <text x="70" y="38" textAnchor="middle" fill="var(--dg-accent)" fontFamily="var(--font-geist-mono)" fontSize="9">Proposes Block 4</text>
+            </g>
+
+            {/* Broadcast Lines from Leader to Validators */}
+            <line x1="350" y1="110" x2="160" y2="180" stroke="var(--dg-success)" strokeWidth="1.2" />
+            <polygon points="160,180 168,178 164,173" fill="var(--dg-success)" />
+            <text x="230" y="140" textAnchor="middle" fill="var(--dg-success)" fontFamily="var(--font-geist-mono)" fontSize="8.5">gossip block</text>
+
+            <line x1="400" y1="110" x2="400" y2="175" stroke="var(--dg-success)" strokeWidth="1.2" />
+            <polygon points="400,175 397,167 403,167" fill="var(--dg-success)" />
+
+            <line x1="450" y1="110" x2="640" y2="180" stroke="var(--dg-danger)" strokeWidth="1.2" strokeDasharray="3,2" />
+            <polygon points="640,180 636,173 632,178" fill="var(--dg-danger)" />
+            <text x="570" y="140" textAnchor="middle" fill="var(--dg-danger)" fontFamily="var(--font-geist-mono)" fontSize="8.5">compromised link</text>
+
+            {/* Validator Nodes */}
+            {/* Honest Validator A */}
+            <g transform="translate(80, 180)">
+              <rect width="160" height="70" rx="8" fill="var(--dg-card)" stroke="var(--dg-success)" strokeWidth="1" />
+              <text x="80" y="20" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-sans)" fontSize="11" fontWeight="bold">Validator A (Honest)</text>
+              <text x="80" y="40" textAnchor="middle" fill="var(--dg-success)" fontFamily="var(--font-geist-mono)" fontSize="9">✓ Verifies signatures</text>
+              <text x="80" y="55" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="8">Adds to Local Ledger</text>
+            </g>
+
+            {/* Honest Validator B */}
+            <g transform="translate(320, 180)">
+              <rect width="160" height="70" rx="8" fill="var(--dg-card)" stroke="var(--dg-success)" strokeWidth="1" />
+              <text x="80" y="20" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-sans)" fontSize="11" fontWeight="bold">Validator B (Honest)</text>
+              <text x="80" y="40" textAnchor="middle" fill="var(--dg-success)" fontFamily="var(--font-geist-mono)" fontSize="9">✓ Verifies hashes</text>
+              <text x="80" y="55" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="8">Replicates State</text>
+            </g>
+
+            {/* Malicious/Offline Validator C */}
+            <g transform="translate(560, 180)">
+              <rect width="160" height="70" rx="8" fill="var(--dg-card)" stroke="var(--dg-danger)" strokeWidth="1" />
+              <text x="80" y="20" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-sans)" fontSize="11" fontWeight="bold">Validator C (Cheater)</text>
+              <text x="80" y="40" textAnchor="middle" fill="var(--dg-danger)" fontFamily="var(--font-geist-mono)" fontSize="9">✗ Tries to double spend</text>
+              <text x="80" y="55" textAnchor="middle" fill="var(--dg-danger)" fontFamily="var(--font-geist-mono)" fontSize="8">Ignored by 2/3 majority</text>
+            </g>
+          </svg>
+        );
+
+      case "eip-1559-pricing":
+        return (
+          <svg viewBox="0 0 800 320" className="w-full h-auto bg-bg border border-border rounded-xl">
+            <text x="400" y="35" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-mono)" fontSize="11" letterSpacing="0.05em">EIP-1559 TRANSACTION FEE DYNAMICS</text>
+            
+            {/* Core Box */}
+            <rect x="60" y="70" width="680" height="180" rx="10" fill="var(--dg-card)" stroke="var(--dg-border)" strokeWidth="1" />
+
+            {/* Fee Formula */}
+            <text x="400" y="110" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="16" fontWeight="bold">
+              Total Gas Fee = (Base Fee + Priority Fee) &times; Gas Used
+            </text>
+
+            <line x1="100" y1="135" x2="700" y2="135" stroke="var(--dg-border)" strokeWidth="1" strokeDasharray="3,3" />
+
+            {/* Base Fee (Left) */}
+            <g transform="translate(100, 155)">
+              <rect width="260" height="70" rx="6" fill="var(--dg-card2)" stroke="var(--dg-danger)" strokeWidth="1" />
+              <text x="130" y="25" textAnchor="middle" fill="var(--dg-danger)" fontFamily="var(--font-geist-sans)" fontSize="12" fontWeight="bold">🔥 Base Fee</text>
+              <text x="130" y="45" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="10">Set by protocol &bull; Automatically Burned</text>
+              <text x="130" y="60" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-sans)" fontSize="9">Fluctuates based on block fullness</text>
+            </g>
+
+            {/* Priority Fee (Right) */}
+            <g transform="translate(440, 155)">
+              <rect width="260" height="70" rx="6" fill="var(--dg-card2)" stroke="var(--dg-success)" strokeWidth="1" />
+              <text x="130" y="25" textAnchor="middle" fill="var(--dg-success)" fontFamily="var(--font-geist-sans)" fontSize="12" fontWeight="bold">💰 Priority Fee (Tip)</text>
+              <text x="130" y="45" textAnchor="middle" fill="var(--dg-text)" fontFamily="var(--font-geist-mono)" fontSize="10">Set by user &bull; Paid to Validator</text>
+              <text x="130" y="60" textAnchor="middle" fill="var(--dg-text-dim)" fontFamily="var(--font-geist-sans)" fontSize="9">Used to skip transaction queue</text>
+            </g>
           </svg>
         );
 

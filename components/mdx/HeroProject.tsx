@@ -27,21 +27,18 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
 
   return (
     <div className={`not-prose my-8 rounded-xl border p-5 ${styleClass}`}>
-      <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
+      <div className="flex items-center justify-between border-b border-border/30 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Star className="h-4 w-4 fill-current" />
           <span className="font-mono text-xs font-semibold uppercase tracking-wider">
             HERO PROJECT CONNECTION
           </span>
         </div>
-        <span className="rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] text-text border border-white/5 uppercase">
+        <span className="rounded bg-bg3/50 px-2 py-0.5 font-mono text-[10px] text-text border border-border/50 uppercase">
           {name}
         </span>
       </div>
-      <div
-        className="text-sm leading-relaxed font-sans [&_p]:!text-zinc-800 dark:[&_p]:!text-zinc-200 [&_p]:my-1.5 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_strong]:!font-bold [&_strong]:!text-zinc-900 dark:[&_strong]:!text-zinc-100 [&_a]:underline [&_ul]:!text-zinc-800 dark:[&_ul]:!text-zinc-200 [&_li]:!text-zinc-800 dark:[&_li]:!text-zinc-200"
-        style={{ color: "inherit" }}
-      >
+      <div className="text-sm leading-relaxed font-sans text-text dark:text-zinc-200 [&_p]:my-1.5 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_strong]:!font-bold [&_strong]:!text-text dark:[&_strong]:!text-zinc-100 [&_a]:underline">
         {children}
       </div>
     </div>
