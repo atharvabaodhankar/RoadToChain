@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 context
+chainvidya_seo_bible.md
 
 # debug
 npm-debug.log*
