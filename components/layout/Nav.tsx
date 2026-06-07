@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X, ArrowRight, Lock, Unlock, LogIn, LogOut, Loader2, Sun, Moon } from "lucide-react";
@@ -68,7 +69,17 @@ export default function Nav() {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-bg/85 backdrop-blur-md transition-all duration-300">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-1.5 font-mono text-sm font-semibold tracking-tight text-text shrink-0">
+          <Link href="/" className="flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-text shrink-0 group">
+            <div className="relative h-6 w-6 rounded border border-border/80 bg-bg2 overflow-hidden shadow-sm flex-shrink-0">
+              <Image
+                src="/logo.png"
+                alt="ChainVidya Logo"
+                fill
+                sizes="24px"
+                className="object-cover group-hover:scale-105 transition-transform duration-250 ease-out"
+                priority
+              />
+            </div>
             <span>{siteName}</span>
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
