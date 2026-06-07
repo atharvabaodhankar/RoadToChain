@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 export default function Footer() {
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "LearnBlockchain";
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ChainVidya";
 
   return (
     <footer className="border-t border-border bg-bg px-4 py-8 sm:px-6 lg:px-8">

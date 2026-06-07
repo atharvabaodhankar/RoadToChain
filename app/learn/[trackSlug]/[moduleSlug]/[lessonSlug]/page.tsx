@@ -6,6 +6,10 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Clock, Tag, Hammer, Compass, AlertCircle, ChevronRight } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import fs from "fs";
+import path from "path";
+import JsonLd from "@/components/seo/JsonLd";
+import { lessonSchema, breadcrumbSchema, faqSchema } from "@/lib/seo";
 
 // Import custom MDX components
 import Diagram from "@/components/mdx/Diagram";
@@ -199,9 +203,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Lesson Not Found" };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const canonicalUrl = `${siteUrl}/learn/${trackSlug}/${moduleSlug}/${lessonSlug}`;
+
   return {
-    title: `${currentLesson.title} — LearnBlockchain`,
+    title: currentLesson.title,
     description: currentLesson.description,
+    keywords: currentLesson.tags,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "article",
+      title: currentLesson.title,
+      description: currentLesson.description,
+      url: canonicalUrl,
+      images: [
+        {
+          url: `${siteUrl}/api/og?title=${encodeURIComponent(currentLesson.title)}&track=${encodeURIComponent(currentTrack.name)}`,
+          width: 1200,
+          height: 630,
+        }
+      ],
+      authors: ["Atharva Baodhankar"],
+      section: currentTrack.name,
+      tags: currentLesson.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: currentLesson.title,
+      description: currentLesson.description,
+    },
   };
 }
 
@@ -228,6 +260,65 @@ export default async function LessonPage({ params }: Props) {
 
   const data = await getLessonData(trackSlug, moduleSlug, lessonSlug);
   const isImplemented = !!data;
+
+  // File metadata dates for SEO schema
+  let datePublished = "2026-06-04T00:00:00.000Z";
+  let dateModified = "2026-06-04T00:00:00.000Z";
+  let normalizedModuleSlug = moduleSlug;
+  if (moduleSlug.startsWith("m") && moduleSlug.includes("-")) {
+    const parts = moduleSlug.split("-");
+    if (parts.length === 2 && !isNaN(parseInt(parts[1], 10))) {
+      normalizedModuleSlug = `module-${parts[1]}`;
+    }
+  }
+  try {
+    const filePath = path.join(process.cwd(), "content", trackSlug, normalizedModuleSlug, `${lessonSlug}.mdx`);
+    if (fs.existsSync(filePath)) {
+      const fileStat = fs.statSync(filePath);
+      datePublished = fileStat.birthtime.toISOString();
+      dateModified = fileStat.mtime.toISOString();
+    }
+  } catch {
+    // fallback
+  }
+
+  // Dynamically extract KeyConfusion callouts from content to build FAQ Schema
+  const faqs: Array<{ question: string; answer: string }> = [];
+  if (isImplemented && data?.content) {
+    try {
+      const matches = data.content.matchAll(/<KeyConfusion\s+([^>]*)\/>/g);
+      for (const m of matches) {
+        const attrsStr = m[1];
+        const qMatch = attrsStr.match(/question=["']([^"']+)["']/);
+        const aMatch = attrsStr.match(/answer=["']([^"']+)["']/);
+        if (qMatch && aMatch) {
+          faqs.push({
+            question: qMatch[1].trim(),
+            answer: aMatch[1].trim(),
+          });
+        }
+      }
+    } catch {
+      // fail silently
+    }
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const canonicalUrl = `${siteUrl}/learn/${trackSlug}/${moduleSlug}/${lessonSlug}`;
+
+  const schemas: any[] = [
+    lessonSchema(currentLesson, currentTrack.name, currentTrack.slug, canonicalUrl, datePublished, dateModified),
+    breadcrumbSchema([
+      { name: "Learn", url: `${siteUrl}/learn` },
+      { name: currentTrack.name, url: `${siteUrl}/learn/${currentTrack.slug}` },
+      { name: currentModule.name, url: `${siteUrl}/learn/${currentTrack.slug}#module-${currentModule.number.split(".")[1]}` },
+      { name: currentLesson.title, url: canonicalUrl },
+    ])
+  ];
+
+  if (faqs.length > 0) {
+    schemas.push(faqSchema(faqs));
+  }
 
   // Build headings list for Table of Contents
   const headings: Array<{ text: string; id: string; level: number }> = [];
@@ -272,6 +363,7 @@ export default async function LessonPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg text-text selection:bg-accent/20">
+      <JsonLd schema={schemas} />
       <ReadingProgressBar />
       
       <div className="flex w-full">

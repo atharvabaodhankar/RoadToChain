@@ -8,6 +8,8 @@ import path from "path";
 import TrackProgressBar from "@/components/layout/TrackProgressBar";
 import LessonStatusBadge from "@/components/layout/LessonStatusBadge";
 import ContentGating from "@/components/layout/ContentGating";
+import JsonLd from "@/components/seo/JsonLd";
+import { courseSchema } from "@/lib/seo";
 
 
 interface Props {
@@ -33,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${track.number}: ${track.name} — LearnBlockchain`,
+    title: `${track.number}: ${track.name} — ChainVidya`,
     description: track.description,
   };
 }
@@ -52,6 +54,7 @@ export default async function TrackPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg text-text pb-24">
+      <JsonLd schema={courseSchema(track)} />
       {/* ── Top Navigation Bar ──────────────────────────────────── */}
       <div className="border-b border-border bg-bg2 px-4 py-3 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-5xl items-center justify-between">

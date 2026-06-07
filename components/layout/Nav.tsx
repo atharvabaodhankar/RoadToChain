@@ -29,7 +29,7 @@ export default function Nav() {
     }
   };
 
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "LearnBlockchain";
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ChainVidya";
   const { 
     user, 
     loading, 

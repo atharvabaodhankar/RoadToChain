@@ -2,51 +2,49 @@ import { MetadataRoute } from "next";
 import { tracks } from "@/lib/curriculum";
 import { getAllLessonPaths } from "@/lib/content";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
 
-  const staticPages = [
+  const staticPages: MetadataRoute.Sitemap = [
     {
-      url: `${siteUrl}`,
+      url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+      changeFrequency: "weekly",
       priority: 1.0,
     },
     {
-      url: `${siteUrl}/curriculum`,
+      url: `${baseUrl}/curriculum`,
       lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+      changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: `${siteUrl}/mistakes`,
+      url: `${baseUrl}/mistakes`,
       lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+      changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: `${siteUrl}/architecture-autopsies`,
+      url: `${baseUrl}/architecture-autopsies`,
       lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+      changeFrequency: "weekly",
       priority: 0.8,
     },
   ];
 
-  // Dynamic tracks
-  const trackPages = tracks.map((track) => ({
-    url: `${siteUrl}/learn/${track.slug}`,
+  const trackPages: MetadataRoute.Sitemap = tracks.map((track) => ({
+    url: `${baseUrl}/learn/${track.slug}`,
     lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
+    changeFrequency: "weekly",
+    priority: 0.8,
   }));
 
-  // Dynamic lessons
   const lessonPaths = getAllLessonPaths();
-  const lessonPages = lessonPaths.map((p) => ({
-    url: `${siteUrl}/learn/${p.track}/${p.module}/${p.slug}`,
+  const lessonPages: MetadataRoute.Sitemap = lessonPaths.map((p) => ({
+    url: `${baseUrl}/learn/${p.track}/${p.module}/${p.slug}`,
     lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
+    changeFrequency: "monthly",
+    priority: 0.7,
   }));
 
   return [...staticPages, ...trackPages, ...lessonPages];
