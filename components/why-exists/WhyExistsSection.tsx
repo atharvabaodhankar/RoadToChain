@@ -63,13 +63,13 @@ export default function WhyExistsSection() {
 
             <div className="font-sans text-[15px] leading-relaxed text-muted space-y-5">
               <p>
-                When I started learning blockchain, I wasn&apos;t confused by advanced cryptography or complex math. I was confused by the basic mental models.
+                When I started, there simply weren&apos;t any resources that explained blockchain properly. Outdated tutorials rushed directly into writing smart contracts, completely skipping the fundamental mechanics of how these distributed networks actually function under the hood.
               </p>
               <p>
-                Where is the state actually stored? Why do failed transactions cost gas? How do clients securely sign transactions without revealing keys? Outdated tutorials skipped these fundamentals to rush into copy-pasting smart contracts.
+                Nobody taught the common, expensive mistakes that almost every developer makes starting out. I had to learn those lessons the hard way—by breaking things, debugging mysterious failures, and wasting gas.
               </p>
               <p className="text-text font-medium">
-                Our platform exists to teach you how these networks actually function, step-by-step, from first principles.
+                I built this because I want my fellow developers to have a clear, honest path to follow. You shouldn&apos;t have to waste your time copy-pasting random scripts just to build basic intuition.
               </p>
             </div>
           </motion.div>
