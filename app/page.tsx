@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Star, AlertTriangle } from "lucide-react";
 import { tracks } from "@/lib/curriculum";
 import HeroSection from "@/components/hero/HeroSection";
+import WhyExistsSection from "@/components/why-exists/WhyExistsSection";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -120,6 +121,7 @@ export default function HomePage() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <HeroSection />
 
+      <WhyExistsSection />
 
       {/* ── Problem-First Learning Flow ──────────────────────────── */}
       <section className="border-b border-border px-4 pt-12 pb-20 sm:px-6 lg:px-8">
