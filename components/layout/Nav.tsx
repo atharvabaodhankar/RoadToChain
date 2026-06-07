@@ -35,8 +35,6 @@ export default function Nav() {
     loading, 
     signInWithGoogle, 
     logout, 
-    walkaroundMode, 
-    toggleWalkaroundMode,
     isFirebaseConfigured
   } = useProgress();
 
@@ -95,28 +93,7 @@ export default function Nav() {
 
           {/* Desktop controls (Walkaround toggle, login/logout, CTA) */}
           <div className="hidden items-center gap-3 md:flex">
-            {/* Walkaround Mode Toggle */}
-            <button
-              onClick={toggleWalkaroundMode}
-              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-mono text-[9px] uppercase font-bold tracking-tight border transition-all cursor-pointer ${
-                walkaroundMode
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.05)]"
-                  : "bg-bg3 border-border text-dim hover:text-text hover:border-border2"
-              }`}
-              title="Toggle Walkaround Mode to unlock all tracks and preview empty lessons"
-            >
-              {walkaroundMode ? (
-                <>
-                  <Unlock className="h-3 w-3 text-emerald-400 animate-pulse" />
-                  <span>Walkaround: ON</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="h-3 w-3 text-dim" />
-                  <span>Walkaround: OFF</span>
-                </>
-              )}
-            </button>
+
 
             {/* Theme Toggle Button */}
             <button
@@ -218,7 +195,7 @@ export default function Nav() {
               <hr className="border-border" />
 
               {/* Mobile controls */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Theme Toggle */}
                 <button
                   onClick={() => {
@@ -235,30 +212,7 @@ export default function Nav() {
                   )}
                 </button>
 
-                {/* Walkaround Mode Toggle */}
-                <button
-                  onClick={() => {
-                    toggleWalkaroundMode();
-                    setIsOpen(false);
-                  }}
-                  className={`flex items-center justify-center gap-1 rounded-md p-2 border transition-all ${
-                    walkaroundMode
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                      : "bg-bg3 border-border text-muted"
-                  }`}
-                >
-                  {walkaroundMode ? (
-                    <>
-                      <Unlock className="h-3.5 w-3.5 text-emerald-400" />
-                      <span className="font-mono text-[9px] uppercase font-bold">ON</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="h-3.5 w-3.5 text-muted" />
-                      <span className="font-mono text-[9px] uppercase font-bold">OFF</span>
-                    </>
-                  )}
-                </button>
+
 
                 {loading ? (
                   <div className="flex items-center justify-center rounded-md border border-border bg-bg3 p-2">

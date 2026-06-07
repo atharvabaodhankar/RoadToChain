@@ -96,6 +96,7 @@ const mdxComponents = {
   HeroProject,
   LessonChallenge,
   KeyConfusion,
+  h1: () => null,
   h2: Heading2,
   h3: Heading3,
   // Interactive simulators
@@ -475,10 +476,10 @@ export default async function LessonPage({ params }: Props) {
 
                       <div className="rounded-xl border border-border bg-bg3/40 p-5 space-y-3">
                         <h4 className="text-xs font-semibold text-text flex items-center gap-1.5">
-                          <AlertCircle className="h-3.5 w-3.5 text-accent" /> Developer Walkaround Tips
+                          <AlertCircle className="h-3.5 w-3.5 text-accent" /> Lesson Progress Tip
                         </h4>
                         <p className="text-[11px] leading-relaxed text-muted">
-                          Use the navigation below to skip to subsequent lessons, or check other tracks in the sidebar list. You can toggle **Walkaround Mode** in the navigation bar to bypass completion prerequisites.
+                          You can navigate freely to any track or module using the sidebar or curriculum overview. Make sure to mark this lesson as complete to save your progress.
                         </p>
                       </div>
                     </div>
