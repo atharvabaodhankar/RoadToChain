@@ -20,7 +20,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       {...rest}
-      className={`absolute top-1/2 left-1/2 rounded-xl border border-border/80 dark:border-white/15 bg-bg/90 dark:bg-bg3/90 backdrop-blur-md text-text [transform-style:preserve-3d] [will-change:transform] [backface-visibility:hidden] shadow-[0_15px_45px_rgba(0,0,0,0.06)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.55)] ${customClass} ${className}`.trim()}
+      className={`absolute top-1/2 left-1/2 rounded-xl border border-border/80 dark:border-white/15 bg-bg/90 dark:bg-bg3/90 backdrop-blur-md text-text [transform-style:preserve-3d] [will-change:transform] [backface-visibility:hidden] shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.25)] ${customClass} ${className}`.trim()}
     />
   )
 );
