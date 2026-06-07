@@ -3,105 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-
-
-// ─── Ambient Particle Canvas ─────────────────────────────────────────────────
-function AmbientParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const mouseRef  = useRef({ x: 0, y: 0 });
-  const animRef   = useRef<number>(0);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    interface Particle {
-      x: number; y: number;
-      vx: number; vy: number;
-      size: number;
-      alpha: number;
-      text: string | null;
-    }
-
-    const particles: Particle[] = [];
-    const texts = ["{ }", "< >", "0x", "=>"];
-
-    const resize = () => {
-      canvas.width  = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    for (let i = 0; i < 50; i++) {
-      particles.push({
-        x:     Math.random() * canvas.width,
-        y:     Math.random() * canvas.height,
-        vx:    (Math.random() - 0.5) * 0.4,
-        vy:    (Math.random() - 0.5) * 0.4,
-        size:  Math.random() * 1.8 + 0.6,
-        alpha: 0.12 + Math.random() * 0.14,
-        text:  Math.random() > 0.85 ? texts[Math.floor(Math.random() * texts.length)] : null,
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
-        const dx   = mouseRef.current.x - p.x;
-        const dy   = mouseRef.current.y - p.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 130 && dist > 0) {
-          p.x -= (dx / dist) * 0.8;
-          p.y -= (dy / dist) * 0.8;
-        }
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width)  p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle   = "var(--accent)";
-        if (p.text) {
-          ctx.font = "10px 'GeistMono', monospace";
-          ctx.fillText(p.text, p.x, p.y);
-        } else {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      });
-      ctx.globalAlpha = 1;
-      animRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
-
-    const handleMouse = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    };
-    window.addEventListener("mousemove", handleMouse);
-
-    return () => {
-      cancelAnimationFrame(animRef.current);
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouse);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      aria-hidden="true"
-    />
-  );
-}
+import PixelBlast from "./PixelBlast";
 
 // ─── Confusion Archive Data & Component ───────────────────────────────────────
 interface ConfusionCard {
@@ -161,7 +63,7 @@ const getCardStyle = (offset: number) => {
   const transformOrigin = "top center";
   if (offset === 0) {
     return {
-      transform: "translateY(48px) scale(1) rotate(0deg)",
+      transform: "translateY(56px) scale(1) rotate(0deg)",
       transformOrigin,
       zIndex: 30,
       opacity: 1,
@@ -170,35 +72,35 @@ const getCardStyle = (offset: number) => {
     };
   } else if (offset === 1) {
     return {
-      transform: "translateY(24px) scale(0.97) rotate(1.2deg)",
+      transform: "translateY(28px) scale(0.96) rotate(1.2deg)",
       transformOrigin,
       zIndex: 20,
-      opacity: 0.9,
+      opacity: 0.95,
       pointerEvents: "auto" as const,
       transition,
     };
   } else if (offset === 2) {
     return {
-      transform: "translateY(0px) scale(0.94) rotate(-0.8deg)",
+      transform: "translateY(0px) scale(0.92) rotate(-0.8deg)",
       transformOrigin,
       zIndex: 10,
-      opacity: 0.65,
+      opacity: 0.82,
       pointerEvents: "auto" as const,
       transition,
     };
   } else if (offset === 3) {
     return {
-      transform: "translateY(-12px) scale(0.91) rotate(0deg)",
+      transform: "translateY(-14px) scale(0.88) rotate(0.4deg)",
       transformOrigin,
-      zIndex: 0,
-      opacity: 0,
+      zIndex: 5,
+      opacity: 0.45,
       pointerEvents: "none" as const,
       transition,
     };
   } else {
     // offset === 4 (Exiting card)
     return {
-      transform: "translateX(-110%) translateY(48px) scale(0.97) rotate(-4deg)",
+      transform: "translateX(-110%) translateY(56px) scale(0.96) rotate(-4deg)",
       transformOrigin,
       zIndex: 40,
       opacity: 0,
@@ -219,7 +121,7 @@ function ConfusionArchive() {
   }, [activeIndex]);
 
   return (
-    <div className="relative w-full max-w-lg lg:max-w-xl h-[215px] select-none overflow-visible">
+    <div className="relative w-full max-w-lg lg:max-w-xl h-[230px] select-none overflow-visible">
       {CONFUSION_CARDS.map((card, idx) => {
         const isActive = idx === activeIndex;
         const offset = (idx - activeIndex + CONFUSION_CARDS.length) % CONFUSION_CARDS.length;
@@ -230,10 +132,10 @@ function ConfusionArchive() {
             key={card.id}
             onClick={() => setActiveIndex(idx)}
             style={styleObj}
-            className={`absolute top-0 left-0 right-0 h-[165px] text-left rounded-lg border p-4 transition-all select-none overflow-hidden ${
+            className={`absolute top-0 left-0 right-0 h-[165px] text-left rounded-lg border p-4 transition-all select-none overflow-hidden backdrop-blur-md ${
               isActive
-                ? "border-accent/40 bg-bg dark:bg-bg2 shadow-[0_20px_50px_rgba(0,0,0,0.035)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
-                : "border-border/25 bg-bg/95 dark:bg-bg2/95 shadow-[0_4px_12px_rgba(0,0,0,0.005)] cursor-pointer hover:border-border/45"
+                ? "border-accent/40 bg-bg/95 dark:bg-bg2/95 shadow-[0_25px_60px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.5)]"
+                : "border-border bg-bg/90 dark:bg-bg2/90 shadow-[0_12px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_12px_30px_rgba(0,0,0,0.35)] cursor-pointer hover:border-border-hover"
             }`}
           >
             {/* Card Header (Tab Area) */}
@@ -301,8 +203,26 @@ export default function HeroSection() {
         borderColor: "var(--border)",
       }}
     >
-      {/* Particle field */}
-      <AmbientParticleCanvas />
+      {/* Interactive WebGL background */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-90 select-none">
+        <PixelBlast
+          variant="circle"
+          pixelSize={4}
+          color="#8b5cf6"
+          patternScale={7}
+          patternDensity={0.95}
+          pixelSizeJitter={0.41}
+          enableRipples={true}
+          rippleSpeed={0.25}
+          rippleThickness={0.1}
+          rippleIntensityScale={1.2}
+          liquid={true}
+          liquidStrength={0.08}
+          liquidRadius={1.0}
+          speed={0.9}
+          edgeFade={0.65}
+        />
+      </div>
 
       {/* Soft accent glow */}
       <div
