@@ -83,6 +83,12 @@ If failed transactions cost nothing, the attacker could spam the network with mi
 
 By charging gas up to the point of failure, the attacker's wallet is drained of money with every single spam attempt, making Denial of Service attacks economically impossible.
 
+<LessonImage
+  src="/images/track-0/failed_transaction_gas.png"
+  alt="Failed transaction gas — why you still pay gas when execution reverts"
+  caption="When a transaction reverts, state changes are rolled back — but the EVM already executed code to reach the revert point. Validators spent real computation, so gas is still charged up to the failure."
+/>
+
 ---
 
 <RealityCheck>
