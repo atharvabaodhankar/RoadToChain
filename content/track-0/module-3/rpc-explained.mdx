@@ -61,6 +61,12 @@ You never see the kitchen. You only interact with the menu and the phone. But un
 
 <Diagram type="abi-translator" caption="The ABI encodes your human-readable function call into the exact hexadecimal format the EVM expects. Think of it as a translator between JavaScript and bytecode." />
 
+<LessonImage
+  src="/images/track-0/rpc_abi_evm_1780492899017.png"
+  alt="RPC, ABI, and EVM — the three invisible layers between your code and the blockchain"
+  caption="ABI translates your function call into binary calldata. RPC transmits that data to a node over JSON-RPC. The EVM executes the bytecode against global state."
+/>
+
 The ABI (Application Binary Interface) is a JSON file that describes every function in your smart contract:
 
 ```typescript
