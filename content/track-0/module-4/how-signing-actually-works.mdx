@@ -102,6 +102,12 @@ Here is the exact journey of a transaction from your click to validator confirma
 4. **Broadcasting:** The raw transaction bytes and signature are sent to an RPC node.
 5. **Verification on Nodes:** Before executing, the nodes run a cryptographic recovery function `ecrecover(hash, r, s, v)` to extract the sender's public address and verify it matches the `from` field. If verified, it executes.
 
+<LessonImage
+  src="/images/track-0/signing_vs_broadcasting_1780492968221.png"
+  alt="Signing vs Broadcasting — offline signature generation vs on-chain state change"
+  caption="Signing is a local, offline operation — no gas, no internet required. Broadcasting is when the signed transaction travels to an RPC node, enters the mempool, and gets executed by validators."
+/>
+
 ---
 
 ### 4. Important Realization: Signing does not equal Broadcasting

@@ -79,6 +79,12 @@ type Transaction = {
 
 <Diagram type="transaction-lifecycle" caption="A transaction moves from signed to broadcasted, queued in the mempool, processed by a validator, and permanently sealed on-chain." />
 
+<LessonImage
+  src="/images/track-0/transaction_fields_anatomy_1780493094746.png"
+  alt="Transaction fields anatomy — nonce, gasLimit, to, value, data, chainId, and signature"
+  caption="Every Ethereum transaction is an RLP-encoded struct: nonce (replay protection), gasLimit, recipient, value in Wei, calldata for contract calls, chainId, and the (v, r, s) ECDSA signature."
+/>
+
 ---
 
 ### 4. Real-World Usage: Understanding the 'data' field
