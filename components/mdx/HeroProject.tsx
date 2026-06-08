@@ -163,8 +163,8 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
       </div>
 
       {/* Right: Graphic thumbnail */}
-      <div className="w-full md:w-[240px] shrink-0 bg-[#070709] border-t md:border-t-0 flex items-center justify-center p-6 sm:p-8 select-none">
-        <div className="w-36 h-36 border border-border/40 bg-bg/50 rounded-xl overflow-hidden flex items-center justify-center shadow-inner relative group">
+      <div className="w-full md:w-[240px] shrink-0 bg-bg3/60 dark:bg-[#070709] border-t md:border-t-0 flex items-center justify-center p-6 sm:p-8 select-none">
+        <div className="w-36 h-36 border border-border/40 bg-bg dark:bg-bg2/40 rounded-xl overflow-hidden flex items-center justify-center shadow-inner relative group">
           <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-transparent pointer-events-none" />
           {getThumbnailSvg(track)}
         </div>
