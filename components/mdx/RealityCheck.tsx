@@ -1,5 +1,4 @@
 import React from "react";
-import { Info } from "lucide-react";
 
 interface RealityCheckProps {
   children: React.ReactNode;
@@ -7,13 +6,15 @@ interface RealityCheckProps {
 
 export default function RealityCheck({ children }: RealityCheckProps) {
   return (
-    <div className="not-prose my-6 rounded-lg border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/20 p-4 text-blue-900 dark:text-blue-200">
-      <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-blue-800 dark:text-blue-300">
-        <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-        <span>Reality Check</span>
+    <div className="not-prose my-8 pl-6 border-l-[3px] border-accent/80 space-y-3">
+      <div className="font-mono text-[9px] font-bold uppercase tracking-widest text-accent/90 select-none">
+        // Reality Check
       </div>
-      <div className="text-sm leading-relaxed font-sans [&_p]:my-1.5 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_strong]:!font-bold [&_strong]:!text-blue-950 dark:[&_strong]:!text-blue-100 [&_a]:!text-blue-700 dark:[&_a]:!text-blue-300 [&_a]:underline">
+      <div className="font-serif font-light italic text-[16px] leading-relaxed text-text/90 antialiased max-w-xl [&_strong]:!font-bold [&_strong]:!text-text [&_a]:underline">
         {children}
+      </div>
+      <div className="font-mono text-[9px] text-dim uppercase tracking-wider select-none">
+        — Production Engineering Principle
       </div>
     </div>
   );
