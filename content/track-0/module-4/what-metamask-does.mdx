@@ -55,6 +55,12 @@ That's it. MetaMask does not hold your ETH. It does not communicate with Ethereu
 
 <Diagram type="metamask-keys" caption="MetaMask manages private keys locally in the browser. Your assets exist entirely on the public blockchain state — MetaMask never holds them." />
 
+<LessonImage
+  src="/images/track-0/what_metamask_does.png"
+  alt="What MetaMask actually does — key storage, signing, and RPC relay"
+  caption="MetaMask: stores your encrypted private key in localStorage, generates ECDSA signatures locally when you confirm, then relays the signed transaction hex to Infura's RPC endpoint. It never holds your ETH."
+/>
+
 Inside MetaMask's architecture:
 1. **Key Storage:** Your private key is stored in the browser's `localStorage`, AES-256 encrypted with the password you chose. It never leaves your device.
 2. **Signature Generation:** When a dApp calls `window.ethereum.request({ method: 'eth_sendTransaction' })`, MetaMask intercepts, shows you the transaction details, and if you confirm, it uses the Web Crypto API to generate an ECDSA signature locally.
