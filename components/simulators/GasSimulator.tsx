@@ -97,7 +97,7 @@ export default function GasSimulator() {
   );
 
   return (
-    <div className="my-8 rounded-xl border border-border bg-[#0a0a0b] overflow-hidden font-mono">
+    <div className="my-8 rounded-xl border border-border bg-bg overflow-hidden font-mono">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-bg2">
         <div className="flex items-center gap-2.5">
@@ -127,7 +127,7 @@ export default function GasSimulator() {
             onChange={(e) => setVoterCount(Number(e.target.value))}
             className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
             style={{
-              background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${voterCount / 10}%, #1f1f23 ${voterCount / 10}%, #1f1f23 100%)`,
+              background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${voterCount / 10}%, var(--border) ${voterCount / 10}%, var(--border) 100%)`,
             }}
           />
           <div className="flex justify-between text-[10px] text-dim mt-1">
@@ -187,20 +187,20 @@ export default function GasSimulator() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="rounded-lg border border-red-800/60 bg-red-950/40 p-4"
+              className="rounded-lg border border-red-500/20 bg-red-500/5 dark:border-red-800/60 dark:bg-red-950/40 p-4"
             >
               <div className="flex items-start gap-2.5">
-                <span className="text-red-400 text-lg leading-none mt-0.5">✖</span>
+                <span className="text-red-650 dark:text-red-400 text-lg leading-none mt-0.5">✖</span>
                 <div>
-                  <div className="text-xs font-bold text-red-400 mb-1">
+                  <div className="text-xs font-bold text-red-600 dark:text-red-400 mb-1">
                     TRANSACTION REVERTED — OUT OF GAS
                   </div>
-                  <div className="text-[11px] text-red-300/80 leading-relaxed">
+                  <div className="text-[11px] text-red-700 dark:text-red-300/80 leading-relaxed">
                     The tally function looped over {voterCount} voters. Each SLOAD opcode cost 2,100 gas.
                     Total gas ({formatGas(totalGas)}) exceeded the 30M block gas limit.
-                    The transaction failed. <span className="text-red-400 font-bold">You still paid the gas.</span>
+                    The transaction failed. <span className="text-red-600 dark:text-red-400 font-bold">You still paid the gas.</span>
                   </div>
-                  <div className="mt-2 text-[10px] text-red-400/60 italic">
+                  <div className="mt-2 text-[10px] text-red-700/60 dark:text-red-400/60 italic">
                     This is exactly what happened with my voting system at 714 voters.
                   </div>
                 </div>
@@ -212,10 +212,10 @@ export default function GasSimulator() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="rounded-lg border border-orange-800/60 bg-orange-950/30 p-4"
+              className="rounded-lg border border-orange-500/20 bg-orange-500/5 dark:border-orange-800/60 dark:bg-orange-950/30 p-4"
             >
-              <div className="text-[11px] text-orange-300/80 leading-relaxed">
-                <span className="text-orange-400 font-bold">⚠ Danger zone.</span> At {voterCount} voters you are using {fillPct.toFixed(0)}% of the block gas limit just for this one contract interaction. Any additional gas usage — another function call, more SLOAD ops — will push you over.
+              <div className="text-[11px] text-orange-700 dark:text-orange-300/80 leading-relaxed">
+                <span className="text-orange-600 dark:text-orange-400 font-bold">⚠ Danger zone.</span> At {voterCount} voters you are using {fillPct.toFixed(0)}% of the block gas limit just for this one contract interaction. Any additional gas usage — another function call, more SLOAD ops — will push you over.
               </div>
             </motion.div>
           ) : (
@@ -224,9 +224,9 @@ export default function GasSimulator() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="rounded-lg border border-emerald-800/40 bg-emerald-950/20 p-3"
+              className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-3"
             >
-              <div className="text-[11px] text-emerald-400/80">
+              <div className="text-[11px] text-emerald-700 dark:text-emerald-400/80">
                 ✓ Transaction succeeds at {voterCount} voters. {activeScenario.description}
               </div>
             </motion.div>

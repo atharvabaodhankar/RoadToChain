@@ -124,7 +124,7 @@ export default function WalletSigningSimulator() {
     : null;
 
   return (
-    <div className="my-8 rounded-xl border border-border bg-[#0a0a0b] overflow-hidden font-mono">
+    <div className="my-8 rounded-xl border border-border bg-bg overflow-hidden font-mono">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-bg2">
         <div className="flex items-center gap-2.5">
@@ -221,18 +221,18 @@ export default function WalletSigningSimulator() {
                 <motion.div
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="rounded-lg border border-amber-800/40 bg-amber-950/20 p-3"
+                  className="rounded-lg border border-amber-500/20 bg-amber-500/5 dark:border-amber-800/40 dark:bg-amber-950/20 p-3"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] text-amber-400 font-semibold uppercase">
+                    <span className="text-[10px] text-amber-650 dark:text-amber-400 font-semibold uppercase">
                       Step 1 — Message Hash (Keccak-256 with Ethereum prefix)
                     </span>
-                    {step === "hashing" && <span className="text-[10px] text-amber-400 animate-pulse">computing...</span>}
+                    {step === "hashing" && <span className="text-[10px] text-amber-650 dark:text-amber-400 animate-pulse">computing...</span>}
                   </div>
                   {messageHash && (
-                    <div className="text-[11px] text-amber-200/80 break-all">{messageHash}</div>
+                    <div className="text-[11px] text-amber-800 dark:text-amber-200/80 break-all">{messageHash}</div>
                   )}
-                  <div className="mt-1 text-[10px] text-amber-600/60">
+                  <div className="mt-1 text-[10px] text-amber-700/70 dark:text-amber-600/60">
                     This 32-byte hash is what gets signed — not the raw message.
                   </div>
                 </motion.div>
@@ -243,18 +243,18 @@ export default function WalletSigningSimulator() {
                 <motion.div
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="rounded-lg border border-purple-800/40 bg-purple-950/20 p-3"
+                  className="rounded-lg border border-purple-500/20 bg-purple-500/5 dark:border-purple-800/40 dark:bg-purple-950/20 p-3"
                 >
-                  <div className="text-[10px] text-purple-400 font-semibold uppercase mb-2">
+                  <div className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold uppercase mb-2">
                     Step 2 — ECDSA Signature (Private Key Signs the Hash)
                   </div>
                   <div className="space-y-1">
-                    <div className="text-[10px] text-dim">r: <span className="text-purple-200/80 break-all">{signature.r}</span></div>
-                    <div className="text-[10px] text-dim">s: <span className="text-purple-200/80 break-all">{signature.s}</span></div>
-                    <div className="text-[10px] text-dim">v: <span className="text-purple-200/80">{signature.v}</span></div>
-                    <div className="text-[10px] text-dim mt-2">Full: <span className="text-purple-200/60 break-all">{signatureHex}</span></div>
+                    <div className="text-[10px] text-dim">r: <span className="text-purple-800 dark:text-purple-200/80 break-all">{signature.r}</span></div>
+                    <div className="text-[10px] text-dim">s: <span className="text-purple-800 dark:text-purple-200/80 break-all">{signature.s}</span></div>
+                    <div className="text-[10px] text-dim">v: <span className="text-purple-800 dark:text-purple-200/80">{signature.v}</span></div>
+                    <div className="text-[10px] text-dim mt-2">Full: <span className="text-purple-800/80 dark:text-purple-200/60 break-all">{signatureHex}</span></div>
                   </div>
-                  <div className="mt-2 text-[10px] text-purple-600/60">
+                  <div className="mt-2 text-[10px] text-purple-600/70 dark:text-purple-600/60">
                     This signature proves you controlled the private key — without ever revealing it.
                   </div>
                 </motion.div>
@@ -265,20 +265,20 @@ export default function WalletSigningSimulator() {
                 <motion.div
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="rounded-lg border border-emerald-800/40 bg-emerald-950/20 p-3"
+                  className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-3"
                 >
-                  <div className="text-[10px] text-emerald-400 font-semibold uppercase mb-2">
+                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase mb-2">
                     Step 3 — ecrecover(hash, v, r, s) → Signer Address
                   </div>
                   <div className="text-[11px] space-y-1">
-                    <div className="text-dim">Recovered: <span className="text-emerald-300">{recoveredAddress}</span></div>
-                    <div className="text-dim">Expected:  <span className="text-emerald-300">{signerAddress}</span></div>
+                    <div className="text-dim">Recovered: <span className="text-emerald-850 dark:text-emerald-300">{recoveredAddress}</span></div>
+                    <div className="text-dim">Expected:  <span className="text-emerald-850 dark:text-emerald-300">{signerAddress}</span></div>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-emerald-400 text-base">✓</span>
-                      <span className="text-emerald-400 font-bold text-xs">MATCH — Signature is valid</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 text-base">✓</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">MATCH — Signature is valid</span>
                     </div>
                   </div>
-                  <div className="mt-2 text-[10px] text-emerald-600/60">
+                  <div className="mt-2 text-[10px] text-emerald-700/70 dark:text-emerald-600/60">
                     Any node on the network can verify this without knowing your private key.
                   </div>
                 </motion.div>

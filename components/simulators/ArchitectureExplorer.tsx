@@ -118,7 +118,7 @@ export default function ArchitectureExplorer() {
               whileTap={{ scale: 0.99 }}
               className="w-full flex items-start gap-4 p-4 rounded-xl border bg-bg/40 text-left transition-all duration-300 relative cursor-pointer group"
               style={{
-                borderColor: isSelected ? item.color : "rgba(255, 255, 255, 0.08)",
+                borderColor: isSelected ? item.color : "var(--border)",
                 boxShadow: isSelected ? `0 0 15px ${item.color}25` : "none"
               }}
             >
@@ -193,7 +193,7 @@ export default function ArchitectureExplorer() {
               <div className="space-y-4 text-xs">
                 {/* Problem Section */}
                 <div className="flex gap-3">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/5 dark:bg-red-500/10 text-red-650 dark:text-red-400 border border-red-500/20">
                     <HelpCircle className="h-3 w-3" />
                   </div>
                   <div>
@@ -206,7 +206,7 @@ export default function ArchitectureExplorer() {
 
                 {/* Mistake Section */}
                 <div className="flex gap-3">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/5 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                     <AlertTriangle className="h-3 w-3" />
                   </div>
                   <div>
@@ -219,7 +219,7 @@ export default function ArchitectureExplorer() {
 
                 {/* Solution Section */}
                 <div className="flex gap-3">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-500/5 dark:bg-green-500/10 text-green-600 dark:text-green-450 border border-green-500/20">
                     <ShieldCheck className="h-3 w-3" />
                   </div>
                   <div>

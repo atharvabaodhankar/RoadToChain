@@ -239,7 +239,7 @@ export default function DeploymentSimulator() {
   };
 
   return (
-    <div className="my-8 rounded-xl border border-border bg-[#0a0a0b] overflow-hidden font-mono">
+    <div className="my-8 rounded-xl border border-border bg-bg overflow-hidden font-mono">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-bg2">
         <div className="flex items-center gap-2.5">
@@ -300,7 +300,7 @@ export default function DeploymentSimulator() {
           </div>
 
           {/* Artifact */}
-          <div className="rounded-lg bg-[#030304] border border-border overflow-hidden">
+          <div className="rounded-lg bg-bg3 border border-border overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-bg2">
               <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
@@ -313,7 +313,7 @@ export default function DeploymentSimulator() {
                 {current.label.toUpperCase()}
               </span>
             </div>
-            <pre className="p-4 text-[11px] leading-relaxed text-zinc-300 overflow-x-auto max-h-72">
+            <pre className="p-4 text-[11px] leading-relaxed text-text overflow-x-auto max-h-72">
               <code>{current.artifact.content}</code>
             </pre>
           </div>
@@ -334,7 +334,7 @@ export default function DeploymentSimulator() {
                   className="h-1.5 rounded-full transition-all duration-300"
                   style={{
                     width: i === activePhase ? "20px" : "6px",
-                    backgroundColor: i <= activePhase ? p.color : "#27272a",
+                    backgroundColor: i <= activePhase ? p.color : "var(--border2)",
                   }}
                 />
               ))}

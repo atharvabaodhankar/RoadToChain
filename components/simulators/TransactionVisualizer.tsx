@@ -157,7 +157,7 @@ export default function TransactionVisualizer() {
   const current = steps[activeStep];
 
   return (
-    <div className="my-8 rounded-xl border border-border bg-[#0a0a0b] overflow-hidden font-mono">
+    <div className="my-8 rounded-xl border border-border bg-bg overflow-hidden font-mono">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-bg2">
         <div className="flex items-center gap-2.5">
@@ -196,7 +196,7 @@ export default function TransactionVisualizer() {
             {i < steps.length - 1 && (
               <div
                 className="h-px w-6 mx-1 transition-all duration-500"
-                style={{ backgroundColor: i < activeStep ? steps[i].color : "#2a2a2e" }}
+                style={{ backgroundColor: i < activeStep ? steps[i].color : "var(--border2)" }}
               />
             )}
           </div>
@@ -233,7 +233,7 @@ export default function TransactionVisualizer() {
           </div>
 
           {/* Code view */}
-          <div className="rounded-lg bg-[#030304] border border-border overflow-hidden">
+          <div className="rounded-lg bg-bg3 border border-border overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-bg2">
               <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
@@ -248,7 +248,7 @@ export default function TransactionVisualizer() {
                 </span>
               )}
             </div>
-            <pre className="p-4 text-[11px] leading-relaxed text-zinc-300 overflow-x-auto">
+            <pre className="p-4 text-[11px] leading-relaxed text-text overflow-x-auto">
               <code>{current.code}</code>
             </pre>
           </div>
@@ -270,7 +270,7 @@ export default function TransactionVisualizer() {
                   className="h-1.5 rounded-full transition-all"
                   style={{
                     width: i === activeStep ? "20px" : "6px",
-                    backgroundColor: i === activeStep ? current.color : i < activeStep ? "#3f3f46" : "#27272a",
+                    backgroundColor: i === activeStep ? current.color : i < activeStep ? "var(--border3)" : "var(--border2)",
                   }}
                 />
               ))}
