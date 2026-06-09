@@ -150,13 +150,21 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
           </div>
 
           {/* Rebuilt Interactive SVG Dependency Graph */}
-          <div id="roadmap-blueprint" className="lg:col-span-6 relative bg-bg2/40 border border-border p-6 rounded-2xl backdrop-blur-md overflow-hidden">
-            <div className="absolute top-3 left-4 font-mono text-[9px] text-dim uppercase tracking-widest">
-              {"// PREREQUISITE NETWORK BLUEPRINT"}
+          <div id="roadmap-blueprint" className="lg:col-span-6 relative bg-bg2/40 border border-border p-6 rounded-2xl backdrop-blur-md overflow-hidden flex flex-col justify-between">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border/40 pb-4 mb-4 font-mono text-[10px]">
+              <div className="flex items-center gap-1.5 uppercase text-muted tracking-wider">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                Prerequisite Map
+              </div>
+              <div className="text-dim">
+                8 tracks &middot; 3 parallel paths
+              </div>
             </div>
-            
-            <div className="mt-4 overflow-x-auto">
-              <svg viewBox="0 0 540 240" className="w-full min-w-[420px]">
+
+            {/* SVG graph */}
+            <div className="mt-2 overflow-x-auto">
+              <svg viewBox="0 0 540 260" className="w-full min-w-[420px]">
                 {/* Arrowhead Marker */}
                 <defs>
                   <marker id="glow-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
@@ -167,7 +175,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* Connection Lines with interactive highlighting */}
                 {/* T0 -> T1 */}
                 <path 
-                  d="M 65 120 L 125 120" 
+                  d="M 88 110 L 120 110" 
                   stroke={activeTrackId >= 1 || hoveredTrackId === 1 ? "#3b82f6" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 1 ? "2" : "1.2"} 
                   className="transition-all duration-300"
@@ -175,7 +183,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 />
                 {/* T1 -> T2 */}
                 <path 
-                  d="M 185 120 L 245 120" 
+                  d="M 191 110 L 220 110" 
                   stroke={activeTrackId >= 2 || hoveredTrackId === 2 ? "#14b8a6" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 2 ? "2" : "1.2"} 
                   className="transition-all duration-300"
@@ -184,7 +192,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 
                 {/* T2 -> T3 (Top) */}
                 <path 
-                  d="M 305 110 L 365 60" 
+                  d="M 291 102 L 320 58" 
                   stroke={activeTrackId >= 3 || hoveredTrackId === 3 ? "#22c55e" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 3 ? "2" : "1.2"} 
                   className="transition-all duration-300"
@@ -192,7 +200,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 />
                 {/* T2 -> T4 (Middle) */}
                 <path 
-                  d="M 305 120 L 365 120" 
+                  d="M 291 110 L 320 110" 
                   stroke={activeTrackId >= 4 || hoveredTrackId === 4 ? "#f59e0b" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 4 ? "2" : "1.2"} 
                   className="transition-all duration-300"
@@ -200,49 +208,101 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 />
                 {/* T2 -> T5 (Bottom) */}
                 <path 
-                  d="M 305 130 L 365 180" 
+                  d="M 291 118 L 320 162" 
                   stroke={activeTrackId >= 5 || hoveredTrackId === 5 ? "#ec4899" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 5 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
                 />
 
-                {/* T3/T4 -> T6 */}
+                {/* T3 -> T6 */}
                 <path 
-                  d="M 425 60 L 485 105" 
+                  d="M 391 50 L 420 50" 
                   stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 6 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
                 />
+                {/* T4 -> T6 */}
                 <path 
-                  d="M 425 120 L 485 120" 
+                  d="M 391 102 L 420 68" 
                   stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 6 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
                 />
-                
+                {/* T4 -> T7 */}
+                <path 
+                  d="M 391 118 L 420 152" 
+                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border2)"} 
+                  strokeWidth={hoveredTrackId === 7 ? "2" : "1.2"} 
+                  className="transition-all duration-300"
+                  markerEnd="url(#glow-arrow)" 
+                />
                 {/* T5 -> T7 */}
                 <path 
-                  d="M 425 180 L 485 135" 
+                  d="M 391 170 L 420 170" 
                   stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 7 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
                 />
 
-                {/* GRAPH NODES */}
+                {/* Vertical dashed line between T6 and T7 */}
+                <path 
+                  d="M 456 80 L 456 140" 
+                  stroke="var(--border)" 
+                  strokeWidth="1.2" 
+                  strokeDasharray="3 3" 
+                  className="transition-all duration-300"
+                />
+
+                {/* Level indicators at the bottom */}
+                <g opacity="0.6">
+                  {/* Level 0 under T0 */}
+                  <line x1="30" y1="225" x2="80" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+                  <text x="55" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Level 0</text>
+
+                  {/* Level 1 under T1 */}
+                  <line x1="131" y1="225" x2="181" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+                  <text x="156" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Level 1</text>
+
+                  {/* Level 2 under T2 */}
+                  <line x1="231" y1="225" x2="281" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+                  <text x="256" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Level 2</text>
+
+                  {/* Specialisations under T3-T7 */}
+                  <line x1="331" y1="225" x2="481" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+                  <text x="406" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Specialisations</text>
+                </g>
+
+                {/* T0 CIRCLE NODE */}
+                <g 
+                  className="cursor-pointer group"
+                  onMouseEnter={() => setHoveredTrackId(0)}
+                  onMouseLeave={() => setHoveredTrackId(null)}
+                  onClick={() => scrollToTrack(0)}
+                >
+                  {/* Outer concentric rings */}
+                  <circle cx="55" cy="110" r="30" fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity={(activeTrackId === 0 || hoveredTrackId === 0) ? "0.2" : "0.08"} className="transition-all duration-300" />
+                  <circle cx="55" cy="110" r="24" fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity={(activeTrackId === 0 || hoveredTrackId === 0) ? "0.5" : "0.25"} className="transition-all duration-300" />
+                  <circle cx="55" cy="110" r="18" fill="var(--accent)" />
+                  <text x="55" y="108" textAnchor="middle" fill="white" fontFamily="var(--font-geist-mono)" fontSize="9" fontWeight="bold">T0</text>
+                  <text x="55" y="117" textAnchor="middle" fill="white" opacity="0.8" fontFamily="var(--font-geist-mono)" fontSize="6">Start</text>
+                  <text x="55" y="152" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Foundation</text>
+                </g>
+
+                {/* GRAPH CARDS T1 - T7 */}
                 {[
-                  { id: 0, x: 25, y: 98, label: "T0", color: "#7c3aed", sub: "Foundations" },
-                  { id: 1, x: 125, y: 98, label: "T1", color: "#3b82f6", sub: "Solidity" },
-                  { id: 2, x: 245, y: 98, label: "T2", color: "#14b8a6", sub: "Full Stack" },
-                  { id: 3, x: 365, y: 38, label: "T3", color: "#22c55e", sub: "System Design" },
-                  { id: 4, x: 365, y: 98, label: "T4 ★", color: "#f59e0b", sub: "Modern UX" },
-                  { id: 5, x: 365, y: 158, label: "T5 ★", color: "#ec4899", sub: "ZK Privacy" },
-                  { id: 6, x: 465, y: 98, label: "T6", color: "#f97316", sub: "Security" },
-                  { id: 7, x: 465, y: 158, label: "T7", color: "#06b6d4", sub: "Real Systems" },
+                  { id: 1, x: 125, y: 85, label: "T1", sub: "Solidity" },
+                  { id: 2, x: 225, y: 85, label: "T2", sub: "Full Stack" },
+                  { id: 3, x: 325, y: 25, label: "T3", sub: "Sys Design" },
+                  { id: 4, x: 325, y: 85, label: "T4 ★", sub: "Modern UX", isSignature: true },
+                  { id: 5, x: 325, y: 145, label: "T5 ★", sub: "ZK Privacy", isSignature: true },
+                  { id: 6, x: 425, y: 25, label: "T6", sub: "Security" },
+                  { id: 7, x: 425, y: 145, label: "T7", sub: "Real Systems" },
                 ].map((node) => {
+                  const nodeColor = trackColors[node.id];
                   const isActive = activeTrackId === node.id;
                   const isHovered = hoveredTrackId === node.id;
                   
@@ -254,39 +314,45 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                       onMouseLeave={() => setHoveredTrackId(null)}
                       onClick={() => scrollToTrack(node.id)}
                     >
-                      <rect 
-                        x={node.x} 
-                        y={node.y} 
-                        width="60" 
-                        height="44" 
-                        rx="8" 
-                        fill={isActive ? "#111" : "#0d0d0f"} 
-                        stroke={isActive || isHovered ? node.color : "rgba(255, 255, 255, 0.08)"} 
-                        strokeWidth={isActive || isHovered ? "1.8" : "1"} 
-                        className="transition-all duration-300"
-                      />
-                      
-                      {/* Glow effect on active/hover */}
-                      {(isActive || isHovered) && (
+                      {/* Signature glow box backdrops */}
+                      {node.isSignature && (
                         <rect 
                           x={node.x - 2} 
                           y={node.y - 2} 
-                          width="64" 
-                          height="48" 
-                          rx="10" 
-                          fill="none" 
-                          stroke={node.color} 
-                          strokeWidth="0.8" 
-                          opacity="0.5" 
-                          className="transition-all duration-300"
+                          width="66" 
+                          height="54" 
+                          rx="8" 
+                          fill={`${nodeColor}03`} 
+                          stroke="none" 
                         />
                       )}
 
+                      {/* Main Node Card */}
+                      <rect 
+                        x={node.x} 
+                        y={node.y} 
+                        width="62" 
+                        height="50" 
+                        rx="6" 
+                        fill={isActive ? "var(--bg3)" : node.isSignature ? `${nodeColor}06` : "var(--bg)"} 
+                        stroke={isActive || isHovered ? nodeColor : node.isSignature ? `${nodeColor}30` : "var(--border)"} 
+                        strokeWidth={isActive || isHovered ? "1.5" : "1"} 
+                        className="transition-all duration-300"
+                      />
+                      
+                      {/* Left color bar accent */}
+                      <path 
+                        d={`M ${node.x} ${node.y + 6} L ${node.x} ${node.y + 44}`} 
+                        stroke={nodeColor} 
+                        strokeWidth="3.5" 
+                        strokeLinecap="round" 
+                      />
+
                       <text 
-                        x={node.x + 30} 
-                        y={node.y + 18} 
+                        x={node.x + 31} 
+                        y={node.y + 20} 
                         textAnchor="middle" 
-                        fill={isActive || isHovered ? "#fafafa" : "#a1a1aa"} 
+                        fill="var(--text)" 
                         fontFamily="var(--font-geist-mono)" 
                         fontSize="10" 
                         fontWeight="bold"
@@ -296,12 +362,13 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                       </text>
                       
                       <text 
-                        x={node.x + 30} 
-                        y={node.y + 32} 
+                        x={node.x + 31} 
+                        y={node.y + 36} 
                         textAnchor="middle" 
-                        fill="#52525b" 
+                        fill="var(--text-secondary)" 
+                        opacity="0.8"
                         fontFamily="var(--font-geist-mono)" 
-                        fontSize="7" 
+                        fontSize="7.5" 
                         fontWeight="normal"
                       >
                         {node.sub}
@@ -312,8 +379,30 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
               </svg>
             </div>
             
-            <div className="mt-3 text-[9px] font-mono text-dim text-center uppercase tracking-wider">
-              {"// hover nodes to map pathways • click to warp"}
+            {/* Footer and Legend */}
+            <div className="mt-4 border-t border-border/40 pt-4 flex flex-col gap-3 font-mono text-[9px]">
+              <div className="text-center text-dim uppercase tracking-wider">
+                Hover any track to preview &bull; T4 and T5 are parallel specialisations after T2
+              </div>
+              <div className="h-px bg-border/40 w-full" />
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-dim">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-0.5 w-4 bg-accent" />
+                  <span>Track 0 (origin)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                  <span>Signature track</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-muted text-xs leading-none">&rarr;</span>
+                  <span>Prerequisite</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-0 w-4 border-t border-dashed border-accent" />
+                  <span>Active path</span>
+                </div>
+              </div>
             </div>
           </div>
 
