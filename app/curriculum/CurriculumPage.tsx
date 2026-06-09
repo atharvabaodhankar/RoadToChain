@@ -138,7 +138,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* Arrowhead Marker */}
                 <defs>
                   <marker id="glow-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                    <path d="M 0 0 L 6 3 L 0 6 Z" fill="rgba(255,255,255,0.15)" />
+                    <path d="M 0 0 L 6 3 L 0 6 Z" fill="var(--border3)" />
                   </marker>
                 </defs>
 
@@ -146,7 +146,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T0 -> T1 */}
                 <path 
                   d="M 65 120 L 125 120" 
-                  stroke={activeTrackId >= 1 || hoveredTrackId === 1 ? "#3b82f6" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 1 || hoveredTrackId === 1 ? "#3b82f6" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 1 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -154,7 +154,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T1 -> T2 */}
                 <path 
                   d="M 185 120 L 245 120" 
-                  stroke={activeTrackId >= 2 || hoveredTrackId === 2 ? "#14b8a6" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 2 || hoveredTrackId === 2 ? "#14b8a6" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 2 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -163,7 +163,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T2 -> T3 (Top) */}
                 <path 
                   d="M 305 110 L 365 60" 
-                  stroke={activeTrackId >= 3 || hoveredTrackId === 3 ? "#22c55e" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 3 || hoveredTrackId === 3 ? "#22c55e" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 3 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -171,7 +171,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T2 -> T4 (Middle) */}
                 <path 
                   d="M 305 120 L 365 120" 
-                  stroke={activeTrackId >= 4 || hoveredTrackId === 4 ? "#f59e0b" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 4 || hoveredTrackId === 4 ? "#f59e0b" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 4 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -179,7 +179,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T2 -> T5 (Bottom) */}
                 <path 
                   d="M 305 130 L 365 180" 
-                  stroke={activeTrackId >= 5 || hoveredTrackId === 5 ? "#ec4899" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 5 || hoveredTrackId === 5 ? "#ec4899" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 5 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -188,14 +188,14 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T3/T4 -> T6 */}
                 <path 
                   d="M 425 60 L 485 105" 
-                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 6 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
                 />
                 <path 
                   d="M 425 120 L 485 120" 
-                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 6 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -204,7 +204,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                 {/* T5 -> T7 */}
                 <path 
                   d="M 425 180 L 485 135" 
-                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "rgba(255,255,255,0.06)"} 
+                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border2)"} 
                   strokeWidth={hoveredTrackId === 7 ? "2" : "1.2"} 
                   className="transition-all duration-300"
                   markerEnd="url(#glow-arrow)" 
@@ -299,7 +299,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
       </section>
 
       {/* ── VERTICAL TRACK NAVIGATOR (Right Side Dots) ───────────────────── */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3.5 bg-bg2/40 hover:bg-bg2/70 border border-border px-2 py-4.5 rounded-full backdrop-blur-md transition-all duration-300">
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3.5 bg-bg2/80 dark:bg-bg2/40 hover:bg-bg2/95 dark:hover:bg-bg2/70 border border-border/80 dark:border-border px-2 py-4.5 rounded-full backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-300">
         {tracks.map((track) => (
           <button
             key={track.id}
@@ -311,7 +311,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
             <div 
               className="w-1.5 h-1.5 rounded-full transition-all duration-300 group-hover:scale-[1.4]"
               style={{
-                backgroundColor: activeTrackId === track.id ? trackColors[track.id] : "rgba(255, 255, 255, 0.25)",
+                backgroundColor: activeTrackId === track.id ? trackColors[track.id] : "var(--border3)",
                 boxShadow: activeTrackId === track.id ? `0 0 8px ${trackColors[track.id]}` : "none",
                 transform: activeTrackId === track.id ? "scale(1.3)" : "scale(1)"
               }}
