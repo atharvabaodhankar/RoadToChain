@@ -10,7 +10,7 @@ lesson: 1
 difficulty: "beginner"
 estimatedMinutes: 10
 tags: ["variables", "state", "visibility"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: false
 realProjectSource: ""
@@ -32,6 +32,12 @@ In smart contracts, variables are not just values in RAM. They are **persistent 
 To understand how variables behave, imagine a traditional bank lobby:
 * **State Variables (The Stone Ledger):** There is a massive, heavy book bound in iron sitting on a pedestal in the center of the lobby. When you declare `uint256 public balance;` in Solidity, you are carving a new line in this stone ledger. Anyone can walk in and read it. If you want to change it, a security guard must verify your credentials (your private key signature) and you must pay a fee to cover the ink and stone-carver's labor.
 * **Local Variables (The Chef's Receipt):** Inside functions, you declare temporary variables like `uint256 tempResult = 5;`. This is like scribbling a temporary calculation on a small piece of scrap paper at the counter. You use it to do some quick math, and the second you step out of the bank lobby, the guard shreds it. It is completely free to write on, and disappears immediately.
+
+<LessonImage
+  src="/images/track-1/variables_and_state_1780577125352.png"
+  alt="Solidity Variables & State — Where Data Lives"
+  caption="State variables are carved permanently in the blockchain ledger (expensive to write), whereas local variables exist only temporarily in the VM's cheap memory space during execution."
+/>
 
 ---
 

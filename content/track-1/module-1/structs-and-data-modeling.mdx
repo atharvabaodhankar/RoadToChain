@@ -10,7 +10,7 @@ lesson: 4
 difficulty: "intermediate"
 estimatedMinutes: 14
 tags: ["structs", "data-modeling", "gas"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: true
 hasProject: false
 realProjectSource: ""
@@ -50,6 +50,12 @@ Imagine you are packing a single carry-on backpack for a long budget airline fli
 * Instead, you buy packing cubes, roll your shirts tightly, squeeze the air out, and group small items together. By packing compactly, you fit the exact same amount of cargo into a bag half the size, paying zero fees.
 
 Declaring variables inside a Solidity struct is exactly like packing this bag. By ordering variables by size, the compiler automatically compresses them to squeeze into as few storage slots as possible.
+
+<LessonImage
+  src="/images/track-1/structs_data_modeling_1780577172488.png"
+  alt="Structs & Data Modeling in Solidity"
+  caption="Structuring data with sequential variable layout allows the compiler to pack fields into single 32-byte slots, significantly lowering gas fees."
+/>
 
 ---
 

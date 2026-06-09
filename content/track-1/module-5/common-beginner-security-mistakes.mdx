@@ -10,7 +10,7 @@ lesson: 3
 difficulty: "intermediate"
 estimatedMinutes: 12
 tags: ["security", "origin", "auth", "mistakes"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: true
 hasProject: false
 realProjectSource: ""
@@ -45,6 +45,12 @@ Imagine you have a secure voice-activated home security system:
 <RealityCheck>
   `tx.origin` should **never be used for access control or authentication check-ins**. It is strictly a transaction tracing variable. If you use `tx.origin` for authorization, any user who interacts with a malicious smart contract can have their assets completely drained by that contract on your platform!
 </RealityCheck>
+
+<LessonImage
+  src="/images/track-1/beginner_security_mistakes.png"
+  alt="Beginner Security Mistakes"
+  caption="Using tx.origin for access control opens a phishing vulnerability where a malicious contract can proxy the owner's signature; always use msg.sender instead."
+/>
 
 ---
 

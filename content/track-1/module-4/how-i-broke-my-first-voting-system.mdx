@@ -77,6 +77,12 @@ Our frontend represents this transaction path dynamically. Notice how as the vot
 > **VISUAL TRIGGER FOR FRONTEND:**
 > This diagram illustrates the linear complexity bottleneck of dynamic loops. When rendering this in the dApp UI, animate the dynamic growth of $N$. As $N$ exceeds the safety margin, transition the signal path from a green success node to a flashing red revert node representing the block gas threshold.
 
+<LessonImage
+  src="/images/track-1/gas_disaster_antipatterns_1780577437441.png"
+  alt="Gas Disaster — Anti-Patterns That Break Smart Contracts"
+  caption="Iterating over unbounded dynamic arrays inside write functions causes gas consumption to grow linearly until it hits the Block Gas Limit, bricking the contract."
+/>
+
 ---
 
 ### 4. Technical Explanation: The Physics of Block Gas Limits & Mappings

@@ -79,6 +79,12 @@ Blockchain State Updated
 > **FRONTEND INTERACTIVE TRIGGER:**
 > Notice how the deployment process is entirely transactional. When your frontend displays a deployment status tracker, it is tracking the progression of this exact pipeline, waiting for the validators to process the constructor execution and return the address. Make sure your SVG nodes highlight sequentially as the transactions propagate.
 
+<LessonImage
+  src="/images/track-1/contract_deployment_address_1780577375672.png"
+  alt="What Deployment Actually Means — Validator Replication"
+  caption="Deploying a smart contract executes its creation bytecode once in a sandbox, then replicates the final runtime bytecode across all node validators under a deterministic address."
+/>
+
 ---
 
 ### 4. Technical Explanation: Bytecode Sandbox & Address Math

@@ -10,7 +10,7 @@ lesson: 2
 difficulty: "advanced"
 estimatedMinutes: 13
 tags: ["security", "signatures", "replays"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: true
 hasProject: false
 realProjectSource: ""
@@ -45,6 +45,12 @@ Cryptographic signatures are infinitely duplicable. You must explicitly build se
 <RealityCheck>
   A signature is strictly offline data. It does not contain an internal "spent" flag, it does not exist on the blockchain state until broadcasted, and the same signature remains mathematically valid forever unless your smart contract explicitly records and invalidates its unique hash coordinates in state after first use!
 </RealityCheck>
+
+<LessonImage
+  src="/images/track-1/replay_attack_nonce.png"
+  alt="Replay Attacks Explained"
+  caption="Without unique nonces and chain IDs in signature hashes, an offline approval signature can be copied and replayed multiple times on the same or forks of the network."
+/>
 
 ---
 

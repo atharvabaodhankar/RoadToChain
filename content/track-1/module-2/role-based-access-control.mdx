@@ -10,7 +10,7 @@ lesson: 3
 difficulty: "intermediate"
 estimatedMinutes: 12
 tags: ["access-control", "roles", "openzeppelin"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: true
 hasProject: false
 realProjectSource: ""
@@ -41,6 +41,12 @@ Imagine a secure headquarters of a modern technological corporation:
   * **The HR Administrator (Master Admin):** They cannot print stock or pause doors themselves. Their only power is to program, issue, and revoke electronic badges for others.
 
 This separation of concerns makes your operations highly secure, scalable, and resistant to single-source target compromises.
+
+<LessonImage
+  src="/images/track-1/role_based_access_control_1780577254881.png"
+  alt="Role-Based Access Control (RBAC) — Hierarchy"
+  caption="Role-Based Access Control assigns granular permission roles (Minter, Auditor) managed by a central DEFAULT_ADMIN_ROLE, replacing the single-owner vulnerability."
+/>
 
 ---
 

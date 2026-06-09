@@ -66,6 +66,12 @@ If anyone tries to tamper with the cargo in your warehouse or change the logs on
   "Fully decentralized" does not mean storing everything on-chain. Storing strings, descriptions, or heavy structs in Solidity is a production anti-pattern. If a state does not require mathematical consensus, double-spend protection, or absolute validation rules, it does not belong in a smart contract.
 </RealityCheck>
 
+<LessonImage
+  src="/images/track-1/blockchain_not_database_1780577385959.png"
+  alt="Blockchain is NOT Your Database — Storage Cost Reality"
+  caption="Storing raw files or dynamic arrays on-chain wastes massive gas; the correct pattern stores data on IPFS/Web2 and registers only a 32-byte cryptographic hash proof on-chain."
+/>
+
 ---
 
 ### 3. Technical Explanation: The Cost of an SSTORE

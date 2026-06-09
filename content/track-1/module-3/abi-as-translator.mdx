@@ -10,7 +10,7 @@ lesson: 2
 difficulty: "intermediate"
 estimatedMinutes: 11
 tags: ["abi", "frontend"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: false
 realProjectSource: ""
@@ -83,6 +83,12 @@ The **ABI** is your printed menu listing English names next to the chef's secret
 Your frontend library is the **translator booth**. It takes your request (*"3 pizzas"*), looks at the ABI menu, translates it to `0x882a1b0000000000000000000000000000000000000000000000000000000000000003` (Menu Item `0x882a1b`, Quantity `3` encoded), and hands it to the waiter (the RPC node) to deliver to the chef (the EVM).
 
 If the menu is wrong or outdated, you translate the wrong code, the chef gets confused, and your order (the transaction) fails.
+
+<LessonImage
+  src="/images/track-1/abi_encoding_flow_1780577300038.png"
+  alt="ABI Encoding — From Function Call to Hex Calldata"
+  caption="The ABI acts as the schema translation layer, mapping human-readable frontend calls to structured hexadecimal bytes that the EVM can parse."
+/>
 
 ---
 

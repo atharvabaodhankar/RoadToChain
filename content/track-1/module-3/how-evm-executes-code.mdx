@@ -51,17 +51,11 @@ Think of the EVM as a high-volume, extremely cramped restaurant kitchen running 
 
 The EVM doesn't have a single shared heap memory. Instead, it operates with three completely separate memory areas. Each has a different lifecycle, access speed, and gas cost:
 
-```
-                  +-----------------------------------------+
-                  |              EVM EXECUTION              |
-                  |                                         |
-                  |  [ STACK ] (1024 depth, 32-byte words)   |
-                  |     ▲                                   |
-                  |     ├── [ MEMORY ] (Volatile byte-array)│
-                  |     ▼                                   |
-                  |  [ STORAGE ] (Persistent 32-byte slots) |
-                  +-----------------------------------------+
-```
+<LessonImage
+  src="/images/track-1/evm_stack_machine_1780577344086.png"
+  alt="How the EVM Executes Code — The Stack Machine"
+  caption="The EVM executes bytecode opcodes using a LIFO Stack for computations, volatile Memory for temporary arrays, and persistent Storage slots for state variables."
+/>
 
 #### 1. The Stack
 * **How it works:** A standard Last-In-First-Out (LIFO) stack. Think of a stack of plates. You can only add or remove a plate from the very top.

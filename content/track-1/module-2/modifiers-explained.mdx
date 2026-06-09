@@ -10,7 +10,7 @@ lesson: 2
 difficulty: "beginner"
 estimatedMinutes: 10
 tags: ["modifiers", "logic", "validation"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: false
 realProjectSource: ""
@@ -46,6 +46,12 @@ Think of a function modifier as a physical **Security Turnstile Gate** placed at
 * **The Target Room (The Function Body):** The room you want to enter to execute work (e.g. transfer funds or change a settings variable).
 * **The Turnstile (The Modifier):** A physical gate placed *before* the door. To pass through, you must swipe your badge, pass an alcohol breathalyzer check, or pay an entry fee.
 * **The Placeholder `_;` (The Door Opening):** In Solidity, the modifier contains a special symbol: a single underscore followed by a semicolon `_;`. This symbol acts as the **release signal for the turnstile lock**. It means: *"If all the checks above passed successfully, unlock the gate now and let the user enter the target room to run the actual function code."*
+
+<LessonImage
+  src="/images/track-1/modifiers_execution_flow_1780577213690.png"
+  alt="Solidity Modifiers — Execution Flow"
+  caption="Modifiers wrap function executions, running precondition checks sequentially before executing the core logic signaled by the underscore operator."
+/>
 
 ---
 

@@ -10,7 +10,7 @@ lesson: 1
 difficulty: "beginner"
 estimatedMinutes: 12
 tags: ["architecture", "voting", "project"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: true
 realProjectSource: "Evolutionary Voting System"
@@ -43,6 +43,12 @@ In Solidity, dynamic arrays and heavy on-chain strings are that cardboard shelf.
 <RealityCheck>
   A clean, green local test suite (like Hardhat or Foundry running on a local hardhat node) is **not a production validation**. Local nodes run with infinite gas ceilings and zero network latency. If you validate your contracts strictly based on "it worked in local testing," you are setting yourself up for live network disaster!
 </RealityCheck>
+
+<LessonImage
+  src="/images/track-1/voting_system_architecture_1780577426517.png"
+  alt="Voting System — Smart Contract Architecture"
+  caption="The architecture maps the naive setup where voting logic, voter registry, and candidate stats live in unified, unbounded storage structures."
+/>
 
 ---
 

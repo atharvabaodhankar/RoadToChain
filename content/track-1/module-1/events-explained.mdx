@@ -10,7 +10,7 @@ lesson: 5
 difficulty: "beginner"
 estimatedMinutes: 11
 tags: ["events", "logs", "indexing"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: false
 realProjectSource: ""
@@ -39,6 +39,12 @@ Imagine a busy central bank:
   * It costs **virtually nothing** to shout. The bank guards don't charge you for checking it.
   * Off-chain observers (like your frontend web application or indexing servers) are sitting in the lobby with clipboards, writing down everything you shout into their local journals (databases) for instant searching.
   * **The Catch:** The people inside the bank vault (your smart contract's actual code) are wearing heavy earmuffs. **A smart contract cannot hear its own emitted events** or read historical logs during execution!
+
+<LessonImage
+  src="/images/track-1/events_vs_storage_1780577203417.png"
+  alt="Events vs Storage — What Gets Indexed Where"
+  caption="Writing to storage changes the EVM state but is highly expensive; emitting events logs parameters to cheaper, indexable off-chain receipts that contracts cannot read."
+/>
 
 ---
 

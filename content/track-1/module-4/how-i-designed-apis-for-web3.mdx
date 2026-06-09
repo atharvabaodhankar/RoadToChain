@@ -96,6 +96,12 @@ Frontend ──── Authenticated Request ────► Backend (Express)
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate this as two data flow diagrams side by side. In the broken architecture, highlight the API key leaking into the public browser box in red. In the secure architecture, the API key never leaves the server box — animate it as a locked vault that only the backend can open.
 
+<LessonImage
+  src="/images/track-1/web3_api_ownership_model.png"
+  alt="Web3 API Design — The Three-Tier Ownership Model"
+  caption="Web3 APIs use a proxy backend to hide API keys from the browser, validating sessions before forwarding heavy media to IPFS and storing only light CID hashes on-chain."
+/>
+
 ---
 
 ### 4. Technical Explanation: The Three-Layer Ownership Model

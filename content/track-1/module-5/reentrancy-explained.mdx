@@ -95,6 +95,12 @@ Our frontend represents this paused execution path dynamically. Notice how the v
 > **VISUAL TRIGGER FOR FRONTEND:**
 > This diagram illustrates the recursive callback path. In the frontend dApp UI, animate this loop as a circular, pulsating signal path. As the attacker re-enters the vault, show the vault's internal execution state "freezing" at the transfer step, and highlight the multiple concurrent withdrawal balances piling up inside the attacker's wallet.
 
+<LessonImage
+  src="/images/track-1/reentrancy_attack.png"
+  alt="Reentrancy Attack"
+  caption="A reentrancy attack occurs when a vulnerable vault sends ETH before resetting the sender's balance, allowing a malicious fallback function to recursively drain funds."
+/>
+
 ---
 
 ### 4. Technical Explanation: The call Handoff & Checks-Effects-Interactions

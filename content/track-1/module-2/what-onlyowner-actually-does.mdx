@@ -10,7 +10,7 @@ lesson: 1
 difficulty: "beginner"
 estimatedMinutes: 10
 tags: ["ownership", "authorization", "security"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: false
 realProjectSource: ""
@@ -41,6 +41,12 @@ Imagine your smart contract is a physical office building:
   1. The scanner checks the unique signature chip on the card currently swiped (`msg.sender`).
   2. If the chip coordinates exactly match the master signature key registered on the wall, the lock clicks open.
   3. If there is a single digit mismatch, the system triggers an alarm, rolls back the transaction immediately (`revert`), and locks the door shut.
+
+<LessonImage
+  src="/images/track-1/onlyowner_msg_sender_1780577240583.png"
+  alt="onlyOwner — How msg.sender Access Control Works"
+  caption="The onlyOwner modifier checks if the swiped caller address (msg.sender) matches the designated owner variable, rejecting unauthorized callers instantly."
+/>
 
 ---
 

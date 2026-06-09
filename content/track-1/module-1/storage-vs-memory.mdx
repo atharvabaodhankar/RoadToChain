@@ -81,6 +81,12 @@ Our frontend can intercept and render the exact state data flow. Notice how decl
 > **VISUAL TRIGGER FOR FRONTEND:**
 > This diagram represents how data mutations are routed inside the EVM. When animating this flow in the UI, highlight the active green path representing `storage` writing directly back to the persistent storage box, vs the red path showing `memory` data loading into a floating box and dissolving when the execution terminates.
 
+<LessonImage
+  src="/images/track-1/storage_vs_memory_calldata_1780577109693.png"
+  alt="Solidity Storage vs Memory vs Calldata"
+  caption="Storage writes persist permanently on-chain (expensive), memory is a cheap temporary copy in RAM, and calldata is a read-only transaction payload reference."
+/>
+
 ---
 
 ### 4. Technical Explanation: EVM Data Allocations & Slot Mechanics

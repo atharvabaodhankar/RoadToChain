@@ -10,7 +10,7 @@ lesson: 4
 difficulty: "intermediate"
 estimatedMinutes: 14
 tags: ["audits", "upgrades", "monitoring"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: false
 hasProject: false
 realProjectSource: ""
@@ -52,22 +52,11 @@ To build reliable systems, you cannot rely on hopes. You must build structured d
 
 To survive the hostile mainnet environment, every flagship project implements these four pillars:
 
-```
-+--------------------------------------------------------------+
-|                   PRODUCTION DEFENSE SYSTEM                  |
-|                                                              |
-|  [ PRE-LAUNCH AUDIT ] ──> Third-party expert code review     |
-|         │                                                    |
-|         ▼                                                    |
-|  [ CIRCUIT BREAKER ] ──> Emergency pause modifier to stop trade|
-|         │                                                    |
-|         ▼                                                    |
-|  [ TIMELOCKED GOVERNANCE ] ──> 48-hour delay on admin actions|
-|         │                                                    |
-|         ▼                                                    |
-|  [ METRIC MONITORING ] ──> PagerDuty alerts on weird transactions|
-+--------------------------------------------------------------+
-```
+<LessonImage
+  src="/images/track-1/production_smart_contracts.png"
+  alt="Production Reality of Smart Contracts"
+  caption="Production dApps implement a defense-in-depth system: pre-launch audits, emergency circuit breakers (pause keys), administrative timelocks, and real-time telemetry monitoring."
+/>
 
 #### 1. Professional Audits
 Before deploying code that handles significant value, you hire specialized auditing firms (like ConsenSys Diligence, Trail of Bits, or OpenZeppelin) to perform a line-by-line security review of your codebase.

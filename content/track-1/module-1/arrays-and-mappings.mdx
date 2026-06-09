@@ -10,7 +10,7 @@ lesson: 3
 difficulty: "beginner"
 estimatedMinutes: 12
 tags: ["arrays", "mappings", "iteration"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: true
 hasProject: false
 realProjectSource: ""
@@ -43,6 +43,12 @@ To build secure, scalable smart contracts, you must master the differences betwe
 Think of these two structures as completely different physical storage systems:
 * **Arrays (The Clipboard Checklist):** Imagine a long sheet of paper on a clipboard hanging on the wall. Every time you add a user, you write their name at the bottom of the list. If you want to check if a specific person is on the list, you must take the clipboard, start at line 1, and read line-by-line until you find the name or hit the bottom. If the checklist has 10,000 names, your eyes will fall out before you reach the end.
 * **Mappings (The Locker Wall):** Imagine a giant wall of security lockers. Every locker has a label that matches the hash of a wallet address. If you want to check if someone is authorized, you don't look through lists. You go directly to the locker door marked with their address. You put your hand on it—if the locker is unlocked (returns `true`), they are authorized. It takes **exactly one second**, whether there are 5 lockers or 5 million lockers on the wall.
+
+<LessonImage
+  src="/images/track-1/arrays_vs_mappings_1780577155868.png"
+  alt="Arrays vs Mappings — O(N) vs O(1) Lookup"
+  caption="Arrays preserve index order but require expensive linear searches, while mappings use direct slot hashing to deliver instant constant-time lookups."
+/>
 
 ---
 
