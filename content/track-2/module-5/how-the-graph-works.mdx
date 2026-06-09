@@ -68,6 +68,12 @@ The Graph is a **decentralized indexing protocol** — a network of nodes that r
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate this as three animated layers. Layer 1: blockchain emitting events (pulsing). Layer 2: The Graph indexer consuming them (shows handler function running). Layer 3: PostgreSQL building up rows in real-time. Layer 4: GraphQL cursor querying the result table. Show the entire pipeline processing a single "Voted" event end-to-end.
 
+<LessonImage
+  src="/images/track-2/the_graph_indexing_architecture_1780631090166.png"
+  alt="The Graph Indexing & Query Architecture"
+  caption="The Graph Node extracts events from blocks, translates them into entity records using custom WASM mapping logic, and hosts them as a queryable GraphQL database."
+/>
+
 ---
 
 ### 2. What a Subgraph Actually Is

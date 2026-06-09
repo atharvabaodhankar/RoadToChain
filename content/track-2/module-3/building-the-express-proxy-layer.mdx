@@ -52,6 +52,12 @@ React ──── POST /api/upload (with session cookie) ────► Expres
 React ◄──────────────────────────── { cid: "QmXyZ..." }
 ```
 
+<LessonImage
+  src="/images/track-2/express_ipfs_proxy_flow_1780631022860.png"
+  alt="Secure IPFS Upload Proxy Flow"
+  caption="By routing media uploads through a backend proxy, API keys remain hidden on the server, and the backend can rate-limit uploads and validate user sessions before paying for IPFS storage."
+/>
+
 ---
 
 ### 2. The Backend Setup: Express + Multer + Supabase

@@ -78,6 +78,12 @@ Frontend Request ──► Backend ──► Redis (check cache)
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate the cache hit path as a short, green loop that resolves immediately. The cache miss path shows the full IPFS lookup journey, then the result stored in a Redis box, then returned. On repeat requests, the path skips the IPFS gateway entirely — the green loop.
 
+<LessonImage
+  src="/images/track-2/ipfs_vs_redis_caching_latency_1780631039332.png"
+  alt="IPFS Gateway Latency vs Redis Cache Speed"
+  caption="Because public IPFS gateways have high request overhead and network latency, full-stack Web3 apps cache JSON metadata in Redis to drop UI loading times from seconds to milliseconds."
+/>
+
 ---
 
 ### 3. Technical Explanation: Redis as a CID → URL Cache

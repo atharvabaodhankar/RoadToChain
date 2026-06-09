@@ -10,7 +10,7 @@ lesson: 2
 difficulty: "intermediate"
 estimatedMinutes: 12
 tags: ["redis", "nextjs", "caching", "performance", "project"]
-hasDiagram: false
+hasDiagram: true
 hasMistake: true
 hasProject: true
 realProjectSource: "ChainElect"
@@ -28,6 +28,12 @@ In a serverless environment (like Next.js API routes running on Vercel), each re
 To avoid this, modern serverless Web3 apps use **HTTP-based Redis clients** like **Upstash Redis** (`@upstash/redis`). It executes queries over HTTP REST requests, which are stateless, pool-free, and perfectly designed for serverless environments.
 
 Let's implement a production-grade IPFS cache route inside Next.js using Upstash Redis.
+
+<LessonImage
+  src="/images/track-2/nextjs_redis_caching_flow_1780631049409.png"
+  alt="Cache Routing Flow in Next.js API Route"
+  caption="A caching resolver intercepts queries, returning cached data instantly on hits, and fetching and storing raw IPFS files on misses to build a self-populating cache."
+/>
 
 ---
 

@@ -73,6 +73,12 @@ Public RPC Limit: max 500 blocks per query
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate this as a sliding window on the block range. The window (query range) is fixed at 500 blocks. To cover the full history, the window must slide across the entire chain in sequential steps. Show the number of required API calls = (latestBlock - deployBlock) / 500. Highlight how this grows over time.
 
+<LessonImage
+  src="/images/track-2/eth_getlogs_block_range_limits_1780630973844.png"
+  alt="RPC Query Limits on eth_getLogs Range"
+  caption="Public RPC nodes enforce strict block range limits (typically 2,000 to 50,000 blocks) on event log searches to prevent memory exhaustion, causing naive history queries to fail in production."
+/>
+
 ---
 
 ### 3. Technical Explanation: RPC Node Log Limits by Provider

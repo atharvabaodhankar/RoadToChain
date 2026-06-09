@@ -113,6 +113,12 @@ EVENT-DRIVEN INVALIDATION (correct)
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate a timeline with two parallel tracks. Track A (TTL) shows a long period of serving stale data after a state change. Track B (Event-driven) shows an immediate invalidation the instant the event fires. Make the difference stark and visible — this is the intuition that explains why event subscriptions matter.
 
+<LessonImage
+  src="/images/track-2/web3_cache_invalidation_matrix_1780631060211.png"
+  alt="Web3 Caching Strategies: Immutable vs Mutable Data"
+  caption="IPFS assets can be safely cached forever because they are content-addressed (immutable). On-chain state cache must be invalidated dynamically by listening to blockchain event logs."
+/>
+
 ---
 
 ### 4. The Hybrid Cache Strategy

@@ -142,6 +142,12 @@ This is it. No JWT. No server session. No database lookup. The user's MetaMask a
 > **VISUAL TRIGGER FOR FRONTEND:**
 > This is Module 1's architecture state. Throughout Track 2, this diagram will evolve — new boxes will appear (Backend, Redis, Subgraph) as each module introduces them. Animate the progression of this diagram across modules to show the dApp literally growing its architecture.
 
+<LessonImage
+  src="/images/track-2/react_direct_rpc_architecture_1780630917093.png"
+  alt="The Direct Frontend-to-RPC Naive Architecture"
+  caption="In this basic architecture, the client app interacts directly with the blockchain via a browser provider. While simple, it has zero caching, cannot store secrets, and has terrible read latency."
+/>
+
 ---
 
 ### 4. Technical Explanation: What MetaMask Actually Does Here

@@ -91,6 +91,12 @@ Promise.all rejects ──► UI shows blank screen
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate this as a fan-out diagram where the single admin load spawns 1,000 parallel arrows hitting the RPC node. Show the node visually "overloading" as the arrows pile up, then some turning red (timeouts) and the entire Promise.all collapsing. This is the exact moment the naive architecture breaks.
 
+<LessonImage
+  src="/images/track-2/rpc_read_scaling_disaster_1780630963009.png"
+  alt="The Read-Scaling Bottleneck: Direct RPC List Queries"
+  caption="Querying lists directly from smart contract storage using loops or individual RPC calls is an anti-pattern. As N grows, latency increases linearly until requests hit rate limits or timeout thresholds."
+/>
+
 ---
 
 ### 3. Technical Explanation: Why Blockchain Reads Don't Scale Like This

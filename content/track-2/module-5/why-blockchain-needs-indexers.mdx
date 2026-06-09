@@ -142,6 +142,12 @@ Contract Events ──► Indexer ───────────────�
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate the EVM storage as a flat, unsorted key-value grid — show a sort query bouncing off it. Then show the indexer as a processing pipeline that ingests events and writes them into a structured, indexed database with a GraphQL query interface on top.
 
+<LessonImage
+  src="/images/track-2/blockchain_sort_filter_bottleneck_1780631079037.png"
+  alt="The Sorting & Filtering Problem: On-Chain vs Indexer"
+  caption="Because the EVM cannot index data for complex sorting or filtering, smart contracts offload queries to indexing databases that compile event logs into highly indexed relational state stores."
+/>
+
 ---
 
 ### 4. The ProofChain Example

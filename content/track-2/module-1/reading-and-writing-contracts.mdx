@@ -79,6 +79,12 @@ React ──► ethers.js.sendTransaction() ──► MetaMask popup
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate both flows as simultaneous signal paths. The read path is a short, fast loop. The write path is a longer sequential pipeline with a clear "PENDING" state bubble that animates until the block confirmation arrives. This sets user expectations correctly.
 
+<LessonImage
+  src="/images/track-2/contract_read_vs_write_flow_1780630945028.png"
+  alt="Solidity Read (Call) vs Write (Transaction) Flows"
+  caption="Reads are read-only view calls executed locally on an RPC node for free. Writes are signed transactions that alter blockchain state, requiring gas and mining confirmation."
+/>
+
 ---
 
 ### 3. Technical Explanation: The Read Pattern

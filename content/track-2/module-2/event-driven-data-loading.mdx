@@ -70,6 +70,12 @@ Subscribe to contract.events.Voted()
 > **VISUAL TRIGGER FOR FRONTEND:**
 > Animate the initial load as a "replay" — show historical events streaming in and building up a state object like a ledger. Then show the real-time subscription as a live wire that updates the same state object in place. This helps students understand state reconstruction from events vs polling contract state.
 
+<LessonImage
+  src="/images/track-2/event_driven_data_loading_1780630982827.png"
+  alt="Event-Driven Data Synchronization Flow"
+  caption="Instead of polling the blockchain with heavy read calls, the client application listens to real-time event logs, executing lightweight updates to UI state as transactions are confirmed."
+/>
+
 ---
 
 ### 3. Technical Explanation: Web3.js Event Subscriptions
