@@ -85,7 +85,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-bg2/80 px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-muted">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-bg2/80 px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-muted">
               <span 
                 className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" 
                 style={{ 
@@ -93,19 +93,41 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                   animationDuration: "3s"
                 }} 
               />
-              Interactive visual curriculum
+              8 Tracks &middot; One System
             </div>
             
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[0.95] text-text font-sans">
+            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.05] text-text font-sans">
               8 Tracks.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-text via-muted to-dim">
+              <span className="font-serif italic text-accent font-normal">
                 One System.
               </span>
             </h1>
             
             <p className="max-w-md text-sm text-muted leading-relaxed font-sans">
-              The evolution from a confused beginner to a production-grade systems engineer. Every track centers around a shipped product. Scroll down to enter each world.
+              The evolution from a confused beginner to a production-grade systems engineer. <strong className="text-text font-semibold">Every track centres around a shipped, deployed product</strong> &mdash; not a toy demo.
             </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                onClick={() => scrollToTrack(0)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-5 py-2.5 font-mono text-xs font-semibold text-white transition-all hover:bg-accent-hover cursor-pointer"
+              >
+                Begin from Track 0 &rarr;
+              </button>
+              <button
+                onClick={() => {
+                  const el = document.getElementById("roadmap-blueprint");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  } else {
+                    scrollToTrack(0);
+                  }
+                }}
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-bg px-5 py-2.5 font-mono text-xs font-semibold text-muted hover:text-text hover:border-border2 transition-all cursor-pointer"
+              >
+                See the roadmap
+              </button>
+            </div>
 
             {/* Premium Interactive Stat Row */}
             <div className="pt-6 grid grid-cols-4 gap-4 border-t border-border">
@@ -128,7 +150,7 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
           </div>
 
           {/* Rebuilt Interactive SVG Dependency Graph */}
-          <div className="lg:col-span-6 relative bg-bg2/40 border border-border p-6 rounded-2xl backdrop-blur-md overflow-hidden">
+          <div id="roadmap-blueprint" className="lg:col-span-6 relative bg-bg2/40 border border-border p-6 rounded-2xl backdrop-blur-md overflow-hidden">
             <div className="absolute top-3 left-4 font-mono text-[9px] text-dim uppercase tracking-widest">
               {"// PREREQUISITE NETWORK BLUEPRINT"}
             </div>
