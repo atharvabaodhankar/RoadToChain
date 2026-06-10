@@ -24,6 +24,7 @@ import LessonImage from "@/components/mdx/LessonImage";
 import ReadingProgressBar from "@/components/layout/ReadingProgressBar";
 import LessonCompleteButton from "@/components/layout/LessonCompleteButton";
 import TableOfContents from "@/components/layout/TableOfContents";
+import LessonSidebarLayout from "@/components/layout/LessonSidebarLayout";
 
 // Import interactive simulator components
 import GasSimulator from "@/components/simulators/GasSimulator";
@@ -384,9 +385,8 @@ export default async function LessonPage({ params }: Props) {
       <JsonLd schema={schemas} />
       <ReadingProgressBar />
       
-      <div className="flex w-full">
-        {/* ── COLUMN 1: Left Navigation Sidebar ────────────────────────────── */}
-        <aside className="w-68 border-r border-border bg-bg2 hidden lg:block shrink-0 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto p-6 scrollbar-thin select-none">
+      <LessonSidebarLayout
+        sidebarContent={
           <div className="space-y-6">
             <div>
               <Link 
@@ -439,8 +439,8 @@ export default async function LessonPage({ params }: Props) {
               })}
             </nav>
           </div>
-        </aside>
-
+        }
+      >
         {/* ── COLUMN 2 & 3: Content Reader + Right TOC ────────────────────────── */}
         <div className="flex-1 flex justify-center min-w-0">
           <div className="w-full max-w-[980px] px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
@@ -757,7 +757,7 @@ export default async function LessonPage({ params }: Props) {
 
           </div>
         </div>
-      </div>
+      </LessonSidebarLayout>
     </div>
   );
 }
