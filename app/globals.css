@@ -64,7 +64,11 @@
   --dg-warning: #d97706;
   --dg-blue: #2563eb;
   --dg-teal: #0d9488;
-  
+
+  /* Code highlights system — light */
+  --code-bg: #fafafa;
+  --code-header-bg: #f4f4f5;
+  --code-text: #1a1a1a;
 }
 
 [data-theme="dark"] {
@@ -104,6 +108,11 @@
   --dg-warning: #fbbf24;
   --dg-blue: #60a5fa;
   --dg-teal: #2dd4bf;
+
+  /* Code highlights system — dark */
+  --code-bg: #0d0d0f;
+  --code-header-bg: #09090b;
+  --code-text: #ededed;
 }
 
 body {
@@ -232,4 +241,12 @@ body {
 /* ─── Hero Primary Button ──────────────────────────────────────────────────── */
 .hero-btn-primary:hover {
   box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 40%, transparent) !important;
+}
+
+/* ─── Dual Theme Code Highlights Display ──────────────────────────────────── */
+html:not([data-theme="dark"]) [data-theme="dark"] {
+  display: none !important;
+}
+html[data-theme="dark"] [data-theme="light"] {
+  display: none !important;
 }

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
-interface CodeBlockProps {
+interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
   filename?: string;
   language?: string;
   code: string;
@@ -15,6 +15,8 @@ export default function CodeBlock({
   language = "solidity",
   code,
   children,
+  className,
+  ...rest
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
@@ -53,9 +55,12 @@ export default function CodeBlock({
   const displayCode = getRawCode();
 
   return (
-    <div className="my-6 overflow-hidden rounded-xl border border-border bg-[#0d0d0f]">
+    <div 
+      className={`my-6 overflow-hidden rounded-xl border border-border bg-[var(--code-bg)] ${className || ""}`}
+      {...rest}
+    >
       {/* Header Bar */}
-      <div className="flex items-center justify-between border-b border-border bg-[#09090b] px-4 py-3">
+      <div className="flex items-center justify-between border-b border-border bg-[var(--code-header-bg)] px-4 py-3">
         {/* Mac OS Window Controls */}
         <div className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
@@ -80,7 +85,7 @@ export default function CodeBlock({
           {/* Copy Button */}
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-md border border-border p-1.5 font-mono text-[11px] text-muted transition-colors hover:bg-bg3 hover:text-text"
+            className="flex items-center gap-1.5 rounded-md border border-border p-1.5 font-mono text-[11px] text-muted transition-colors hover:bg-bg3 hover:text-text cursor-pointer"
             aria-label="Copy code block"
           >
             {copied ? (
@@ -99,7 +104,7 @@ export default function CodeBlock({
       </div>
 
       {/* Code Area */}
-      <div className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-[#d4d4d8] scrollbar-thin">
+      <div className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-[var(--code-text)] scrollbar-thin">
         {children ? (
           <pre className="m-0 bg-transparent p-0 select-text overflow-visible">
             {children}

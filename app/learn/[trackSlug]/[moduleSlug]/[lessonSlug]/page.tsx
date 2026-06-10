@@ -134,29 +134,46 @@ const mdxComponents = {
       const rawCode = extractTextContent(codeProps.children);
 
       let defaultFilename = "SmartAccount.sol";
-      if (language === "typescript" || language === "ts" || language === "tsx") {
+      const langLower = (language || "").toLowerCase();
+      if (langLower === "typescript" || langLower === "ts" || langLower === "tsx") {
         defaultFilename = "types.ts";
-      } else if (language === "javascript" || language === "js") {
+      } else if (langLower === "javascript" || langLower === "js" || langLower === "jsx") {
         defaultFilename = "index.js";
-      } else if (language === "circom") {
+      } else if (langLower === "circom") {
         defaultFilename = "circuit.circom";
-      } else if (language === "bash" || language === "sh" || language === "shell") {
+      } else if (langLower === "bash" || langLower === "sh" || langLower === "shell" || langLower === "terminal") {
         defaultFilename = "terminal";
+      } else if (langLower === "yaml" || langLower === "yml") {
+        defaultFilename = "subgraph.yaml";
+      } else if (langLower === "json") {
+        defaultFilename = "package.json";
+      } else if (langLower === "python" || langLower === "py") {
+        defaultFilename = "script.py";
+      } else if (langLower === "html") {
+        defaultFilename = "index.html";
+      } else if (langLower === "css") {
+        defaultFilename = "styles.css";
+      } else if (langLower === "solidity" || langLower === "sol") {
+        defaultFilename = "SmartAccount.sol";
       }
 
       let filename = defaultFilename;
       if (rawCode) {
-        const fileMatch = rawCode.match(/\/\/\s*([a-zA-Z0-9_\-\.]+\.[a-zA-Z0-9]+)/);
+        // Match // filename.ext, # filename.ext, or <!-- filename.ext -->
+        const fileMatch = rawCode.match(/(?:\/\/\/|#|\/\/|<!--)\s*([a-zA-Z0-9_\-\.]+\.[a-zA-Z0-9]+)/);
         if (fileMatch) {
           filename = fileMatch[1];
         }
       }
+
+      const { children: _, ...preRest } = props;
 
       return (
         <CodeBlock
           filename={filename}
           language={language}
           code={rawCode}
+          {...(preRest as any)}
         >
           {codeProps.children}
         </CodeBlock>
@@ -501,7 +518,16 @@ export default async function LessonPage({ params }: Props) {
                       options={{
                         mdxOptions: {
                           rehypePlugins: [
-                            [rehypePrettyCode, { theme: "github-dark", keepBackground: true }]
+                            [
+                              rehypePrettyCode,
+                              {
+                                theme: {
+                                  dark: "github-dark",
+                                  light: "github-light",
+                                },
+                                keepBackground: false,
+                              },
+                            ],
                           ]
                         }
                       }}
