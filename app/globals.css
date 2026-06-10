@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+
 @theme {
   --color-bg: var(--bg);
   --color-bg2: var(--bg2);
@@ -156,6 +159,7 @@ body {
   --tw-prose-quote-borders: var(--accent);
   --tw-prose-captions: var(--text-dim);
   --tw-prose-code: var(--text);
+  --tw-prose-pre-code: var(--text);
   --tw-prose-pre-bg: var(--bg2);
   --tw-prose-th-borders: var(--border2);
   --tw-prose-td-borders: var(--border);
@@ -252,10 +256,16 @@ html[data-theme="dark"] [data-theme="light"] {
 }
 
 /* Shiki Dual-Theme Token CSS Variable Overrides */
+[data-theme*="light"][data-theme*="dark"],
+[data-theme*="light"][data-theme*="dark"] pre,
+[data-theme*="light"][data-theme*="dark"] code,
 [data-theme*="light"][data-theme*="dark"] span {
   color: var(--shiki-light) !important;
 }
 
+html[data-theme="dark"] [data-theme*="light"][data-theme*="dark"],
+html[data-theme="dark"] [data-theme*="light"][data-theme*="dark"] pre,
+html[data-theme="dark"] [data-theme*="light"][data-theme*="dark"] code,
 html[data-theme="dark"] [data-theme*="light"][data-theme*="dark"] span {
   color: var(--shiki-dark) !important;
 }
