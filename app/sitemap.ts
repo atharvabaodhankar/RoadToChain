@@ -3,7 +3,7 @@ import { tracks } from "@/lib/curriculum";
 import { getAllLessonPaths } from "@/lib/content";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
 
   const staticPages: MetadataRoute.Sitemap = [
     {

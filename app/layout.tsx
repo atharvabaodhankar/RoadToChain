@@ -27,13 +27,13 @@ const playfair = Playfair_Display({
   weight: ["400", "700"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ChainVidya — Learn Web3 Engineering",
-    template: "%s · ChainVidya",
+    default: "RoadToChain — Learn Web3 Engineering",
+    template: "%s · RoadToChain",
   },
   description: "Modern Web3 engineering education. 8 tracks from blockchain foundations to ZK proofs. Built from real shipped projects — Socio3, ProofChain, ChainCure, ZeroLeak. No hype. Real systems.",
   keywords: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Atharva Baodhankar", url: "https://atharvabaodhankar.me" }],
   creator: "Atharva Baodhankar",
-  publisher: "ChainVidya",
+  publisher: "RoadToChain",
   robots: {
     index: true,
     follow: true,
@@ -66,21 +66,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: siteUrl,
-    siteName: "ChainVidya",
-    title: "ChainVidya — Learn Web3 Engineering",
+    siteName: "RoadToChain",
+    title: "RoadToChain — Learn Web3 Engineering",
     description: "Modern Web3 engineering education. No hype. Real systems.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ChainVidya — Web3 Engineering Education",
+        alt: "RoadToChain — Web3 Engineering Education",
       }
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ChainVidya — Learn Web3 Engineering",
+    title: "RoadToChain — Learn Web3 Engineering",
     description: "Modern Web3 engineering. No hype. Real systems.",
     images: ["/og-twitter.png"],
     creator: "@atharvabaodhankar",
