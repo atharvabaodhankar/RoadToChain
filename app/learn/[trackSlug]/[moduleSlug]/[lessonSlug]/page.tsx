@@ -510,63 +510,163 @@ export default async function LessonPage({ params }: Props) {
                 ) : (
                   /* Gated preview / Placeholder */
                   <div className="space-y-8 animate-fade-in font-sans">
-                    <div className="relative rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 md:p-8 overflow-hidden backdrop-blur-sm">
+                    <div className="relative rounded-2xl border border-border bg-bg2/40 p-1 overflow-hidden backdrop-blur-sm shadow-sm">
+                      {/* Technical Grid Overlay */}
+                      <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.15] pointer-events-none" style={{
+                        backgroundImage: 'radial-gradient(circle, var(--border2) 1px, transparent 1px)',
+                        backgroundSize: '16px 16px',
+                        backgroundPosition: 'center'
+                      }} />
+
+                      {/* CAD corner framing brackets */}
+                      <div className="absolute top-2 left-2 w-3.5 h-3.5 border-t border-l border-border3/40" />
+                      <div className="absolute top-2 right-2 w-3.5 h-3.5 border-t border-r border-border3/40" />
+                      <div className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b border-l border-border3/40" />
+                      <div className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b border-r border-border3/40" />
+
+                      {/* Left Track Color Accent Spine */}
                       <div 
-                        className="absolute inset-0 pointer-events-none opacity-5"
-                        style={{
-                          background: `radial-gradient(circle at 70% 30%, ${currentTrack.color} 0%, transparent 60%)`,
-                        }}
+                        className="absolute left-0 top-6 bottom-6 w-[3px] rounded-r"
+                        style={{ backgroundColor: currentTrack.color }}
                       />
-                      <div className="relative z-10 flex flex-col md:flex-row items-start gap-6">
-                        <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400 shrink-0">
-                          <Hammer className="h-6 w-6 stroke-[1.8] animate-pulse" />
-                        </div>
-                        <div className="space-y-3">
-                          <h3 className="text-lg font-bold text-text tracking-tight flex items-center gap-2">
-                            Lesson Under Construction
+
+                      <div className="relative z-10 border border-border/80 rounded-xl p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start gap-8">
+                        <div className="space-y-4 flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span 
+                              className="font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border"
+                              style={{
+                                color: currentTrack.color,
+                                borderColor: `${currentTrack.color}30`,
+                                backgroundColor: `${currentTrack.color}08`
+                              }}
+                            >
+                              Draft Stage: Active Assembly
+                            </span>
+                            <span className="font-mono text-[9px] text-dim">
+                              SYSTEM INDEX: T0{currentTrack.id}
+                            </span>
+                          </div>
+
+                          <h3 className="text-xl font-bold text-text tracking-tight font-sans">
+                            Curriculum Workbench: <span className="font-serif italic text-accent font-normal">{currentLesson.title}</span>
                           </h3>
-                          <p className="text-sm leading-relaxed text-muted">
-                            This lesson details have been defined in the curriculum blueprint, but the full interactive content and simulators are currently being engineered.
+
+                          <p className="text-xs text-muted leading-relaxed max-w-xl">
+                            The technical specifications and prerequisite maps for this module have been verified. Our engineering team is currently assembling the live interactive simulators, textbook-grade schemas, and production post-mortems for this workbench.
                           </p>
-                          <p className="text-xs text-dim leading-relaxed">
-                            You can read the lesson summary below, or mark this lesson as complete to advance through the track overview and continue your walkaround.
-                          </p>
+
+                          <div className="flex items-center gap-1.5 font-mono text-[9px] text-dim">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500/80 animate-pulse-dot" />
+                            <span>Calibrating custom lesson simulators & textbook content</span>
+                          </div>
+
+                          {/* CAD Title Block */}
+                          <div className="mt-6 border border-border bg-bg/85 backdrop-blur-sm rounded-lg overflow-hidden max-w-xs shadow-sm">
+                            <div className="grid grid-cols-2 border-b border-border/50 font-mono text-[9px]">
+                              <div className="p-2 border-r border-border/50">
+                                <span className="block text-[8px] text-dim/80 uppercase">Doc Index</span>
+                                <span className="font-semibold text-text">T0{currentTrack.id}-M{currentModule.number.split(".")[1]}-L{currentModule.lessons.findIndex((l) => l.slug === lessonSlug) + 1}</span>
+                              </div>
+                              <div className="p-2">
+                                <span className="block text-[8px] text-dim/80 uppercase">Workbench Stage</span>
+                                <span className="font-semibold text-accent uppercase">Calibrating</span>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 font-mono text-[9px]">
+                              <div className="p-2 border-r border-border/50">
+                                <span className="block text-[8px] text-dim/80 uppercase">System Revision</span>
+                                <span className="font-semibold text-text">REV 0.9.5</span>
+                              </div>
+                              <div className="p-2">
+                                <span className="block text-[8px] text-dim/80 uppercase">Calibrated For</span>
+                                <span className="font-semibold text-text truncate block">{currentTrack.name}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Technical CAD Blueprint Schematic */}
+                        <div className="shrink-0 flex items-center justify-center self-center lg:self-start border border-border/60 bg-bg/50 rounded-xl p-2 shadow-inner select-none pointer-events-none">
+                          <svg className="w-32 h-32 md:w-36 md:h-36 text-accent/50 dark:text-accent/35" viewBox="0 0 100 100" fill="none">
+                            <pattern id="cadGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                              <circle cx="5" cy="5" r="0.5" fill="currentColor" opacity="0.25" />
+                            </pattern>
+                            <rect width="100%" height="100%" fill="url(#cadGrid)" />
+
+                            {/* Centered crosshairs */}
+                            <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.25" strokeDasharray="1 3" />
+                            <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.25" strokeDasharray="1 3" />
+
+                            {/* Geometric drafting circles */}
+                            <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="0.5" />
+                            <circle cx="50" cy="50" r="28" stroke="currentColor" strokeWidth="0.35" strokeDasharray="2 2" />
+                            <circle cx="50" cy="50" r="10" stroke="currentColor" strokeWidth="0.5" />
+                            <circle cx="50" cy="50" r="3" fill="currentColor" />
+
+                            {/* Outer Dimension lines */}
+                            <path d="M 12 8 L 12 4 M 88 8 L 88 4 M 12 6 L 88 6" stroke="currentColor" strokeWidth="0.35" />
+                            <polygon points="12,6 15,4.5 15,7.5" fill="currentColor" />
+                            <polygon points="88,6 85,4.5 85,7.5" fill="currentColor" />
+                            <text x="50" y="11" className="font-mono text-[4px] fill-current text-center font-bold" textAnchor="middle">Ø 76.00 mm</text>
+
+                            {/* Structural schematic lines & nodes */}
+                            <rect x="44" y="44" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="0.75" fill="var(--bg)" />
+                            <path d="M 50 22 L 50 44 M 50 56 L 50 78 M 22 50 L 44 50 M 56 50 L 78 50" stroke="currentColor" strokeWidth="0.35" />
+                            <circle cx="50" cy="22" r="1.5" stroke="currentColor" strokeWidth="0.5" fill="var(--bg)" />
+                            <circle cx="50" cy="78" r="1.5" stroke="currentColor" strokeWidth="0.5" fill="var(--bg)" />
+                            <circle cx="22" cy="50" r="1.5" stroke="currentColor" strokeWidth="0.5" fill="var(--bg)" />
+                            <circle cx="78" cy="50" r="1.5" stroke="currentColor" strokeWidth="0.5" fill="var(--bg)" />
+
+                            {/* Caliper measurement lines */}
+                            <path d="M 78 50 A 28 28 0 0 0 69.8 30.2" stroke="currentColor" strokeWidth="0.5" />
+                            <text x="73" y="36" className="font-mono text-[3.5px] fill-current italic font-bold">r=28.00</text>
+                          </svg>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-6">
                       <h3 className="text-base font-bold text-text flex items-center gap-2 border-b border-border/40 pb-2">
-                        <Compass className="h-4 w-4 text-accent" /> Lesson Learning Path
+                        <Compass className="h-4 w-4 text-accent" /> Module Spec Sheet & Calibration
                       </h3>
                       
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="bg-bg2 border border-border/60 rounded-xl p-5 space-y-2">
+                        <div className="bg-bg/40 border border-border/65 rounded-xl p-5 space-y-2 relative overflow-hidden">
+                          <div className="absolute top-2 right-3 font-mono text-[8px] text-dim">ITEM 01</div>
                           <div className="font-mono text-[9px] uppercase font-bold text-accent">Core Concept</div>
                           <h4 className="text-xs font-semibold text-text">{currentLesson.title}</h4>
                           <p className="text-xs text-muted leading-relaxed">{currentLesson.description}</p>
                         </div>
 
-                        <div className="bg-bg2 border border-border/60 rounded-xl p-5 space-y-3">
-                          <div className="font-mono text-[9px] uppercase font-bold text-dim">Features Included</div>
-                          <div className="space-y-2 text-xs text-muted">
-                            <div className="flex items-center gap-2">
-                              <div className={`h-1.5 w-1.5 rounded-full ${currentLesson.hasDiagram ? "bg-emerald-500" : "bg-zinc-700"}`} />
-                              <span>{currentLesson.hasDiagram ? "Visual Architecture Diagrams" : "Conceptual Layout"}</span>
+                        <div className="bg-bg/40 border border-border/65 rounded-xl p-5 space-y-3 relative overflow-hidden">
+                          <div className="absolute top-2 right-3 font-mono text-[8px] text-dim">ITEM 02</div>
+                          <div className="font-mono text-[9px] uppercase font-bold text-dim">Calibration Specs</div>
+                          <div className="space-y-2.5 text-xs text-muted">
+                            <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+                              <span className="text-text font-medium">Visual Architecture Diagram</span>
+                              <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded ${currentLesson.hasDiagram ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"}`}>
+                                {currentLesson.hasDiagram ? "SCHEMATIC STAGED" : "TEXTUAL ONLY"}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className={`h-1.5 w-1.5 rounded-full ${currentLesson.hasMistake ? "bg-amber-500" : "bg-zinc-700"}`} />
-                              <span>{currentLesson.hasMistake ? "Top Production Mistakes Autopsy" : "Standard Pitfalls List"}</span>
+                            <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+                              <span className="text-text font-medium">Production Autopsy Logs</span>
+                              <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded ${currentLesson.hasMistake ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"}`}>
+                                {currentLesson.hasMistake ? "CASES DOCUMENTED" : "SUMMARY GUIDE"}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className={`h-1.5 w-1.5 rounded-full ${currentLesson.hasProject ? "bg-purple-500" : "bg-zinc-700"}`} />
-                              <span>{currentLesson.hasProject ? "Hands-on Capstone Code Integration" : "Practical Reference Code"}</span>
+                            <div className="flex items-center justify-between">
+                              <span className="text-text font-medium">Capstone Code Integration</span>
+                              <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded ${currentLesson.hasProject ? "bg-purple-500/10 text-purple-500 border border-purple-500/20" : "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"}`}>
+                                {currentLesson.hasProject ? "LAB CODE COMPILED" : "CODE SNIPPETS"}
+                              </span>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-border bg-bg3/40 p-5 space-y-3">
+                      <div className="rounded-xl border border-border bg-bg3/40 p-5 space-y-2 relative">
+                        <div className="absolute top-2 right-3 font-mono text-[8px] text-dim">ADVISORY</div>
                         <h4 className="text-xs font-semibold text-text flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5 text-accent" /> Lesson Progress Tip
                         </h4>
