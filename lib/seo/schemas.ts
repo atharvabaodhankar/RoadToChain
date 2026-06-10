@@ -1,12 +1,12 @@
 import { Track, Lesson } from "../curriculum";
 
 export function organizationSchema() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${siteUrl}/#organization`,
-    name: "ChainVidya",
+    name: "RoadToChain",
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
@@ -23,20 +23,20 @@ export function organizationSchema() {
       ],
     },
     sameAs: [
-      "https://github.com/chainvidya",
-      "https://twitter.com/chainvidya",
+      "https://github.com/roadtochain",
+      "https://twitter.com/roadtochain",
     ],
   };
 }
 
 export function websiteSchema() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": `${siteUrl}/#website`,
     url: siteUrl,
-    name: "ChainVidya",
+    name: "RoadToChain",
     description: "Modern Web3 engineering education.",
     publisher: {
       "@id": `${siteUrl}/#organization`,
@@ -53,12 +53,12 @@ export function websiteSchema() {
 }
 
 export function courseSchema(track: Track) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
   return {
     "@context": "https://schema.org",
     "@type": "Course",
     "@id": `${siteUrl}/learn/${track.slug}/#course`,
-    name: `${track.name} — ChainVidya`,
+    name: `${track.name} — RoadToChain`,
     description: track.description,
     url: `${siteUrl}/learn/${track.slug}`,
     provider: {
@@ -99,7 +99,7 @@ export function lessonSchema(
   datePublished?: string,
   dateModified?: string
 ) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chainvidya.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
   const published = datePublished || "2026-06-04T00:00:00.000Z";
   const modified = dateModified || published;
 

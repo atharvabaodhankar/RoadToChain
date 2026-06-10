@@ -30,7 +30,7 @@ export default function Nav() {
     }
   };
 
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ChainVidya";
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "RoadToChain";
   const { 
     user, 
     loading, 
@@ -73,7 +73,7 @@ export default function Nav() {
             <div className="relative h-6 w-6 rounded border border-border/80 bg-bg2 overflow-hidden shadow-sm flex-shrink-0">
               <Image
                 src="/logo.png"
-                alt="ChainVidya Logo"
+                alt="RoadToChain Logo"
                 fill
                 sizes="24px"
                 className="object-cover group-hover:scale-105 transition-transform duration-250 ease-out"
