@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Real mistakes from shipping ZKredential, ChainCure, erc4337-kit, and more. First-person stories about blockchain engineering failures and what I learned.",
   openGraph: {
-    title: "Mistakes I Made — ChainVidya",
+    title: "Mistakes I Made — RoadToChain",
     description: "Real mistakes from shipping Web3 projects. First-person stories about blockchain engineering failures.",
   },
 };
