@@ -161,7 +161,7 @@ export default function WhereIsBlockchainStored() {
 
       {/* Footer */}
       <div className="px-5 py-3 border-t font-mono text-[10px] text-center" style={{ borderColor: "var(--dg-border)", color: "var(--dg-text-dim)" }}>
-        Every full node stores a complete copy. "The blockchain" is not a single place — it's thousands of identical copies.
+        Every full node stores a complete copy. &quot;The blockchain&quot; is not a single place — it&apos;s thousands of identical copies.
       </div>
     </div>
   );

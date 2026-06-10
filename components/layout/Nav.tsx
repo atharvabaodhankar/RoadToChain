@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ArrowRight, Lock, Unlock, LogIn, LogOut, Loader2, Sun, Moon } from "lucide-react";
+import { Menu, X, ArrowRight, LogIn, LogOut, Loader2, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProgress } from "@/app/context/ProgressContext";
 

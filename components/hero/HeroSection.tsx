@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import PixelBlast from "./PixelBlast";
@@ -223,7 +222,7 @@ export default function HeroSection() {
                 <div className="flex items-center justify-between h-5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[9px] font-bold text-accent/80 opacity-70 tracking-wider">
-                      {card.id} // {card.shortLabel}
+                      {card.id} {"//"} {card.shortLabel}
                     </span>
                   </div>
                   <span className="inline-flex items-center gap-1 font-mono text-[8px] font-bold tracking-wider text-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">

@@ -208,7 +208,7 @@ const CardSwap = ({
 
   const rendered = childArr.map((child, i) =>
     isValidElement(child)
-      ? cloneElement(child as React.ReactElement<any>, {
+      ? cloneElement(child as React.ReactElement<Record<string, unknown>>, {
           key: i,
           ref: refs[i],
           style: { width, height, ...(child.props.style ?? {}) },

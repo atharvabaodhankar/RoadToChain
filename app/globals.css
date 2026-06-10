@@ -250,3 +250,14 @@ html:not([data-theme="dark"]) [data-theme="dark"] {
 html[data-theme="dark"] [data-theme="light"] {
   display: none !important;
 }
+
+/* Shiki Dual-Theme Token CSS Variable Overrides */
+[data-theme*="light"][data-theme*="dark"] span {
+  color: var(--shiki-light) !important;
+}
+
+html[data-theme="dark"] [data-theme*="light"][data-theme*="dark"] span {
+  color: var(--shiki-dark) !important;
+}
+
+

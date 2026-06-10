@@ -114,7 +114,7 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
       <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between">
         <div>
           <span className="font-mono text-[9px] font-bold text-accent uppercase tracking-widest block mb-2 select-none">
-            // Project Connection
+            {"// Project Connection"}
           </span>
           <h3 className="font-sans font-bold text-lg sm:text-xl text-text tracking-tight mb-3">
             {name}

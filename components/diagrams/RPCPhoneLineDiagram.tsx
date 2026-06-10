@@ -55,7 +55,7 @@ export default function RPCPhoneLineDiagram() {
       {/* Header */}
       <div className="px-5 py-3 border-b" style={{ borderColor: "var(--dg-border)" }}>
         <span className="font-mono text-[11px] tracking-widest uppercase" style={{ color: "var(--dg-text-dim)" }}>
-          T0.7 — RPC: Your App's Phone Line to the Blockchain
+          T0.7 — RPC: Your App&apos;s Phone Line to the Blockchain
         </span>
       </div>
 
@@ -101,7 +101,7 @@ export default function RPCPhoneLineDiagram() {
       <div className="mx-5 mt-4 mb-3 rounded-md border-l-2 px-3 py-2" style={{ borderColor: "var(--dg-danger)", background: "rgba(220,38,38,0.04)" }}>
         <span className="font-mono text-[9px] uppercase tracking-widest mr-2" style={{ color: "var(--dg-danger)" }}>myth:</span>
         <span className="font-mono text-[10px]" style={{ color: "var(--dg-text)" }}>
-          &ldquo;RPC is the blockchain.&rdquo; — No. RPC is a courier. The blockchain is the destination. Alchemy going down doesn't affect the blockchain itself.
+          &ldquo;RPC is the blockchain.&rdquo; — No. RPC is a courier. The blockchain is the destination. Alchemy going down doesn&apos;t affect the blockchain itself.
         </span>
       </div>
 

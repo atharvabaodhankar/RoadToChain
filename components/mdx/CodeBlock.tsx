@@ -104,7 +104,7 @@ export default function CodeBlock({
       </div>
 
       {/* Code Area */}
-      <div className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-[var(--code-text)] scrollbar-thin">
+      <div className="overflow-x-auto p-4 font-mono text-[13px] md:text-[16px] leading-relaxed text-[var(--code-text)] scrollbar-thin">
         {children ? (
           <pre className="m-0 bg-transparent p-0 select-text overflow-visible">
             {children}

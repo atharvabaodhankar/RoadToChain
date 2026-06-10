@@ -6,12 +6,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-const fadeUpVariant: any = {
+const fadeUpVariant = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
   },
 };
 
@@ -54,7 +54,7 @@ export default function WhyExistsSection() {
             className="space-y-6"
           >
             <span className="font-mono text-[10px] tracking-wider text-accent uppercase font-semibold">
-              // Why this exists
+              {"// Why this exists"}
             </span>
             
             <h2 className="font-serif font-light text-3xl sm:text-[38px] tracking-tight text-text leading-[1.15]">
