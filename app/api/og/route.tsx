@@ -6,7 +6,7 @@ export const runtime = "edge";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const title = searchParams.get("title") ?? "ChainVidya";
+    const title = searchParams.get("title") ?? "RoadToChain";
     const track = searchParams.get("track") ?? "Web3 Engineering";
 
     return new ImageResponse(
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
                 fontWeight: "bold",
               }}
             >
-              ChainVidya
+              RoadToChain
             </span>
           </div>
 
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
                 color: "#71717a",
               }}
             >
-              chainvidya.com
+              roadtochain.com
             </span>
             <span
               style={{
