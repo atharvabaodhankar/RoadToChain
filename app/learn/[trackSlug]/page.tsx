@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${track.number}: ${track.name} — ChainVidya`,
+    title: `${track.number}: ${track.name} — RoadToChain`,
     description: track.description,
   };
 }

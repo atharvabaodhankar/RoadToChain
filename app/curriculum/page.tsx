@@ -7,11 +7,11 @@ import JsonLd from "@/components/seo/JsonLd";
 export const metadata: Metadata = {
   title: "Curriculum — 8 Tracks. One Path.",
   description:
-    "The complete ChainVidya curriculum: 8 tracks, 40+ lessons, 12 real shipped projects. From blockchain foundations to zero-knowledge proof systems.",
+    "The complete RoadToChain curriculum: 8 tracks, 40+ lessons, 12 real shipped projects. From blockchain foundations to zero-knowledge proof systems.",
   openGraph: {
-    title: "ChainVidya Curriculum",
+    title: "RoadToChain Curriculum",
     description:
-      "The complete ChainVidya curriculum: 8 tracks, 40+ lessons, 12 real shipped projects.",
+      "The complete RoadToChain curriculum: 8 tracks, 40+ lessons, 12 real shipped projects.",
   },
 };
 
