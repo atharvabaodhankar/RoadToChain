@@ -29,8 +29,6 @@ export default function Nav() {
       document.documentElement.classList.remove("dark");
     }
   };
-
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "RoadToChain";
   const { 
     user, 
     loading, 
