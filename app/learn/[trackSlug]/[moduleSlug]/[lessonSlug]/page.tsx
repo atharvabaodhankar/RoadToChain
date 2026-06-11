@@ -21,6 +21,8 @@ import LessonChallenge from "@/components/mdx/LessonChallenge";
 import KeyConfusion from "@/components/mdx/KeyConfusion";
 import CodeBlock from "@/components/mdx/CodeBlock";
 import LessonImage from "@/components/mdx/LessonImage";
+import LiveProjectExample from "@/components/mdx/LiveProjectExample";
+import LiveCodeBlock from "@/components/mdx/LiveCodeBlock";
 import ReadingProgressBar from "@/components/layout/ReadingProgressBar";
 import LessonCompleteButton from "@/components/layout/LessonCompleteButton";
 import TableOfContents from "@/components/layout/TableOfContents";
@@ -121,6 +123,9 @@ const mdxComponents = {
   RPCPhoneLineDiagram,
   GasCostVisualizer,
   LessonImage,
+  // Live GitHub integration components
+  LiveProjectExample,
+  LiveCodeBlock,
   // Custom code block renderer to replace standard markdown pre blocks
   pre: (props: React.ComponentPropsWithoutRef<"pre">) => {
     const codeEl = props.children;
