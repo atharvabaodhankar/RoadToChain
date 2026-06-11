@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Track } from "@/lib/curriculum";
 import ModuleAccordion from "@/components/curriculum/ModuleAccordion";
 import { Star, Cpu, ArrowUpRight } from "lucide-react";
+import GithubMetrics from "@/components/portfolio/GithubMetrics";
 
 interface CurriculumPageProps {
   tracks: Track[];
@@ -405,6 +406,11 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
             </div>
           </div>
 
+        </div>
+
+        {/* Live Github Portfolio Integration */}
+        <div className="mt-16 pt-12 border-t border-border/40">
+          <GithubMetrics />
         </div>
       </section>
 
