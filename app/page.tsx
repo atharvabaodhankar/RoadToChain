@@ -136,10 +136,10 @@ export default function HomePage() {
               {"// how every lesson works"}
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
-              Problem-first learning
+              We learn by breaking things, not reading definitions
             </h2>
             <p className="mt-2 text-sm text-muted max-w-lg">
-              Most Web3 tutorials start with concepts. We start with real problems. This is how engineers actually learn — from situations, not definitions.
+              Most Web3 tutorials start with dry concepts. We start with real problems. This is how engineers actually learn — from situations, not syntax.
             </p>
           </motion.div>
 
@@ -183,7 +183,7 @@ export default function HomePage() {
               {"// curriculum"}
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
-              8 tracks. One engineer. Zero hype.
+              8 tracks. Built from real shipped projects. Zero hype.
             </h2>
           </motion.div>
 
@@ -268,7 +268,7 @@ export default function HomePage() {
               {"// real code, real context"}
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
-              Not syntax. Understanding.
+              We don&apos;t teach syntax templates. We build systems.
             </h2>
           </motion.div>
 
@@ -466,7 +466,7 @@ const userOp = await smartAccount
               {"// tech stack"}
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
-              Modern tools. Modern patterns.
+              A realistic stack. No useless tech.
             </h2>
           </motion.div>
 
@@ -511,7 +511,7 @@ const userOp = await smartAccount
             Start where it actually makes sense.
           </h2>
           <p className="mt-4 text-sm text-muted">
-            Track 0. No wallet needed. No setup. Just open and read.
+            Track 0. No wallets. No setup. Just open it and read.
           </p>
           <div className="mt-8">
             <Link
