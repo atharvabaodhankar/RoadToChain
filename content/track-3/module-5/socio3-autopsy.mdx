@@ -84,6 +84,18 @@ We realized the blockchain's job is not database querying or storage; its job is
 
 ---
 
+### 3. Live From the Repo: Socio3's Actual V2 Architecture
+
+Don't take my word for it — here's the actual system architecture docs from the Socio3 repository, with every contract address, every service layer, and the real identity model we shipped:
+
+<LiveProjectExample repo="Socio3" section="System Architecture" showMetadata={false} />
+
+And here's how the V2 identity model actually works — the dual EOA + Smart Account system:
+
+<LiveProjectExample repo="Socio3" section="V2 Identity Model" showMetadata={false} />
+
+---
+
 <MistakeCallout>
   **The Direct RPC dependency:**
   Assuming an RPC provider (like Alchemy, Infura, or QuickNode) can act as your main database query engine is a fatal architectural mistake. RPC nodes are designed to validate and route state mutations, not to run heavy queries or custom sorting. Any data that needs to be displayed in a feed must go through an indexing layer.
