@@ -11,9 +11,9 @@ difficulty: "intermediate"
 estimatedMinutes: 14
 tags: ["structs", "data-modeling", "gas"]
 hasDiagram: true
-hasMistake: true
-hasProject: false
-realProjectSource: ""
+hasMistake: false
+hasProject: true
+realProjectSource: "ChainLock"
 heroProjectContribution: "Core data layout design required for scalable on-chain user registries and voting models."
 ---
 
@@ -116,6 +116,18 @@ contract ProfileRegistry {
 1. **Keep Strings Off-chain:** Never store user-generated text, names, bios, or descriptions inside state structs. Store them in a Web2 database or IPFS and only store their 32-byte hash or CID identifier on-chain.
 2. **Order by Size:** Always declare your struct variables in sequential order of size, from largest to smallest, or smallest to largest.
 3. **Use smaller uints cautiously:** Inside memory, smaller uints (like `uint8` or `uint16`) are actually padded to 32 bytes and can cost *more* gas due to conversions. Only use them inside state structs where packing actually saves persistent storage slots!
+
+---
+
+### 4. Real-World Case Study: ChainLock's Password Vault
+
+Here is how the actual password manager project **ChainLock** structures its data layout. Instead of storing credentials in a central server, it models an array of encrypted password structs mapped directly to the owner's wallet address:
+
+<LiveCodeBlock repo="ChainLock" file="contracts/contracts/PasswordVault.sol" />
+
+Notice these key production architectural patterns:
+* **The Custom Struct (`VaultItem`)**: It packs `title` and `encryptedPassword` strings together into a single logical model.
+* **Wallet-Bound Mappings**: The `userVault` mapping (`mapping(address => VaultItem[])`) stores a dynamic array of these vault items key-bound to the user's `msg.sender` address. This prevents cross-user access and ensures true data ownership.
 
 ---
 

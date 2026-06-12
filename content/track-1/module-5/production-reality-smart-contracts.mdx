@@ -12,8 +12,8 @@ estimatedMinutes: 14
 tags: ["audits", "upgrades", "monitoring"]
 hasDiagram: true
 hasMistake: false
-hasProject: false
-realProjectSource: ""
+hasProject: true
+realProjectSource: "ZeroLeak"
 heroProjectContribution: "Core process foundations required to deploy secure and monitorable smart contracts in production."
 ---
 
@@ -75,6 +75,20 @@ You configure automated monitoring tools (like Tenderly Alerts or OpenZeppelin D
 <MistakeCallout>
   **The Un-pause Trap:** A common incident response mistake is rushing to un-pause a contract after an attack before completely verifying that the attacker's contract state has been disabled. If you un-pause too early, the attacker's script can immediately resume draining the remaining funds. Always coordinate patches offline and verify on local forks first!
 </MistakeCallout>
+
+---
+
+### 3. Case Study: ZeroLeak's On-Chain Timelock Registry
+
+To understand how timelocks are actually written and hard-enforced in production codebases, look at the security contract of the decentralized exam system **ZeroLeak**. 
+
+It uses a hard-enforced, on-chain time gate to prevent exam papers from being decrypted until exactly the start time has passed. Here's a live window into the contract:
+
+<LiveCodeBlock repo="ZeroLeak" file="contracts/contracts/ExamRegistry.sol" lines="1-75" />
+
+Notice these key production architectural patterns:
+1. **The Time Check**: The scheduler must pass a `_unlockTimestamp` in the future (`require(_unlockTimestamp > block.timestamp, "Unlock time must be in future")`).
+2. **The Hard Lock**: Any download or decryption share request checks `require(block.timestamp >= paper.unlockTimestamp, "Too early to unlock")`. Because this is validated by smart contract consensus on-chain, there is no admin backdoor that can leak the papers early.
 
 ---
 
