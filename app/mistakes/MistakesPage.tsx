@@ -181,7 +181,7 @@ export default function MistakesPage() {
       {/* Header */}
       <section className="relative overflow-hidden border-b border-border bg-bg2/40 px-4 py-16 sm:px-6 lg:px-8">
         {/* Decorative Grid and Lights */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f0f11_1px,transparent_1px),linear-gradient(to_bottom,#0f0f11_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-60" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40" />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-[250px] w-[600px] rounded-full bg-amber-500/5 blur-[80px]" />
         </div>
@@ -204,7 +204,7 @@ export default function MistakesPage() {
           {/* Telemetry Dashboard Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
             {/* Metric 1 */}
-            <div className="rounded-xl border border-border/80 bg-[#08080a] p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
+            <div className="rounded-xl border border-border bg-bg3 p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[9px] uppercase tracking-wider text-dim">Telemetry Health</span>
                 <Activity className="h-4 w-4 text-emerald-500" />
@@ -220,7 +220,7 @@ export default function MistakesPage() {
             </div>
 
             {/* Metric 2 */}
-            <div className="rounded-xl border border-border/80 bg-[#08080a] p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
+            <div className="rounded-xl border border-border bg-bg3 p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[9px] uppercase tracking-wider text-dim">Simulator Diagnostics</span>
                 <Play className="h-4 w-4 text-purple-400" />
@@ -237,7 +237,7 @@ export default function MistakesPage() {
             </div>
 
             {/* Metric 3 */}
-            <div className="rounded-xl border border-border/80 bg-[#08080a] p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
+            <div className="rounded-xl border border-border bg-bg3 p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[9px] uppercase tracking-wider text-dim">Inspected Incidents</span>
                 <Eye className="h-4 w-4 text-amber-500" />
@@ -252,7 +252,7 @@ export default function MistakesPage() {
             </div>
 
             {/* Metric 4 */}
-            <div className="rounded-xl border border-border/80 bg-[#08080a] p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
+            <div className="rounded-xl border border-border bg-bg3 p-4 relative overflow-hidden group hover:border-border2 transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[9px] uppercase tracking-wider text-dim">Top Hotspot</span>
                 <BarChart2 className="h-4 w-4 text-blue-400" />
@@ -375,19 +375,19 @@ export default function MistakesPage() {
                       >
                         <div className="p-5 space-y-6">
                           {/* Incident Story (Terminal UI block) */}
-                          <div className="rounded-lg border border-border bg-[#030304] overflow-hidden">
-                            <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-bg2 font-mono text-[9px] text-dim">
+                          <div className="rounded-lg border border-border bg-bg overflow-hidden">
+                            <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-bg3 font-mono text-[9px] text-dim">
                               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
                               <span>INCIDENT_REPORT_LOG_{m.id.toUpperCase()}.txt</span>
                             </div>
-                            <div className="p-4 font-mono text-[11px] leading-relaxed text-muted/90 max-h-72 overflow-y-auto">
+                            <div className="p-4 font-mono text-[11px] leading-relaxed text-text/80 max-h-72 overflow-y-auto bg-bg2/60">
                               <p className="italic">&ldquo;{m.story}&rdquo;</p>
                             </div>
                           </div>
 
                           {/* Analysis / Lesson Learned */}
                           <div>
-                            <h4 className="font-mono text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1.5">
+                            <h4 className="font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1.5">
                               Root Cause Analysis
                             </h4>
                             <p className="text-xs text-text leading-relaxed">
