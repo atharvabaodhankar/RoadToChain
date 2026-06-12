@@ -162,3 +162,16 @@ export async function verifyPrivySession(req: Request, res: Response, next: Next
 }
 ```
 This secure loop prevents unauthorized requests from abusing your backend proxy nodes or IPFS pinning keys.
+
+---
+
+### 4. Live From Production: Socio3's Full Authentication Flow
+
+The code above is simplified for learning. Here's how the complete authentication flow actually works in Socio3 V2 — including the embedded wallet creation, Smart Account initialization, and the 10-step onboarding sequence:
+
+<LiveProjectExample repo="Socio3" section="Authentication Flow" showMetadata={false} />
+
+And here's how social interactions (posts, likes, follows, tips) are routed — all gasless for Privy users:
+
+<LiveProjectExample repo="Socio3" section="Social Interactions" showMetadata={false} />
+

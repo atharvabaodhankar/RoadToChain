@@ -69,3 +69,16 @@ Once all operations in the bundle are validated, the EntryPoint executes the tra
 * The Smart Account executes the target contract calls.
 * The EntryPoint calculates the exact gas consumed and charges either the Smart Account's deposit or the sponsoring Paymaster.
 * The remainder of the gas is refunded.
+
+---
+
+### 4. Live From Production: How Socio3 Actually Uses ERC-4337
+
+Everything above isn't theoretical for us. Socio3 V2 is a production social media platform running on ERC-4337 right now. Here's the real Account Abstraction layer from our codebase — with the actual EntryPoint address, the Pimlico integration, and the developer rules we wrote after breaking things:
+
+<LiveProjectExample repo="Socio3" section="Account Abstraction Layer" showMetadata={false} />
+
+And these are the actual developer rules we enforce on every pull request. Rule 3 and Rule 4 exist because we shipped bugs that broke gasless tipping:
+
+<LiveProjectExample repo="Socio3" section="Developer Rules" showMetadata={false} />
+
