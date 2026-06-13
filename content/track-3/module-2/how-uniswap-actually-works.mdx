@@ -17,6 +17,12 @@ hasProject: false
 
 # How Uniswap Actually Works: AMM System Design
 
+<LessonImage
+  src="/images/track-3/uniswap_amm.png"
+  alt="Automated Market Maker (AMM) Constant Product Model"
+  caption="Uniswap replaces traditional order books with a Constant Product formula (x * y = k) Liquidity Pool, pricing assets purely on internal reserves ratio and correcting to market via arbitrage."
+/>
+
 Traditional financial systems rely on an **Order Book** model. Buyers submit bid orders ("I want to buy 1 ETH for $3,000") and sellers submit ask orders. A centralized matching engine matches these bids and asks in real-time.
 
 On a public blockchain, running a matching engine is impossible. The computational complexity of maintaining an order book — with constant updates, cancellations, and matching runs — would consume gigabytes of gas, freezing the network.
