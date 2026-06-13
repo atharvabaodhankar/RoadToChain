@@ -16,6 +16,7 @@ interface Autopsy {
   lessons: string;
   color: string;
   badge: string;
+  trackId: string;
 }
 
 const autopsies: Autopsy[] = [
@@ -33,7 +34,8 @@ const autopsies: Autopsy[] = [
     ],
     lessons: "Solidity contract storage is a consensus notary, not a database. Never loop over unbounded dynamic arrays on-chain.",
     color: "#3b82f6", // blue
-    badge: "Solidity Limits"
+    badge: "Solidity Limits",
+    trackId: "0"
   },
   {
     id: "proofchain",
@@ -49,7 +51,8 @@ const autopsies: Autopsy[] = [
     ],
     lessons: "Client-side JS is a public document. Never store secret credentials, credentials proxies, or private keys in the browser.",
     color: "#f59e0b", // amber
-    badge: "Gateway Design"
+    badge: "Gateway Design",
+    trackId: "3"
   },
   {
     id: "socio3v1",
@@ -65,7 +68,8 @@ const autopsies: Autopsy[] = [
     ],
     lessons: "RPC nodes are execution nodes, not query engines. Reading lists requires off-chain event indexing.",
     color: "#ef4444", // red
-    badge: "EVM Limits"
+    badge: "EVM Limits",
+    trackId: "2"
   },
   {
     id: "socio3v2",
@@ -81,7 +85,8 @@ const autopsies: Autopsy[] = [
     ],
     lessons: "Faucets cannot send native assets directly to contract accounts. Send to the EOA, then bridge.",
     color: "#7c3aed", // violet
-    badge: "Account Abstraction"
+    badge: "Account Abstraction",
+    trackId: "4"
   },
   {
     id: "chaincure",
@@ -97,7 +102,59 @@ const autopsies: Autopsy[] = [
     ],
     lessons: "A single admin key is a single point of collapse. Real security requires distributed multi-signature trust models.",
     color: "#ec4899", // pink
-    badge: "Trust Distribution"
+    badge: "Trust Distribution",
+    trackId: "1"
+  },
+  {
+    id: "zeroleak",
+    name: "ZeroLeak",
+    tagline: "The Pre-Exam Timelock Collision Vulnerability",
+    goal: "Distribute high-stakes exam papers to testing centers securely without exposing questions before the exam time.",
+    prototype: "Encrypting exam papers client-side using a symmetric key, storing the key sharded with Shamir's Secret Sharing (SSS) on-chain under a block timestamp timelock check.",
+    pain: "During high-congestion hours on Sepolia, block time drift caused validator timestamps to skew by up to 15 seconds. Centers requesting key shards experienced timeout collisions, while others bypassed the timer early due to validation window gaps.",
+    fixes: [
+      "Shifted timelock enforcement from loose block.timestamp checks to oracle-pushed consensus clocks",
+      "Decoupled raw decryption key shard requests off-chain via ephemeral HTTPS relays",
+      "Implemented client-side cryptography memory zeroization to clear keys from RAM immediately post-decryption"
+    ],
+    lessons: "Block.timestamp is a miner-influenced variable, not a precise network chronometer. Never rely on raw block headers for millisecond-critical security timelocks.",
+    color: "#10b981", // emerald
+    badge: "Security & Cryptography",
+    trackId: "1"
+  },
+  {
+    id: "chainnotesv2",
+    name: "ChainNotes V2",
+    tagline: "The Social Signer Session Lockout",
+    goal: "Enable instant Web2-like social onboarding (Google OAuth) with gasless transaction signing for personal note taking.",
+    prototype: "Embedding a Privy OAuth EOA signer that directly triggers userOperation signatures routed to an ERC-4337 Smart Account wallet.",
+    pain: "When users cleared browser cookies or switched tabs on mobile, Privy signer sessions expired mid-transaction. The bundler received malformed userOps with invalid signatures, consuming sponsored paymaster gas without updating user state.",
+    fixes: [
+      "Added a persistent session keeper proxy checking Privy authentication status before triggering bundler broadcasts",
+      "Configured dynamic gas fee estimation limits on userOperations to prevent bundler over-sponsorship",
+      "Implemented standard local storage encryption caches for temporary note payloads"
+    ],
+    lessons: "Embedded browser signers are ephemeral. Always decouple session authentication checks from underlying account abstraction userOperation queues.",
+    color: "#a78bfa", // purple
+    badge: "Account Abstraction",
+    trackId: "4"
+  },
+  {
+    id: "zkredential",
+    name: "Zkredential",
+    tagline: "The Browser-Side ZK Proof Generation Crash",
+    goal: "Verify academic credentials using Groth16 zkSNARKs without exposing the user's private data.",
+    prototype: "Compiling Circom circuits and running snarkjs in the client browser to generate cryptographic proofs locally on page load.",
+    pain: "Generating Groth16 proofs for complex Poseidon hashes requires massive CPU/RAM. On mobile browsers and low-end devices, the proof generation routinely crashed due to browser memory isolation limits (Out of Memory errors).",
+    fixes: [
+      "Optimized Circom constraints by replacing heavy hash matrices with lightweight proof verification checkpoints",
+      "Moved the heavy prover witness generation step to a secure WebAssembly background web worker",
+      "Wrapped NFT issuance in standard soulbound ERC-5192 locks to prevent credential transfers"
+    ],
+    lessons: "Client-side zk-proving is resource-intensive. Keep Circom circuits under 50k constraints if targeting consumer mobile web engines.",
+    color: "#f43f5e", // rose
+    badge: "Zero-Knowledge Proofs",
+    trackId: "3"
   }
 ];
 
@@ -262,7 +319,7 @@ export default function AutopsiesPage() {
                 {/* Footer Link */}
                 <div className="mt-8 pt-4 border-t border-border/40 flex justify-end">
                   <Link
-                    href={`/learn/track-${current.id === "chainelect" ? "0" : current.id === "proofchain" ? "3" : current.id === "socio3v1" ? "2" : current.id === "socio3v2" ? "4" : "1"}`}
+                    href={`/learn/track-${current.trackId}`}
                     className="inline-flex items-center gap-1 font-mono text-xs font-semibold hover:gap-1.5 transition-all"
                     style={{ color: current.color }}
                   >
