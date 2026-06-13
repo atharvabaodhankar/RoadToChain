@@ -19,6 +19,12 @@ heroProjectContribution: "This lesson details the faucet rate limiting proxy and
 
 # Rate Limiting and Abuse Prevention
 
+<LessonImage
+  src="/images/track-3/gateway_rate_limiting.png"
+  alt="Faucet Rate Limiting Proxy and EOA vs Smart Account Payouts"
+  caption="Bots easily exploit raw contract faucets. Wrap faucets in rate-limiting API proxies, and direct payouts strictly to EOA wallets to prevent out-of-gas reverts on smart contract accounts."
+/>
+
 One of the greatest security challenges in Web3 is the **Sybil Attack**: a single user spawning thousands of automated bots to drain native tokens or spam on-chain smart contracts.
 
 When **Socio3 V2** migrated to an ERC-4337 Account Abstraction design, we wanted to make the app 100% free for users. To achieve this, we set up two systems:
