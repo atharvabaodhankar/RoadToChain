@@ -19,6 +19,12 @@ heroProjectContribution: "This lesson details the event-driven loop powering lik
 
 # Event-Driven Architecture in Web3
 
+<LessonImage
+  src="/images/track-3/event_driven_pipeline.png"
+  alt="Event-Driven Web3 Pipeline"
+  caption="In an event-driven Web3 loop, state-changing smart contract transactions emit logs that are picked up asynchronously by off-chain indexers and backend daemons."
+/>
+
 In a standard centralized Web2 system, when User A likes User B's post, the server updates the database and immediately pushes a socket notification to User B:
 ```text
 Like Button ──▶ express.js ──▶ PostgreSQL (likes + 1)
