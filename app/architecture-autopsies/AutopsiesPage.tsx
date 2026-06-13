@@ -180,8 +180,7 @@ export default function AutopsiesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="rounded-xl border p-6 bg-bg2 relative overflow-hidden"
-                style={{ borderLeft: `4px solid ${current.color}` }}
+                className="rounded-xl border border-border p-6 bg-bg2 relative overflow-hidden"
               >
                 {/* Accent Background Glow */}
                 <div 
@@ -192,20 +191,9 @@ export default function AutopsiesPage() {
                 />
 
                 {/* Eyebrow */}
-                <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-4 mb-5">
-                  <span 
-                    className="rounded px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider border"
-                    style={{
-                      color: current.color,
-                      borderColor: `${current.color}30`,
-                      backgroundColor: `${current.color}10`,
-                    }}
-                  >
-                    {current.badge}
-                  </span>
-                  <span className="font-mono text-[9px] text-dim uppercase">
-                    Case Study ID: {current.id.toUpperCase()}
-                  </span>
+                <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-4 mb-5 font-mono text-[9px] text-dim uppercase tracking-widest">
+                  <span>{current.badge}</span>
+                  <span>Case Study ID: {current.id.toUpperCase()}</span>
                 </div>
 
                 {/* Title & Tagline */}
@@ -213,73 +201,60 @@ export default function AutopsiesPage() {
                   {current.name} <span className="text-muted font-normal">&mdash; {current.tagline}</span>
                 </h2>
 
-                {/* Grid Sections */}
-                <div className="mt-6 space-y-5 text-xs leading-relaxed">
+                {/* Grid Sections (Two-column table style) */}
+                <div className="mt-6 grid grid-cols-[80px_1fr] gap-x-4 gap-y-6 text-xs leading-relaxed">
                   
                   {/* System Goal */}
-                  <div className="flex gap-3">
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent border border-accent/20">
-                      <Activity className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
-                        System Goal
-                      </h4>
-                      <p className="text-muted">{current.goal}</p>
-                    </div>
+                  <div className="font-mono text-[10px] text-dim select-none pt-0.5">
+                    [goal]
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
+                      System Goal
+                    </h4>
+                    <p className="text-muted">{current.goal}</p>
                   </div>
 
                   {/* Naive Prototype */}
-                  <div className="flex gap-3">
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      <Cpu className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
-                        The Naive Prototype
-                      </h4>
-                      <p className="text-muted">{current.prototype}</p>
-                    </div>
+                  <div className="font-mono text-[10px] text-dim select-none pt-0.5">
+                    [prototype]
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
+                      The Naive Prototype
+                    </h4>
+                    <p className="text-muted">{current.prototype}</p>
                   </div>
 
                   {/* Pain & Failures */}
-                  <div className="flex gap-3">
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                      <ShieldAlert className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
-                        Why it broke in production
-                      </h4>
-                      <p className="text-muted">{current.pain}</p>
-                    </div>
+                  <div className="font-mono text-[10px] text-red-500 dark:text-red-400 select-none pt-0.5">
+                    [failure]
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
+                      Why it broke in production
+                    </h4>
+                    <p className="text-muted">{current.pain}</p>
                   </div>
 
                   {/* Architectural Fixes */}
-                  <div className="flex gap-3">
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      <CheckCircle2 className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
-                        Production Refactoring
-                      </h4>
-                      <ul className="list-disc list-inside space-y-1 mt-1 text-muted">
-                        {current.fixes.map((f, idx) => (
-                          <li key={idx}>{f}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="font-mono text-[10px] text-emerald-500 dark:text-emerald-400 select-none pt-0.5">
+                    [fix]
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim mb-1">
+                      Production Refactoring
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1 mt-1 text-muted">
+                      {current.fixes.map((f, idx) => (
+                        <li key={idx}>{f}</li>
+                      ))}
+                    </ul>
                   </div>
 
                   {/* Core Realization */}
-                  <div className="mt-6 border-t border-border/40 pt-4">
-                    <div className="font-mono text-[9px] font-bold uppercase tracking-widest text-emerald-400 mb-1">
-                      Core System Realization
-                    </div>
-                    <p className="text-xs text-text italic">
-                      &ldquo;{current.lessons}&rdquo;
-                    </p>
+                  <div className="col-span-2 mt-2 border-t border-border/40 pt-4 font-mono text-xs text-text">
+                    &gt; {current.lessons}
                   </div>
 
                 </div>

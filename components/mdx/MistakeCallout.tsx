@@ -10,7 +10,7 @@ export default function MistakeCallout({ children }: MistakeCalloutProps) {
       <div className="font-mono text-[9px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-500/95 select-none">
         {"// I Got This Wrong"}
       </div>
-      <div className="font-serif font-light italic text-[16px] leading-relaxed text-text/90 antialiased max-w-xl [&_strong]:!font-bold [&_strong]:!text-text [&_a]:text-accent hover:[&_a]:underline">
+      <div className="font-sans text-[15px] font-normal leading-relaxed text-text/90 antialiased max-w-xl [&_strong]:!font-bold [&_strong]:!text-text [&_a]:text-accent hover:[&_a]:underline">
         {children}
       </div>
       <div className="font-mono text-[9px] text-dim uppercase tracking-wider select-none">
