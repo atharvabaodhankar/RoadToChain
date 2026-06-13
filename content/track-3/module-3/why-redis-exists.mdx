@@ -19,6 +19,12 @@ heroProjectContribution: "This lesson details the Upstash Redis caching backend 
 
 # Why Redis Exists in Web3 Systems
 
+<LessonImage
+  src="/images/track-3/redis_cache.png"
+  alt="Redis Cache Proxy Flow for Immutable IPFS Content"
+  caption="Decentralized IPFS gateways have highDHT-lookup latencies (3-5s). Caching immutable, content-addressed CIDs in Redis bypasses DHT lookups for subsequent loads (80ms)."
+/>
+
 Decentralized storage solutions (like IPFS, Arweave, and Filecoin) are great for censorship-resistance, but they are **terrible** for real-time latency.
 
 When **Socio3 V2** loaded a user's feed, it had to fetch the metadata JSON file for every post:

@@ -19,6 +19,12 @@ heroProjectContribution: "This lesson serves as the technical post-mortem of the
 
 # Why Direct RPC Queries Die at Scale
 
+<LessonImage
+  src="/images/track-3/rpc_vs_indexer.png"
+  alt="Direct RPC Query Bottlenecks vs Indexed Query Flow"
+  caption="Iterating arrays directly on RPC nodes leads to O(n) memory allocation timeouts and massive payload bloat. Scalable designs offload queries to indexers/subgraphs."
+/>
+
 When I built **Socio3 V1**, I had a simple, naive plan to render the home feed:
 1. Load the page.
 2. Call `PostContract.getAllPosts()` using an RPC provider (like Alchemy or QuickNode).
