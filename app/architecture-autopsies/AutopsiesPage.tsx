@@ -1,9 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldAlert, Cpu, CheckCircle2, ChevronRight, Activity } from "lucide-react";
 import Link from "next/link";
+
+const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    stroke="currentColor"
+    strokeWidth="2"
+    fill="none"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+  </svg>
+);
+
 
 interface Autopsy {
   id: string;
@@ -17,6 +34,7 @@ interface Autopsy {
   color: string;
   badge: string;
   trackId: string;
+  githubUrl: string;
 }
 
 const autopsies: Autopsy[] = [
@@ -35,7 +53,8 @@ const autopsies: Autopsy[] = [
     lessons: "Solidity contract storage is a consensus notary, not a database. Never loop over unbounded dynamic arrays on-chain.",
     color: "#3b82f6", // blue
     badge: "Solidity Limits",
-    trackId: "0"
+    trackId: "0",
+    githubUrl: "https://github.com/atharvabaodhankar/ChainElect"
   },
   {
     id: "proofchain",
@@ -52,7 +71,8 @@ const autopsies: Autopsy[] = [
     lessons: "Client-side JS is a public document. Never store secret credentials, credentials proxies, or private keys in the browser.",
     color: "#f59e0b", // amber
     badge: "Gateway Design",
-    trackId: "3"
+    trackId: "3",
+    githubUrl: "https://github.com/atharvabaodhankar/ProofChain"
   },
   {
     id: "socio3v1",
@@ -69,7 +89,8 @@ const autopsies: Autopsy[] = [
     lessons: "RPC nodes are execution nodes, not query engines. Reading lists requires off-chain event indexing.",
     color: "#ef4444", // red
     badge: "EVM Limits",
-    trackId: "2"
+    trackId: "2",
+    githubUrl: "https://github.com/atharvabaodhankar/Socio3"
   },
   {
     id: "socio3v2",
@@ -86,7 +107,8 @@ const autopsies: Autopsy[] = [
     lessons: "Faucets cannot send native assets directly to contract accounts. Send to the EOA, then bridge.",
     color: "#7c3aed", // violet
     badge: "Account Abstraction",
-    trackId: "4"
+    trackId: "4",
+    githubUrl: "https://github.com/atharvabaodhankar/Socio3"
   },
   {
     id: "chaincure",
@@ -103,7 +125,8 @@ const autopsies: Autopsy[] = [
     lessons: "A single admin key is a single point of collapse. Real security requires distributed multi-signature trust models.",
     color: "#ec4899", // pink
     badge: "Trust Distribution",
-    trackId: "1"
+    trackId: "1",
+    githubUrl: "https://github.com/atharvabaodhankar/ChainCure"
   },
   {
     id: "zeroleak",
@@ -120,7 +143,8 @@ const autopsies: Autopsy[] = [
     lessons: "Block.timestamp is a miner-influenced variable, not a precise network chronometer. Never rely on raw block headers for millisecond-critical security timelocks.",
     color: "#10b981", // emerald
     badge: "Security & Cryptography",
-    trackId: "1"
+    trackId: "1",
+    githubUrl: "https://github.com/atharvabaodhankar/ZeroLeak"
   },
   {
     id: "chainnotesv2",
@@ -137,7 +161,8 @@ const autopsies: Autopsy[] = [
     lessons: "Embedded browser signers are ephemeral. Always decouple session authentication checks from underlying account abstraction userOperation queues.",
     color: "#a78bfa", // purple
     badge: "Account Abstraction",
-    trackId: "4"
+    trackId: "4",
+    githubUrl: "https://github.com/atharvabaodhankar/ChainNotesV2"
   },
   {
     id: "zkredential",
@@ -154,7 +179,8 @@ const autopsies: Autopsy[] = [
     lessons: "Client-side zk-proving is resource-intensive. Keep Circom circuits under 50k constraints if targeting consumer mobile web engines.",
     color: "#f43f5e", // rose
     badge: "Zero-Knowledge Proofs",
-    trackId: "3"
+    trackId: "3",
+    githubUrl: "https://github.com/atharvabaodhankar/Zkredential"
   }
 ];
 
@@ -316,8 +342,17 @@ export default function AutopsiesPage() {
 
                 </div>
 
-                {/* Footer Link */}
-                <div className="mt-8 pt-4 border-t border-border/40 flex justify-end">
+                {/* Footer Links */}
+                <div className="mt-8 pt-4 border-t border-border/40 flex justify-between items-center">
+                  <a
+                    href={current.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 font-mono text-xs text-muted hover:text-text transition-colors"
+                  >
+                    <GithubIcon className="h-3.5 w-3.5" />
+                    View Source Code &rarr;
+                  </a>
                   <Link
                     href={`/learn/track-${current.trackId}`}
                     className="inline-flex items-center gap-1 font-mono text-xs font-semibold hover:gap-1.5 transition-all"
