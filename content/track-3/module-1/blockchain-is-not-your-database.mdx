@@ -19,6 +19,12 @@ heroProjectContribution: "The exact file→hash→blockchain→Firebase architec
 
 # Blockchain is NOT Your Database: System Design Boundaries
 
+<LessonImage
+  src="/images/track-3/hybrid_storage.png"
+  alt="Web3 Hybrid Enterprise Storage Architecture"
+  caption="A production-grade Web3 storage stack splits data: 32-byte cryptographic proofs on-chain, large assets in IPFS, and metadata / indexes cached in Firebase / The Graph."
+/>
+
 When I was building **ProofChain** — a proof-of-existence system where you can register a document on the blockchain and prove it hasn't been tampered with — I hit the wall instantly.
 
 My first instinct: store everything on-chain. The document. The metadata. The owner. The timestamp. The filename.
