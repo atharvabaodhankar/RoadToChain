@@ -5,18 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
-  Terminal,
-  Activity,
-  BarChart2,
-  Eye,
   Search,
-  Filter,
-  Play,
   RotateCcw,
 } from "lucide-react";
 import { useProgress } from "@/app/context/ProgressContext";
-import { tracks } from "@/lib/curriculum";
 
 interface TimelineStep {
   label: string;
@@ -169,47 +161,11 @@ const txHash = await paymaster.sponsorUserOperation({
   }
 ];
 
-const severityColors: Record<string, string> = {
-  Conceptual: "var(--border2)",
-  Technical: "var(--border2)",
-  Architectural: "var(--border2)",
-  "UX & Product": "var(--border2)",
-};
-
 export default function MistakesPage() {
-  const { completed, simulatorUsage, mistakeViews, trackMistakeView } = useProgress();
+  const { mistakeViews, trackMistakeView } = useProgress();
   const [search, setSearch] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState<string>("All");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  // Total lessons in curriculum
-  const totalLessons = useMemo(() => {
-    return tracks.reduce((acc, t) => acc + t.lessonCount, 0);
-  }, []);
-
-  const completionRate = useMemo(() => {
-    if (totalLessons === 0) return 0;
-    return Math.round((completed.length / totalLessons) * 100);
-  }, [completed.length, totalLessons]);
-
-  const totalSimulatorInteractions = useMemo(() => {
-    return Object.values(simulatorUsage).reduce((acc, val) => acc + val, 0);
-  }, [simulatorUsage]);
-
-  // Find most viewed mistake from telemetry
-  const topMistakeName = useMemo(() => {
-    let topId = "";
-    let maxViews = 0;
-    Object.entries(mistakeViews).forEach(([id, val]) => {
-      if (val > maxViews) {
-        maxViews = val;
-        topId = id;
-      }
-    });
-    if (!topId) return "None";
-    const found = mistakes.find((m) => m.id === topId);
-    return found ? found.title : "None";
-  }, [mistakeViews]);
 
   // Filter mistakes
   const filteredMistakes = useMemo(() => {

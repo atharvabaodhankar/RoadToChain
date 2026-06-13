@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldAlert, Cpu, CheckCircle2, ChevronRight, Activity } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
