@@ -35,6 +35,7 @@ import TransactionVisualizer from "@/components/simulators/TransactionVisualizer
 import WalletSigningSimulator from "@/components/simulators/WalletSigningSimulator";
 import DeploymentSimulator from "@/components/simulators/DeploymentSimulator";
 import ArchitectureExplorer from "@/components/simulators/ArchitectureExplorer";
+import VisualBlockchainSimulator from "@/components/simulators/VisualBlockchainSimulator";
 // Track 0 interactive diagram system
 import TrustProblemDiagram from "@/components/diagrams/TrustProblemDiagram";
 import DoubleSpendSimulator from "@/components/diagrams/DoubleSpendSimulator";
@@ -114,6 +115,7 @@ const mdxComponents = {
   WalletSigningSimulator,
   DeploymentSimulator,
   ArchitectureExplorer,
+  VisualBlockchainSimulator,
   // Track 0 diagram system
   TrustProblemDiagram,
   DoubleSpendSimulator,

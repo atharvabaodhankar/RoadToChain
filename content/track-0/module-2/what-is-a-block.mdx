@@ -101,12 +101,15 @@ This enables a client to prove a transaction `T2` is in the block without downlo
 
 ---
 
+### Interactive Sandbox: Visual Blockchain Simulator
+
+Below is the interactive Visual Blockchain Simulator. You can broadcast transactions, mine blocks into the ledger, view the P2P gossip propagation animation, and tamper with transaction data to see how it breaks the cryptographic hash links between blocks:
+
+<VisualBlockchainSimulator />
+
+---
+
 <LessonChallenge>
   If a block contains 8 transactions, how many levels will the Merkle Tree have, and how many hashing operations are required to compute the Merkle Root?
 </LessonChallenge>
 
----
-
-<HeroProject name="Visual Blockchain Simulator" track="0">
-  In the Visual Blockchain Simulator, you will design the Block Data visualizer. This component renders the block header fields (previous hash, nonce, merkle root) and shows how changing a single character in a block's transaction instantly turns the block background red, indicating the chain link is broken.
-</HeroProject>

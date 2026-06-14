@@ -138,43 +138,45 @@ export default async function TrackPage({ params }: Props) {
         </div>
       </header>
 
-      <section className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl rounded-xl border border-accent/20 bg-accent/5 p-6">
-          <div className="flex flex-col md:flex-row gap-6 items-center">
-            <div className="flex-1 flex items-start gap-3">
-              <Star className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-              <div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-accent">
-                  Capstone Project built in this track
-                </span>
-                <h2 className="mt-1 font-sans text-base font-semibold tracking-tight text-text">
-                  {track.heroProject.name}
-                </h2>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted">
-                  {track.heroProject.description}
-                </p>
-                <div className="mt-3 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
-                  <span className="font-mono text-[10px] text-dim">
-                    Every lesson feeds directly into this codebase.
+      {track.slug !== "track-0" && (
+        <section className="px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl rounded-xl border border-accent/20 bg-accent/5 p-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-1 flex items-start gap-3">
+                <Star className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-accent">
+                    Capstone Project built in this track
                   </span>
+                  <h2 className="mt-1 font-sans text-base font-semibold tracking-tight text-text">
+                    {track.heroProject.name}
+                  </h2>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted">
+                    {track.heroProject.description}
+                  </p>
+                  <div className="mt-3 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
+                    <span className="font-mono text-[10px] text-dim">
+                      Every lesson feeds directly into this codebase.
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {track.slug === "track-0" && (
-              <div className="w-full md:w-72 shrink-0 rounded-lg overflow-hidden border border-border/80 bg-bg/50 shadow-md">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src="/images/blockchain_sim.png" 
-                  alt="Visual Blockchain Simulator" 
-                  className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
+              {track.slug === "track-0" && (
+                <div className="w-full md:w-72 shrink-0 rounded-lg overflow-hidden border border-border/80 bg-bg/50 shadow-md">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src="/images/blockchain_sim.png" 
+                    alt="Visual Blockchain Simulator" 
+                    className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Modules List ────────────────────────────────────────── */}
       <main className="px-4 py-6 sm:px-6 lg:px-8">
