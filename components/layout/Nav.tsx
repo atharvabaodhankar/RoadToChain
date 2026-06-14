@@ -68,12 +68,12 @@ export default function Nav() {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-text shrink-0 group">
-            <div className="relative h-6 w-6 rounded border border-border/80 bg-bg2 overflow-hidden shadow-sm flex-shrink-0">
+            <div className="relative h-8 w-8 overflow-hidden flex-shrink-0">
               <Image
-                src="/logo.png"
+                src="/logo.png?v=4"
                 alt="RoadToChain Logo"
                 fill
-                sizes="24px"
+                sizes="50px"
                 className="object-cover group-hover:scale-105 transition-transform duration-250 ease-out"
                 priority
               />
