@@ -19,6 +19,12 @@ heroProjectContribution: "The final system audit and optimization guidelines for
 
 # ChainElect Autopsy: Gas Limits and Storage Bottlenecks
 
+<LessonImage
+  src="/images/track-3/chainelect_autopsy.png"
+  alt="O(n) State Loop vs O(1) Constant Time Slot Pack Defense"
+  caption="Traversing arrays inside Solidity contracts scales linearly and hits Block Gas Limits. Constant-time checks and packed structures optimize operations to constant O(1)."
+/>
+
 I was sitting in my bedroom, checking the live dashboard of my first real-world deployment: **ChainElect**, a decentralized voting contract designed for a university student body election. Everything was working perfectly for the first 50 votes.
 
 Then, at 200 votes, the frontend began to lag.
