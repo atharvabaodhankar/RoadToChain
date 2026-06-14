@@ -150,157 +150,150 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
           </div>
 
           {/* Rebuilt Interactive SVG Dependency Graph */}
-          <div id="roadmap-blueprint" className="lg:col-span-6 relative bg-bg2/40 border border-border p-6 rounded-2xl backdrop-blur-md overflow-hidden flex flex-col justify-between">
+          <div id="roadmap-blueprint" className="lg:col-span-6 relative border border-border p-6 rounded-2xl backdrop-blur-md overflow-hidden flex flex-col justify-between" style={{
+            background: "var(--bg2)",
+            backgroundImage: "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+            backgroundPosition: "center"
+          }}>
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/40 pb-4 mb-4 font-mono text-[10px]">
-              <div className="flex items-center gap-1.5 uppercase text-muted tracking-wider">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                Prerequisite Map
+            <div className="flex items-center justify-between border-b border-border pb-4 mb-4 font-mono text-[10px] relative z-10">
+              <div className="flex items-center gap-1.5 uppercase text-text font-bold tracking-wider">
+                <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+                SYSTEM ARCHITECTURE DESIGN BOARD
               </div>
               <div className="text-dim">
-                8 tracks &middot; 3 parallel paths
+                Hand-sketched blueprint &bull; Live interactive
               </div>
             </div>
 
-            {/* SVG graph */}
-            <div className="mt-2 overflow-x-auto">
-              <svg viewBox="0 0 540 260" className="w-full min-w-[420px]">
-                {/* Arrowhead Marker */}
+            {/* Sketch SVG Map with Hand-drawn Aesthetic */}
+            <div className="mt-2 overflow-x-auto relative z-10 bg-bg/90 p-4 rounded-xl border border-border/80 shadow-sm">
+              <svg viewBox="0 0 540 180" className="w-full min-w-[420px]">
                 <defs>
-                  <marker id="glow-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                    <path d="M 0 0 L 6 3 L 0 6 Z" fill="var(--border3)" />
+                  {/* Rough sketch arrow head */}
+                  <marker id="sketch-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M 0 1 L 6 3 L 0 5 Z" fill="none" stroke="var(--text-secondary)" strokeWidth="1.2" />
                   </marker>
                 </defs>
 
-                {/* Connection Lines with interactive highlighting */}
+                {/* Hand-drawn connection curves */}
                 {/* T0 -> T1 */}
                 <path 
-                  d="M 88 110 L 120 110" 
-                  stroke={activeTrackId >= 1 || hoveredTrackId === 1 ? "#3b82f6" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 1 ? "2" : "1.2"} 
+                  d="M 70 90 Q 95 87, 120 90" 
+                  fill="none"
+                  stroke={activeTrackId >= 1 || hoveredTrackId === 1 ? "#3b82f6" : "var(--border3)"} 
+                  strokeWidth="1.5" 
+                  strokeDasharray="4 2 2 2"
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
                 {/* T1 -> T2 */}
                 <path 
-                  d="M 191 110 L 220 110" 
-                  stroke={activeTrackId >= 2 || hoveredTrackId === 2 ? "#14b8a6" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 2 ? "2" : "1.2"} 
+                  d="M 175 90 Q 200 93, 220 90" 
+                  fill="none"
+                  stroke={activeTrackId >= 2 || hoveredTrackId === 2 ? "#14b8a6" : "var(--border3)"} 
+                  strokeWidth="1.5" 
+                  strokeDasharray="4 2 2 2"
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
                 
-                {/* T2 -> T3 (Top) */}
+                {/* T2 -> T3 */}
                 <path 
-                  d="M 291 102 L 320 58" 
-                  stroke={activeTrackId >= 3 || hoveredTrackId === 3 ? "#22c55e" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 3 ? "2" : "1.2"} 
+                  d="M 275 80 Q 295 50, 320 40" 
+                  fill="none"
+                  stroke={activeTrackId >= 3 || hoveredTrackId === 3 ? "#22c55e" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
-                {/* T2 -> T4 (Middle) */}
+                {/* T2 -> T4 */}
                 <path 
-                  d="M 291 110 L 320 110" 
-                  stroke={activeTrackId >= 4 || hoveredTrackId === 4 ? "#f59e0b" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 4 ? "2" : "1.2"} 
+                  d="M 275 90 Q 295 90, 320 90" 
+                  fill="none"
+                  stroke={activeTrackId >= 4 || hoveredTrackId === 4 ? "#f59e0b" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
-                {/* T2 -> T5 (Bottom) */}
+                {/* T2 -> T5 */}
                 <path 
-                  d="M 291 118 L 320 162" 
-                  stroke={activeTrackId >= 5 || hoveredTrackId === 5 ? "#ec4899" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 5 ? "2" : "1.2"} 
+                  d="M 275 100 Q 295 130, 320 140" 
+                  fill="none"
+                  stroke={activeTrackId >= 5 || hoveredTrackId === 5 ? "#ec4899" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
 
                 {/* T3 -> T6 */}
                 <path 
-                  d="M 391 50 L 420 50" 
-                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 6 ? "2" : "1.2"} 
+                  d="M 375 40 Q 395 40, 420 40" 
+                  fill="none"
+                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
                 {/* T4 -> T6 */}
                 <path 
-                  d="M 391 102 L 420 68" 
-                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 6 ? "2" : "1.2"} 
+                  d="M 375 80 Q 395 60, 420 50" 
+                  fill="none"
+                  stroke={activeTrackId >= 6 || hoveredTrackId === 6 ? "#f97316" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
                 {/* T4 -> T7 */}
                 <path 
-                  d="M 391 118 L 420 152" 
-                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 7 ? "2" : "1.2"} 
+                  d="M 375 100 Q 395 120, 420 130" 
+                  fill="none"
+                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
                 {/* T5 -> T7 */}
                 <path 
-                  d="M 391 170 L 420 170" 
-                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border2)"} 
-                  strokeWidth={hoveredTrackId === 7 ? "2" : "1.2"} 
+                  d="M 375 140 Q 395 140, 420 140" 
+                  fill="none"
+                  stroke={activeTrackId >= 7 || hoveredTrackId === 7 ? "#06b6d4" : "var(--border3)"} 
+                  strokeWidth="1.5" 
                   className="transition-all duration-300"
-                  markerEnd="url(#glow-arrow)" 
+                  markerEnd="url(#sketch-arrow)" 
                 />
 
-                {/* Vertical dashed line between T6 and T7 */}
-                <path 
-                  d="M 456 80 L 456 140" 
-                  stroke="var(--border)" 
-                  strokeWidth="1.2" 
-                  strokeDasharray="3 3" 
-                  className="transition-all duration-300"
-                />
-
-                {/* Level indicators at the bottom */}
-                <g opacity="0.6">
-                  {/* Level 0 under T0 */}
-                  <line x1="30" y1="225" x2="80" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
-                  <text x="55" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Level 0</text>
-
-                  {/* Level 1 under T1 */}
-                  <line x1="131" y1="225" x2="181" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
-                  <text x="156" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Level 1</text>
-
-                  {/* Level 2 under T2 */}
-                  <line x1="231" y1="225" x2="281" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
-                  <text x="256" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Level 2</text>
-
-                  {/* Specialisations under T3-T7 */}
-                  <line x1="331" y1="225" x2="481" y2="225" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
-                  <text x="406" y="240" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Specialisations</text>
+                {/* Level indicators */}
+                <g opacity="0.4" className="font-mono text-[7px]">
+                  <text x="40" y="170" textAnchor="middle" fill="var(--text-secondary)">[T0 FOUNDATIONS]</text>
+                  <text x="145" y="170" textAnchor="middle" fill="var(--text-secondary)">[T1 CONTRACTS]</text>
+                  <text x="245" y="170" textAnchor="middle" fill="var(--text-secondary)">[T2 FULL-STACK]</text>
+                  <text x="390" y="170" textAnchor="middle" fill="var(--text-secondary)">[SPECIALISATIONS]</text>
                 </g>
 
-                {/* T0 CIRCLE NODE */}
+                {/* Hand-sketched T0 Node */}
                 <g 
                   className="cursor-pointer group"
                   onMouseEnter={() => setHoveredTrackId(0)}
                   onMouseLeave={() => setHoveredTrackId(null)}
                   onClick={() => scrollToTrack(0)}
                 >
-                  {/* Outer concentric rings */}
-                  <circle cx="55" cy="110" r="30" fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity={(activeTrackId === 0 || hoveredTrackId === 0) ? "0.2" : "0.08"} className="transition-all duration-300" />
-                  <circle cx="55" cy="110" r="24" fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity={(activeTrackId === 0 || hoveredTrackId === 0) ? "0.5" : "0.25"} className="transition-all duration-300" />
-                  <circle cx="55" cy="110" r="18" fill="var(--accent)" />
-                  <text x="55" y="108" textAnchor="middle" fill="white" fontFamily="var(--font-geist-mono)" fontSize="9" fontWeight="bold">T0</text>
-                  <text x="55" y="117" textAnchor="middle" fill="white" opacity="0.8" fontFamily="var(--font-geist-mono)" fontSize="6">Start</text>
-                  <text x="55" y="152" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="8">Foundation</text>
+                  <circle cx="40" cy="90" r="22" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="30 5 10 5" />
+                  <circle cx="40" cy="90" r="16" fill="var(--accent)" opacity="0.1" />
+                  <text x="40" y="87" textAnchor="middle" fill="var(--text)" fontFamily="var(--font-geist-mono)" fontSize="9" fontWeight="bold">T0</text>
+                  <text x="40" y="97" textAnchor="middle" fill="var(--text-secondary)" fontFamily="var(--font-geist-mono)" fontSize="7">Start</text>
                 </g>
 
-                {/* GRAPH CARDS T1 - T7 */}
+                {/* Sketch Nodes T1 - T7 */}
                 {[
-                  { id: 1, x: 125, y: 85, label: "T1", sub: "Solidity" },
-                  { id: 2, x: 225, y: 85, label: "T2", sub: "Full Stack" },
-                  { id: 3, x: 325, y: 25, label: "T3", sub: "Sys Design" },
-                  { id: 4, x: 325, y: 85, label: "T4 ★", sub: "Modern UX", isSignature: true },
-                  { id: 5, x: 325, y: 145, label: "T5 ★", sub: "ZK Privacy", isSignature: true },
-                  { id: 6, x: 425, y: 25, label: "T6", sub: "Security" },
-                  { id: 7, x: 425, y: 145, label: "T7", sub: "Real Systems" },
+                  { id: 1, x: 120, y: 68, label: "T1", sub: "Solidity" },
+                  { id: 2, x: 220, y: 68, label: "T2", sub: "Full-Stack" },
+                  { id: 3, x: 320, y: 18, label: "T3", sub: "Sys Design" },
+                  { id: 4, x: 320, y: 68, label: "T4", sub: "Modern UX" },
+                  { id: 5, x: 320, y: 118, label: "T5", sub: "ZK Privacy" },
+                  { id: 6, x: 420, y: 18, label: "T6", sub: "Security" },
+                  { id: 7, x: 420, y: 118, label: "T7", sub: "Real Sys" },
                 ].map((node) => {
                   const nodeColor = trackColors[node.id];
                   const isActive = activeTrackId === node.id;
@@ -314,62 +307,43 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                       onMouseLeave={() => setHoveredTrackId(null)}
                       onClick={() => scrollToTrack(node.id)}
                     >
-                      {/* Signature glow box backdrops */}
-                      {node.isSignature && (
-                        <rect 
-                          x={node.x - 2} 
-                          y={node.y - 2} 
-                          width="66" 
-                          height="54" 
-                          rx="8" 
-                          fill={`${nodeColor}03`} 
-                          stroke="none" 
-                        />
-                      )}
-
-                      {/* Main Node Card */}
+                      {/* Slightly rotated card backdrops to simulate raw hand-drawn whiteboard notes */}
                       <rect 
                         x={node.x} 
                         y={node.y} 
-                        width="62" 
-                        height="50" 
-                        rx="6" 
-                        fill={isActive ? "var(--bg3)" : node.isSignature ? `${nodeColor}06` : "var(--bg)"} 
-                        stroke={isActive || isHovered ? nodeColor : node.isSignature ? `${nodeColor}30` : "var(--border)"} 
-                        strokeWidth={isActive || isHovered ? "1.5" : "1"} 
-                        className="transition-all duration-300"
+                        width="55" 
+                        height="44" 
+                        rx="4" 
+                        fill={isActive ? "var(--bg3)" : "var(--bg)"} 
+                        stroke={isActive || isHovered ? nodeColor : "var(--border3)"} 
+                        strokeWidth="1.5" 
+                        strokeDasharray={isActive || isHovered ? "none" : "30 2 10 2"}
+                        style={{
+                          transform: isHovered ? "rotate(-1deg)" : "none",
+                          transformOrigin: `${node.x + 27}px ${node.y + 22}px`,
+                          transition: "all 0.2s ease"
+                        }}
                       />
                       
-                      {/* Left color bar accent */}
-                      <path 
-                        d={`M ${node.x} ${node.y + 6} L ${node.x} ${node.y + 44}`} 
-                        stroke={nodeColor} 
-                        strokeWidth="3.5" 
-                        strokeLinecap="round" 
-                      />
-
                       <text 
-                        x={node.x + 31} 
-                        y={node.y + 20} 
+                        x={node.x + 27} 
+                        y={node.y + 18} 
                         textAnchor="middle" 
                         fill="var(--text)" 
                         fontFamily="var(--font-geist-mono)" 
-                        fontSize="10" 
+                        fontSize="9.5" 
                         fontWeight="bold"
-                        className="transition-colors duration-300"
                       >
                         {node.label}
                       </text>
                       
                       <text 
-                        x={node.x + 31} 
-                        y={node.y + 36} 
+                        x={node.x + 27} 
+                        y={node.y + 32} 
                         textAnchor="middle" 
                         fill="var(--text-secondary)" 
-                        opacity="0.8"
                         fontFamily="var(--font-geist-mono)" 
-                        fontSize="7.5" 
-                        fontWeight="normal"
+                        fontSize="7" 
                       >
                         {node.sub}
                       </text>
@@ -377,32 +351,6 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
                   );
                 })}
               </svg>
-            </div>
-            
-            {/* Footer and Legend */}
-            <div className="mt-4 border-t border-border/40 pt-4 flex flex-col gap-3 font-mono text-[9px]">
-              <div className="text-center text-dim uppercase tracking-wider">
-                Hover any track to preview &bull; T4 and T5 are parallel specialisations after T2
-              </div>
-              <div className="h-px bg-border/40 w-full" />
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-dim">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-0.5 w-4 bg-accent" />
-                  <span>Track 0 (origin)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                  <span>Signature track</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-muted text-xs leading-none">&rarr;</span>
-                  <span>Prerequisite</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-0 w-4 border-t border-dashed border-accent" />
-                  <span>Active path</span>
-                </div>
-              </div>
             </div>
           </div>
 
