@@ -19,6 +19,12 @@ heroProjectContribution: "Security audits and cryptographic boundaries for multi
 
 # ChainCure Autopsy: Role Permissions and Trust Boundaries
 
+<LessonImage
+  src="/images/track-3/chaincure_autopsy.png"
+  alt="Compromised RBAC vs Multi-Signature Threshold Defense"
+  caption="RBAC permissions fail completely if a single role key is compromised. A secure supply chain maps critical actions to multi-signature threshold bounds, verifying multiple signers before state changes."
+/>
+
 When building **ChainCure**, a pharmaceutical tracking platform, our goal was to secure a complex supply chain with five distinct actors: Manufacturers, Distributors, Warehouses, Pharmacies, and Regulators.
 
 We set up a smart contract using standard OpenZeppelin role-based access control (RBAC). Only accounts designated with `DISTRIBUTOR_ROLE` could sign off on shipments, and only `MANUFACTURER_ROLE` could register new drug batches.
