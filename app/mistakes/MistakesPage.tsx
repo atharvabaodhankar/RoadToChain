@@ -158,6 +158,106 @@ const txHash = await paymaster.sponsorUserOperation({
 });`
     },
     detailsAddendum: "Edit: Hardhat's default local EVM network does not enforce strict gas caps on address.transfer() like mainnet or public testnets do, which is why this vulnerability wasn't caught during early local integration testing."
+  },
+  {
+    id: "version-mismatch",
+    track: "Track 1 · Solidity Systems",
+    module: "Module 3 · Deployment & Blockchain State",
+    lesson: "What deployment actually means",
+    lessonUrl: "/learn/track-1/module-3/what-deployment-actually-means",
+    title: "The Version Mismatch Nightmare",
+    story: "Mixing Hardhat 2.x with Solidity 0.8.31, or using the latest Hardhat with old tutorial configurations. This resulted in unsupported language version errors, wasting hours updating pragma statements.",
+    lessonLearned: "Hardhat and Solidity compiler versions are tightly coupled. Always verify that your hardhat.config.js Solidity compiler version is supported by the specific version of Hardhat you have installed. Run npx hardhat compile to check compatibility early.",
+    severity: "Technical",
+    layoutType: "quote"
+  },
+  {
+    id: "ganache-ghost",
+    track: "Track 0 · Blockchain Foundations",
+    module: "Module 3 · Networks & Storage",
+    lesson: "RPC explained — your app's phone line to the blockchain",
+    lessonUrl: "/learn/track-0/module-3/rpc-explained",
+    title: "The Ganache Ghost Connection",
+    story: "Starting the Ganache GUI, setting MetaMask network to localhost:8545, and wondering why nothing works. The connection is refused, and MetaMask gets stuck on 'Connecting to Unknown Private Network'.",
+    lessonLearned: "Ganache GUI runs on port 7545 by default, whereas the Ganache CLI (and Hardhat Network) runs on 8545. Always verify the port exposed by your node's RPC server before pointing MetaMask to it.",
+    severity: "Conceptual",
+    layoutType: "quote"
+  },
+  {
+    id: "pragma-panic",
+    track: "Track 1 · Solidity Systems",
+    module: "Module 1 · Solidity Fundamentals",
+    lesson: "Solidity variables and contract state",
+    lessonUrl: "/learn/track-1/module-1/variables-and-state",
+    title: "The Pragma Panic Attack",
+    story: "Copying a contract from a 2019 tutorial with pragma solidity ^0.5.0 and trying to compile it with a modern setup. It resulted in a cascade of syntax errors, deprecated function warnings, and complete confusion.",
+    lessonLearned: "Pragma versions restrict compilation compatibility. Solidity has undergone major breaking changes. Always write or refactor contracts to use modern 0.8.x rules.",
+    severity: "Technical",
+    layoutType: "code-diff",
+    codeDiff: {
+      before: `pragma solidity ^0.5.0;
+
+contract OldContract {
+    function get() public {
+        // Old rules
+    }
+}`,
+      after: `pragma solidity ^0.8.24;
+
+contract ModernContract {
+    function get() public pure {
+        // Modern rules
+    }
+}`
+    }
+  },
+  {
+    id: "private-key-paste",
+    track: "Track 0 · Blockchain Foundations",
+    module: "Module 4 · Wallets & Identity",
+    lesson: "Private keys, public keys, and addresses",
+    lessonUrl: "/learn/track-0/module-4/why-web3-needs-wallets",
+    title: "The Private Key Copy-Paste Disaster",
+    story: "Importing a Ganache/Hardhat private key directly into MetaMask and deploying a test contract to Mainnet by accident, losing real ETH trying to deploy test contracts to production.",
+    lessonLearned: "Never mix test accounts/development private keys with wallets containing real funds. Keep separate browser profiles, hardware wallets for production, and use environment variables with dotenv to strictly separate network configs.",
+    severity: "UX & Product",
+    layoutType: "quote"
+  },
+  {
+    id: "truffle-migration",
+    track: "Track 1 · Solidity Systems",
+    module: "Module 3 · Deployment & Blockchain State",
+    lesson: "What deployment actually means",
+    lessonUrl: "/learn/track-1/module-3/what-deployment-actually-means",
+    title: "The Truffle Migration Confusion",
+    story: "Running truffle migrate without understanding migration files, leading to deploying the same contract multiple times, not being able to find the 'real' address, and a general debugging nightmare.",
+    lessonLearned: "Truffle migrations use an on-chain Migrations contract to record the last completed deployment step. To redeploy modified contracts, you must use truffle migrate --reset to run all migrations from scratch.",
+    severity: "Technical",
+    layoutType: "quote"
+  },
+  {
+    id: "gas-black-hole",
+    track: "Track 0 · Blockchain Foundations",
+    module: "Module 5 · Gas & Transactions",
+    lesson: "Why you pay gas even when the transaction fails",
+    lessonUrl: "/learn/track-0/module-5/failed-transaction-gas",
+    title: "The Gas Estimation Black Hole",
+    story: "Sending a transaction without setting a gas limit and letting MetaMask 'estimate'. The transaction fails, you pay gas anyway, and have no idea what went wrong.",
+    lessonLearned: "Always let library providers estimate gas dynamically rather than hardcoding limits, but verify that the contracts are not executing loops or code paths that exceed typical transaction sizes.",
+    severity: "Conceptual",
+    layoutType: "quote"
+  },
+  {
+    id: "abi-import-hell",
+    track: "Track 1 · Solidity Systems",
+    module: "Module 3 · Deployment & Blockchain State",
+    lesson: "ABI — the contract's API specification",
+    lessonUrl: "/learn/track-1/module-3/abi-as-translator",
+    title: "The ABI Import Hell",
+    story: "Manually copying ABI JSON strings from Remix or Hardhat, pasting them directly into frontend files, and missing brackets/commas. This results in contract-not-found errors and hours of debugging JSON syntax instead of smart contract logic.",
+    lessonLearned: "Never manually copy and paste raw ABI JSON strings. Instead, import the JSON file directly if your bundler supports it, or generate type-safe bindings using tools like wagmi-cli or viem.",
+    severity: "Technical",
+    layoutType: "quote"
   }
 ];
 
@@ -201,7 +301,7 @@ export default function MistakesPage() {
             Mistakes Hub
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
-            The things nobody tells you. 6 real failures from shipped projects, organized by category.
+            The things nobody tells you. 13 real failures from shipped projects, organized by category.
           </p>
         </div>
       </section>
