@@ -13,6 +13,9 @@ import {
   doc, 
   setDoc, 
   getDoc,
+  collection,
+  addDoc,
+  getDocs,
   Firestore 
 } from "firebase/firestore";
 
@@ -129,4 +132,58 @@ export async function loadUserProgress(uid: string): Promise<UserProgressData | 
     console.error("Error loading user progress from Firebase:", error);
   }
   return null;
+}
+
+export interface FeedbackData {
+  uid: string | null;
+  email: string | null;
+  trackSlug: string;
+  moduleSlug: string;
+  lessonSlug: string;
+  type: "up" | "down";
+  issues?: string;
+  timestamp: number;
+}
+
+export async function submitFeedback(data: FeedbackData): Promise<void> {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const feedbacksCol = collection(db, "feedbacks");
+    await addDoc(feedbacksCol, data);
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    throw error;
+  }
+}
+
+export interface AdminFeedbackData extends FeedbackData {
+  id: string;
+}
+
+export interface AdminUserData extends UserProgressData {
+  id: string;
+}
+
+export async function getAdminData(): Promise<{ feedbacks: AdminFeedbackData[]; users: AdminUserData[] } | null> {
+  if (!isFirebaseConfigured || !db) return null;
+  try {
+    const feedbacksCol = collection(db, "feedbacks");
+    const feedbacksSnap = await getDocs(feedbacksCol);
+    const feedbacks = feedbacksSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as AdminFeedbackData[];
+
+    const usersCol = collection(db, "users");
+    const usersSnap = await getDocs(usersCol);
+    const users = usersSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as AdminUserData[];
+
+    return { feedbacks, users };
+  } catch (error) {
+    console.error("Error loading admin data:", error);
+    return null;
+  }
 }

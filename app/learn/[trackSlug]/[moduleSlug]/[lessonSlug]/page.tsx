@@ -27,6 +27,7 @@ import ReadingProgressBar from "@/components/layout/ReadingProgressBar";
 import LessonCompleteButton from "@/components/layout/LessonCompleteButton";
 import TableOfContents from "@/components/layout/TableOfContents";
 import LessonSidebarLayout from "@/components/layout/LessonSidebarLayout";
+import LessonFeedback from "@/components/layout/LessonFeedback";
 
 // Import interactive simulator components
 import GasSimulator from "@/components/simulators/GasSimulator";
@@ -710,6 +711,13 @@ export default async function LessonPage({ params }: Props) {
                   </div>
                 )}
               </div>
+
+              {/* Feedback Form */}
+              <LessonFeedback
+                trackSlug={trackSlug}
+                moduleSlug={moduleSlug}
+                lessonSlug={lessonSlug}
+              />
 
               {/* Complete Action Button */}
               <div className="mt-12 border-t border-border/40 pt-8">
