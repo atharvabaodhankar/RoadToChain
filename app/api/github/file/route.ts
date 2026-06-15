@@ -22,6 +22,14 @@ export async function GET(request: Request) {
     process.env.GITHUB_OWNER ||
     "atharvabaodhankar";
 
+  const allowedOwner = (process.env.GITHUB_OWNER || "atharvabaodhankar").toLowerCase();
+  if (owner.toLowerCase() !== allowedOwner) {
+    return NextResponse.json(
+      { error: "Access Denied: Unauthorized repository owner requested." },
+      { status: 403 }
+    );
+  }
+
   if (!repo || !filePath) {
     return NextResponse.json(
       { error: "Missing required 'repo' and 'path' query parameters" },
