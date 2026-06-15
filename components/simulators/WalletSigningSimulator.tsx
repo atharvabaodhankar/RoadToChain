@@ -51,7 +51,7 @@ type Step = "idle" | "hashing" | "signing" | "signed" | "verifying" | "verified"
 
 interface LogEntry {
   timestamp: string;
-  level: 'info' | 'warn' | 'success' | 'debug';
+  level: 'info' | 'warn' | 'error' | 'success' | 'debug';
   text: string;
 }
 

@@ -31,7 +31,6 @@ export default function VisualBlockchainSimulator() {
   const [chain, setChain] = useState<Block[]>([]);
   const [mempool, setMempool] = useState<Transaction[]>([]);
   const [mining, setMining] = useState(false);
-  const [tampering, setTampering] = useState(false);
   const [newTx, setNewTx] = useState({ from: 'Alice', to: 'Bob', amount: 10 });
   const [brokenChain, setBrokenChain] = useState(false);
   const [tamperConfirmId, setTamperConfirmId] = useState<number | null>(null);
@@ -166,7 +165,6 @@ export default function VisualBlockchainSimulator() {
       return;
     }
 
-    setTampering(true);
     addLog(`SECURITY_ALERT: external database modification triggered on block #${blockId}`, 'warn');
 
     setTimeout(() => {
@@ -190,7 +188,6 @@ export default function VisualBlockchainSimulator() {
         return copy;
       });
       setBrokenChain(true);
-      setTampering(false);
       setTamperConfirmId(null);
     }, 800);
   };

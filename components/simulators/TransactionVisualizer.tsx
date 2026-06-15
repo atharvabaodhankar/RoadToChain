@@ -198,7 +198,7 @@ export default function TransactionVisualizer() {
           <div className="lg:col-span-5 p-4 space-y-3 flex flex-col justify-between">
             <div>
               <div className="text-[9px] text-neutral-500 uppercase">
-                STAGE_ID_0{activeStep + 1} // TOTAL_STAGES_0{steps.length}
+                STAGE_ID_0{activeStep + 1} {"//"} TOTAL_STAGES_0{steps.length}
               </div>
               <h3 className="text-xs font-bold text-neutral-200 mt-1 uppercase tracking-wide">
                 {current.title}
