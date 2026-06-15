@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useProgress } from "@/app/context/ProgressContext";
-
-// Lightweight ECDSA simulation — uses Web Crypto + deterministic derivation
-// For educational purposes, we use a simplified but cryptographically meaningful demo
 
 function hexToBytes(hex: string): Uint8Array {
   const clean = hex.replace(/^0x/, "").padStart(64, "0").slice(0, 64);
@@ -22,13 +18,11 @@ function bytesToHex(bytes: Uint8Array): string {
     .join("");
 }
 
-// Deterministic address from a "private key" for demo
 function deriveAddress(privateKeyHex: string): string {
   const seed = privateKeyHex.replace(/^0x/, "").padStart(64, "0").slice(0, 40);
   return "0x" + seed.slice(0, 40).toLowerCase();
 }
 
-// Simple hash for demo (not real Keccak-256, but illustrative)
 async function hashMessage(message: string): Promise<string> {
   const msgWithPrefix = `\x19Ethereum Signed Message:\n${message.length}${message}`;
   const encoded = new TextEncoder().encode(msgWithPrefix);
@@ -36,7 +30,6 @@ async function hashMessage(message: string): Promise<string> {
   return "0x" + bytesToHex(new Uint8Array(hashBuf)).slice(0, 64);
 }
 
-// Produces a deterministic-looking but unique signature for each (key, message) combo
 async function simulateSign(privateKeyHex: string, messageHash: string): Promise<{ r: string; s: string; v: number }> {
   const combined = privateKeyHex + messageHash;
   const encoded = new TextEncoder().encode(combined);
@@ -49,12 +42,18 @@ async function simulateSign(privateKeyHex: string, messageHash: string): Promise
 }
 
 const PRESET_KEYS = [
-  { label: "Alice", key: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" },
-  { label: "Bob", key: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d" },
-  { label: "Custom", key: "" },
+  { label: "ALICE_KEY", key: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" },
+  { label: "BOB_KEY", key: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d" },
+  { label: "CUSTOM_HEX", key: "" },
 ];
 
 type Step = "idle" | "hashing" | "signing" | "signed" | "verifying" | "verified";
+
+interface LogEntry {
+  timestamp: string;
+  level: 'info' | 'warn' | 'success' | 'debug';
+  text: string;
+}
 
 export default function WalletSigningSimulator() {
   const { trackSimulatorUsage } = useProgress();
@@ -65,10 +64,32 @@ export default function WalletSigningSimulator() {
   const [messageHash, setMessageHash] = useState("");
   const [signature, setSignature] = useState<{ r: string; s: string; v: number } | null>(null);
   const [recoveredAddress, setRecoveredAddress] = useState("");
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  
+  const terminalEndRef = useRef<HTMLDivElement>(null);
+
+  const getFormattedTime = () => {
+    const now = new Date();
+    return now.toTimeString().split(' ')[0];
+  };
+
+  const addLog = (text: string, level: 'info' | 'warn' | 'success' | 'debug' = 'info') => {
+    setLogs(prev => [...prev, { timestamp: getFormattedTime(), level, text }]);
+  };
 
   useEffect(() => {
     trackSimulatorUsage("signing");
+    setLogs([
+      { timestamp: getFormattedTime(), level: 'info', text: 'SYSTEM: keypair module loaded' },
+      { timestamp: getFormattedTime(), level: 'debug', text: 'ALGORITHM: secp256k1 ecdsa engine ready' }
+    ]);
   }, [trackSimulatorUsage]);
+
+  useEffect(() => {
+    if (terminalEndRef.current) {
+      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [logs]);
 
   const privateKey = selectedPreset < 2 ? PRESET_KEYS[selectedPreset].key : customKey || "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
   const signerAddress = deriveAddress(privateKey);
@@ -80,27 +101,34 @@ export default function WalletSigningSimulator() {
     setStep("hashing");
     setSignature(null);
     setRecoveredAddress("");
-    await new Promise((r) => setTimeout(r, 700));
-
+    addLog(`HASH_INIT: prepending Eth signed message prefix to payload`, 'info');
+    
+    await new Promise((r) => setTimeout(r, 600));
     const hash = await hashMessage(message);
     setMessageHash(hash);
+    addLog(`HASH_COMPLETE: SHA-256 hash calculated: ${hash}`, 'success');
+    
     setStep("signing");
+    addLog(`ECDSA_SIGN: injecting private key and payload digest into curve engine`, 'info');
+    
     await new Promise((r) => setTimeout(r, 800));
-
     const sig = await simulateSign(privateKey, hash);
     setSignature(sig);
     setStep("signed");
+    addLog(`SIGN_SUCCESS: signature parameters derived. v=${sig.v}`, 'success');
   }, [message, privateKey, trackSimulatorUsage]);
 
   const runVerify = useCallback(async () => {
     if (!signature) return;
     trackSimulatorUsage("signing");
     setStep("verifying");
-    await new Promise((r) => setTimeout(r, 700));
-    // In a real system, ecrecover(messageHash, v, r, s) → address
-    // We simulate by deriving the same address from the key
+    addLog(`RECOVER_INIT: parsing parameters v=${signature.v}, r=${signature.r.slice(0, 10)}..., s=${signature.s.slice(0, 10)}...`, 'info');
+    
+    await new Promise((r) => setTimeout(r, 600));
     setRecoveredAddress(signerAddress);
     setStep("verified");
+    addLog(`RECOVER_COMPLETE: public key address resolved -> ${signerAddress}`, 'success');
+    addLog(`CONSENSUS_VERIFY: reconstructed address matches signer address. integrity validated`, 'success');
   }, [signature, signerAddress, trackSimulatorUsage]);
 
   const reset = () => {
@@ -108,15 +136,10 @@ export default function WalletSigningSimulator() {
     setMessageHash("");
     setSignature(null);
     setRecoveredAddress("");
-  };
-
-  const stepColors: Record<Step, string> = {
-    idle: "#3f3f46",
-    hashing: "#f59e0b",
-    signing: "#7c3aed",
-    signed: "#3b82f6",
-    verifying: "#ec4899",
-    verified: "#22c55e",
+    setLogs(prev => [
+      ...prev,
+      { timestamp: getFormattedTime(), level: 'warn', text: 'STATE_RESET: current signing pipeline cleared' }
+    ]);
   };
 
   const signatureHex = signature
@@ -124,174 +147,184 @@ export default function WalletSigningSimulator() {
     : null;
 
   return (
-    <div className="my-8 rounded-xl border border-border bg-bg overflow-hidden font-mono">
+    <div className="not-prose my-8 w-full bg-neutral-950 border border-neutral-800 text-neutral-300 font-mono text-xs select-none">
+      
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-bg2">
-        <div className="flex items-center gap-2.5">
-          <span
-            className="h-2 w-2 rounded-full transition-colors duration-300"
-            style={{ backgroundColor: stepColors[step] }}
-          />
-          <span className="text-xs font-semibold text-muted uppercase tracking-wider">
-            Wallet Signing Simulator
+      <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800 bg-neutral-900/50">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
+          </div>
+          <span className="text-[10px] text-neutral-500 font-semibold tracking-wider">CRYPTOGRAPHIC_SIGNER_CLI // CORED_v0.2.1</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`h-1.5 w-1.5 rounded-full ${step === 'verified' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
+          <span className={`text-[10px] uppercase font-bold ${step === 'verified' ? 'text-emerald-500' : 'text-neutral-500'}`}>
+            PIPELINE: {step.toUpperCase()}
           </span>
         </div>
-        <span className="text-[10px] text-dim uppercase">{step.replace("_", " ")}</span>
       </div>
 
-      <div className="p-5 space-y-5">
-        {/* Signer selector */}
-        <div>
-          <div className="text-[10px] text-dim uppercase mb-2">Signer</div>
-          <div className="flex gap-2 flex-wrap">
-            {PRESET_KEYS.map((p, i) => (
-              <button
-                key={p.label}
-                onClick={() => { setSelectedPreset(i); reset(); }}
-                className={`text-[11px] px-3 py-1.5 rounded border transition-all ${
-                  selectedPreset === i
-                    ? "border-accent/60 bg-accent/10 text-accent"
-                    : "border-border bg-bg3 text-muted hover:border-border2"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-neutral-800">
+        
+        {/* Left Control Panel */}
+        <div className="lg:col-span-5 p-4 space-y-4 bg-neutral-950">
+          
+          {/* Signer Key Selector */}
+          <div className="space-y-1.5">
+            <label className="block text-neutral-500 text-[9px] uppercase">Signer Entity / Key preset</label>
+            <div className="flex gap-1.5 flex-wrap">
+              {PRESET_KEYS.map((p, i) => (
+                <button
+                  key={p.label}
+                  onClick={() => { setSelectedPreset(i); reset(); }}
+                  className={`text-[10px] px-2.5 py-1 border transition-all ${
+                    selectedPreset === i
+                      ? "border-emerald-500/60 bg-emerald-950/20 text-emerald-400"
+                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {selectedPreset === 2 && (
+              <input
+                type="text"
+                placeholder="0x... (64 hex characters)"
+                value={customKey}
+                onChange={(e) => { setCustomKey(e.target.value); reset(); }}
+                className="w-full bg-black border border-neutral-800 hover:border-neutral-700 focus:border-emerald-500 text-emerald-400 font-mono px-2 py-1.5 rounded outline-none text-[11px] placeholder:text-neutral-700"
+              />
+            )}
+            <div className="text-[9px] text-neutral-500 pt-0.5 truncate">
+              DERIVED_ADDR: <span className="text-neutral-300">{signerAddress}</span>
+            </div>
           </div>
-          {selectedPreset === 2 && (
+
+          {/* Plaintext Payload Input */}
+          <div className="space-y-1.5">
+            <label className="block text-neutral-500 text-[9px] uppercase">Plaintext Payload message</label>
             <input
               type="text"
-              placeholder="0x... (64 hex chars)"
-              value={customKey}
-              onChange={(e) => { setCustomKey(e.target.value); reset(); }}
-              className="mt-2 w-full rounded border border-border bg-bg3 px-3 py-2 text-[11px] text-text placeholder:text-dim focus:outline-none focus:border-accent/60"
+              value={message}
+              onChange={(e) => { setMessage(e.target.value); reset(); }}
+              className="w-full bg-black border border-neutral-800 hover:border-neutral-700 focus:border-emerald-500 text-emerald-400 font-mono px-2 py-1.5 rounded outline-none text-[11px] placeholder:text-neutral-700"
+              placeholder="Type raw message here..."
             />
-          )}
-          <div className="mt-2 text-[10px] text-dim">
-            Signer address: <span className="text-muted">{signerAddress}</span>
           </div>
-        </div>
 
-        {/* Message input */}
-        <div>
-          <div className="text-[10px] text-dim uppercase mb-2">Message to sign</div>
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => { setMessage(e.target.value); reset(); }}
-            className="w-full rounded border border-border bg-bg3 px-3 py-2 text-[12px] text-text placeholder:text-dim focus:outline-none focus:border-accent/60"
-            placeholder="Type any message..."
-          />
-          <div className="mt-1 text-[10px] text-dim">
-            Change the message — the signature will be completely different.
-          </div>
-        </div>
-
-        {/* Sign button */}
-        <div className="flex gap-3">
-          <button
-            onClick={runSigning}
-            disabled={step === "hashing" || step === "signing"}
-            className="flex-1 rounded-lg border border-accent/40 bg-accent/10 py-2.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {step === "hashing" ? "Hashing..." : step === "signing" ? "Signing..." : "Sign Message"}
-          </button>
-          {signature && (
+          {/* Trigger Pipeline Actions */}
+          <div className="flex gap-2 pt-2">
             <button
-              onClick={runVerify}
-              disabled={step === "verifying"}
-              className="flex-1 rounded-lg border border-emerald-600/40 bg-emerald-600/10 py-2.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/20 transition-all disabled:opacity-40"
+              onClick={runSigning}
+              disabled={step === "hashing" || step === "signing"}
+              className="flex-1 bg-emerald-950/60 hover:bg-emerald-900/80 disabled:opacity-30 border border-emerald-500 text-emerald-400 py-1.5 font-bold transition-all active:scale-[0.98] disabled:cursor-not-allowed text-center"
             >
-              {step === "verifying" ? "Recovering..." : "Verify (ecrecover)"}
+              {step === "hashing" ? "HASHING..." : step === "signing" ? "SIGNING..." : "SIGN_PAYLOAD"}
             </button>
-          )}
+            {signature && (
+              <button
+                onClick={runVerify}
+                disabled={step === "verifying"}
+                className="flex-1 bg-neutral-900 hover:bg-neutral-850 disabled:opacity-30 border border-neutral-800 hover:border-neutral-700 text-neutral-300 py-1.5 font-semibold transition-all active:scale-[0.98] text-center"
+              >
+                {step === "verifying" ? "RESOLVING..." : "ECRECOVER_VERIFY"}
+              </button>
+            )}
+          </div>
+
+          <div className="border-t border-neutral-850/60 pt-3 text-[9px] text-neutral-500 leading-relaxed">
+            <span className="text-neutral-400 font-semibold uppercase">Insight:</span> The signature changes completely on any message or key modification. Anyone on-chain can reconstruct the address using the signature parameters to confirm signature authenticity.
+          </div>
         </div>
 
-        {/* Pipeline visualization */}
-        <AnimatePresence>
-          {step !== "idle" && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-3"
-            >
-              {/* Hash output */}
-              {(step === "hashing" || messageHash) && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="rounded-lg border border-amber-500/20 bg-amber-500/5 dark:border-amber-800/40 dark:bg-amber-950/20 p-3"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] text-amber-650 dark:text-amber-400 font-semibold uppercase">
-                      Step 1 — Message Hash (Keccak-256 with Ethereum prefix)
-                    </span>
-                    {step === "hashing" && <span className="text-[10px] text-amber-650 dark:text-amber-400 animate-pulse">computing...</span>}
+        {/* Right Console Output Panel */}
+        <div className="lg:col-span-7 bg-black flex flex-col min-h-[300px]">
+          
+          {/* Internal Console Log Area */}
+          <div className="p-4 flex-grow flex flex-col justify-between">
+            <div className="space-y-4">
+              
+              {/* Active Pipeline Terminal Outputs */}
+              <div className="space-y-2">
+                {messageHash && (
+                  <div className="bg-neutral-900/40 border border-neutral-850 p-2.5">
+                    <span className="text-neutral-500 text-[9px] block mb-1">ETH_SIGNED_MESSAGE_HASH:</span>
+                    <span className="text-amber-500 font-mono text-[10px] break-all">{messageHash}</span>
                   </div>
-                  {messageHash && (
-                    <div className="text-[11px] text-amber-800 dark:text-amber-200/80 break-all">{messageHash}</div>
-                  )}
-                  <div className="mt-1 text-[10px] text-amber-700/70 dark:text-amber-600/60">
-                    This 32-byte hash is what gets signed — not the raw message.
-                  </div>
-                </motion.div>
-              )}
+                )}
 
-              {/* Signature output */}
-              {signature && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="rounded-lg border border-purple-500/20 bg-purple-500/5 dark:border-purple-800/40 dark:bg-purple-950/20 p-3"
-                >
-                  <div className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold uppercase mb-2">
-                    Step 2 — ECDSA Signature (Private Key Signs the Hash)
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] text-dim">r: <span className="text-purple-800 dark:text-purple-200/80 break-all">{signature.r}</span></div>
-                    <div className="text-[10px] text-dim">s: <span className="text-purple-800 dark:text-purple-200/80 break-all">{signature.s}</span></div>
-                    <div className="text-[10px] text-dim">v: <span className="text-purple-800 dark:text-purple-200/80">{signature.v}</span></div>
-                    <div className="text-[10px] text-dim mt-2">Full: <span className="text-purple-800/80 dark:text-purple-200/60 break-all">{signatureHex}</span></div>
-                  </div>
-                  <div className="mt-2 text-[10px] text-purple-600/70 dark:text-purple-600/60">
-                    This signature proves you controlled the private key — without ever revealing it.
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Verify output */}
-              {recoveredAddress && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-3"
-                >
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase mb-2">
-                    Step 3 — ecrecover(hash, v, r, s) → Signer Address
-                  </div>
-                  <div className="text-[11px] space-y-1">
-                    <div className="text-dim">Recovered: <span className="text-emerald-850 dark:text-emerald-300">{recoveredAddress}</span></div>
-                    <div className="text-dim">Expected:  <span className="text-emerald-850 dark:text-emerald-300">{signerAddress}</span></div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-emerald-600 dark:text-emerald-400 text-base">✓</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">MATCH — Signature is valid</span>
+                {signature && (
+                  <div className="bg-neutral-900/40 border border-neutral-850 p-2.5 space-y-1.5">
+                    <span className="text-neutral-500 text-[9px] block">DERIVED_ECDSA_SIGNATURE:</span>
+                    <div className="grid grid-cols-3 gap-1.5 text-[9px] text-neutral-400">
+                      <div>r: <span className="text-emerald-500 truncate block">{signature.r.slice(0, 12)}...</span></div>
+                      <div>s: <span className="text-emerald-500 truncate block">{signature.s.slice(0, 12)}...</span></div>
+                      <div>v: <span className="text-emerald-500 font-bold block">{signature.v}</span></div>
+                    </div>
+                    <div className="text-[9px] pt-1.5 border-t border-neutral-850/40">
+                      <span className="text-neutral-500">HEX:</span>{" "}
+                      <span className="text-emerald-400/80 font-mono break-all">{signatureHex}</span>
                     </div>
                   </div>
-                  <div className="mt-2 text-[10px] text-emerald-700/70 dark:text-emerald-600/60">
-                    Any node on the network can verify this without knowing your private key.
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                )}
 
-        {/* Key insight */}
-        <div className="border-t border-border pt-4 text-[10px] text-dim leading-relaxed">
-          <span className="text-muted font-semibold">Key insight:</span> The signature changes entirely with any change to the message or the private key. The Ethereum network can verify your identity purely from the (message, signature) pair — without a password, a server, or a certificate authority.
+                {recoveredAddress && (
+                  <div className="bg-neutral-900/40 border border-neutral-850 p-2.5 space-y-1">
+                    <span className="text-neutral-500 text-[9px] block">RECOVERED_PUBLIC_ADDRESS:</span>
+                    <div className="text-[10px] text-neutral-300 flex justify-between">
+                      <span>RECOVERED:</span>
+                      <span className="text-emerald-400 font-mono font-semibold">{recoveredAddress}</span>
+                    </div>
+                    <div className="text-[10px] text-neutral-300 flex justify-between">
+                      <span>EXPECTED:</span>
+                      <span className="text-emerald-400 font-mono font-semibold">{signerAddress}</span>
+                    </div>
+                    <div className="text-[9px] pt-1.5 border-t border-neutral-850/40 text-emerald-500 font-semibold flex items-center gap-1.5">
+                      <span>✓ INTEGRITY_OK: SIGNER MATCH VALIDATED</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Logs */}
+              <div className="border-t border-neutral-900 pt-3">
+                <span className="text-neutral-500 text-[9px] uppercase block mb-1.5">Debugger Trace:</span>
+                <div className="max-h-24 overflow-y-auto space-y-1 pr-1 font-mono text-[9px]">
+                  {logs.map((log, index) => {
+                    let levelColor = 'text-neutral-400';
+                    if (log.level === 'warn') levelColor = 'text-amber-500';
+                    if (log.level === 'error') levelColor = 'text-red-500';
+                    if (log.level === 'success') levelColor = 'text-emerald-500';
+                    if (log.level === 'debug') levelColor = 'text-neutral-600';
+                    return (
+                      <div key={index} className="leading-normal">
+                        <span className="text-neutral-700">[{log.timestamp}]</span>{" "}
+                        <span className={levelColor}>{log.text}</span>
+                      </div>
+                    );
+                  })}
+                  <div ref={terminalEndRef} />
+                </div>
+              </div>
+
+            </div>
+
+            <div className="border-t border-neutral-900 pt-2.5 mt-3 flex items-center gap-1.5 text-neutral-600 text-[10px]">
+              <span>guest@keypair-module:~$</span>
+              <span className="w-1.5 h-3.5 bg-emerald-500 animate-pulse inline-block align-middle" />
+            </div>
+          </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
+

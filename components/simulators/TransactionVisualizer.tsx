@@ -8,118 +8,101 @@ const steps = [
   {
     id: "wallet",
     label: "Wallet",
-    icon: "🔑",
-    color: "#7c3aed",
-    title: "You sign the transaction",
+    title: "SIGN_TRANSACTION",
     detail:
-      "Your private key signs the transaction payload: to address, value, data, nonce, gas limit, max fee per gas. The signature proves you authorized it — without revealing your private key.",
+      "Your private key signs the transaction payload (target address, value, call data, account nonce, gas limit, gas fee). The ECDSA signature cryptographically proves authorization without disclosing the key.",
     code: `{
-  from:     "0xYourWallet",
-  to:       "0xContract",
-  value:    "0",
-  data:     "0xa9059cbb...",  // encoded function call
-  nonce:    42,               // prevents replay
-  gasLimit: 65000,
-  maxFeePerGas: "30 gwei",
-  signature: "0x1b9f..."     // your ECDSA signature
+  "from":     "0xYourWalletAddress",
+  "to":       "0xContractTarget",
+  "value":    "0",
+  "data":     "0xa9059cbb...",  // encoded function call
+  "nonce":    42,               // replay protection
+  "gasLimit": 65000,
+  "maxFeePerGas": "30 gwei",
+  "signature": "0x1b9f..."     // ECDSA signature parameters
 }`,
-    cost: null,
+    cost: "INITIATING",
   },
   {
     id: "mempool",
     label: "Mempool",
-    icon: "🌊",
-    color: "#3b82f6",
-    title: "Transaction enters the mempool",
+    title: "BROADCAST_TO_MEMPOOL",
     detail:
-      "Your signed transaction is broadcast to the P2P network. Every node receives it and adds it to their local mempool — a waiting room of unconfirmed transactions. Validators pick from here.",
-    code: `// Your tx is now visible to everyone
-// Anyone can see it before it's confirmed
-
+      "The signed transaction is broadcast to the P2P network. Mining/validating nodes receive the payload and insert it into their local mempool (transaction waiting queue) to await block inclusion.",
+    code: `// Subscribing to pending transaction stream...
 ethers.provider.on("pending", (txHash) => {
-  // This fires for EVERY pending tx on the network
-  // MEV bots watch this to front-run your trades
+  // Triggers for every unconfirmed tx broadcast to network
+  // MEV searchers analyze this queue for front-run options
 });
 
-// Current mempool size varies:
-// Low activity:  ~50K pending txs
-// High activity: ~200K+ pending txs`,
-    cost: "0 gas (not yet mined)",
+// MEMPOOL METRICS:
+// Average queue size: ~75,000 pending_txs
+// Priority strategy: sorted by Gas Fee (gasPrice desc)`,
+    cost: "0 GAS (PENDING)",
   },
   {
     id: "validator",
     label: "Validator",
-    icon: "⚡",
-    color: "#f59e0b",
-    title: "Validator selects and executes",
+    title: "EVM_BYTECODE_EXECUTION",
     detail:
-      "A validator picks your transaction (typically highest-fee-first). They execute the EVM bytecode in their local state. Every opcode costs gas. If execution succeeds, the state change is applied locally.",
-    code: `// Validator's EVM runs your bytecode
-// opcode by opcode, gas meter ticking
-
+      "A validator picks the transaction (preferring higher fees) and executes the EVM bytecode in their local workspace. Opcode executions deduct gas. Successful execution triggers state changes.",
+    code: `// VM executes contract bytecode:
 PUSH1 0x60    // 3 gas
 MSTORE        // 3 gas
 CALLDATALOAD  // 3 gas
-SLOAD         // 2,100 gas ← expensive
-SSTORE        // 20,000 gas ← very expensive
-...
+SLOAD         // 2,100 gas  <- read state (high cost)
+SSTORE        // 20,000 gas <- write state (very high cost)
 
-// If gas runs out before completion:
-// → state reverts
-// → gas consumed is NOT refunded
-// → you paid for nothing`,
-    cost: "Gas consumed here",
+// OUT_OF_GAS EXCEPTION SAFETY:
+// If gas Limit is reached before execution ends:
+// - All transaction state changes revert
+// - Used gas is still paid to proposer`,
+    cost: "GAS_METER_TICKING",
   },
   {
     id: "block",
     label: "Block",
-    icon: "🧱",
-    color: "#22c55e",
-    title: "Transaction included in a block",
+    title: "BLOCK_INCLUSION",
     detail:
-      "The validator proposes a new block containing your transaction. 2/3 of all validators must attest to the block validity before it's added to the chain. This process takes ~12 seconds on Ethereum.",
+      "The validator packages the executed transaction into a proposed block. The block is broadcast, and 2/3 of validators must verify and attest to its validity before it joins the ledger.",
     code: `Block #21,847,339 {
   slot:         21847339,
-  proposer:     "0xValidator...",
+  proposer:     "0xValidatorProposerAddress...",
   transactions: [
-    "0xYourTxHash",  // ← you're in here
-    "0xOtherTx1",
-    "0xOtherTx2",
-    // ... up to ~300 more txs
+    "0xYourTxHash",  // <- included
+    "0xOtherTxHash_1",
+    "0xOtherTxHash_2"
   ],
-  gasUsed:      14_382_001,
-  gasLimit:     30_000_000,
-  baseFee:      "28.4 gwei",   // burned
+  gasUsed:      14382001,
+  gasLimit:     30000000,
+  baseFee:      "28.4 gwei",   // burned fee
   timestamp:    1716124800
 }`,
-    cost: "~12 seconds elapsed",
+    cost: "~12 SEC ELAPSED",
   },
   {
     id: "confirmation",
     label: "Confirmed",
-    icon: "✓",
-    color: "#06b6d4",
-    title: "Final confirmation — state is permanent",
+    title: "LEDGER_FINALIZATION",
     detail:
-      "After 64 slots (~13 minutes), your block achieves finality. It can never be reorganized out of the chain. Your state change is now permanent across all ~7,000 Ethereum nodes worldwide. No takebacks.",
-    code: `// Your receipt is now available
-const receipt = await tx.wait(1); // 1 confirmation
+      "After 64 slots (~13 minutes), the block containing your transaction achieves finality. Reorganization is mathematically impossible, and the state changes are permanent across all nodes.",
+    code: `// Fetching transaction receipt...
+const receipt = await tx.wait(1);
 
 receipt = {
-  status:          1,           // 1 = success, 0 = revert
-  blockNumber:     21847339,
-  gasUsed:         45821,       // actual gas used
+  status:            1,           // 1 = SUCCESS, 0 = REVERT
+  blockNumber:       21847339,
+  gasUsed:           45821,       // actual gas consumed
   effectiveGasPrice: "28.4 gwei",
   logs: [
     { event: "Transfer", args: [...] }
   ]
 }
 
-// State change is now:
-// ✓ Applied on all ~7,000 nodes
-// ✓ Ordered by consensus
-// ✓ Immutable`,
-    cost: "Finalized after ~13 min",
+// LEDGER STATUS:
+// - Immutable state confirmed
+// - Reorg protection active`,
+    cost: "FINALIZED",
   },
 ];
 
@@ -157,131 +140,124 @@ export default function TransactionVisualizer() {
   const current = steps[activeStep];
 
   return (
-    <div className="my-8 rounded-xl border border-border bg-bg overflow-hidden font-mono">
+    <div className="not-prose my-8 w-full bg-neutral-950 border border-neutral-800 text-neutral-300 font-mono text-xs select-none">
+      
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-bg2">
-        <div className="flex items-center gap-2.5">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-semibold text-muted uppercase tracking-wider">
-            Transaction Visualizer
-          </span>
+      <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800 bg-neutral-900/50">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
+            <span className="w-2.5 h-2.5 rounded-full bg-neutral-800 border border-neutral-700" />
+          </div>
+          <span className="text-[10px] text-neutral-500 font-semibold tracking-wider">TX_PIPELINE_MONITOR // CORED_v0.1.1</span>
         </div>
         <button
           onClick={playThrough}
           disabled={playing}
-          className="text-[11px] border border-border rounded px-3 py-1 text-muted hover:text-text hover:border-border2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="text-[9px] border border-neutral-800 hover:border-neutral-700 bg-neutral-950 px-3 py-0.5 rounded text-neutral-400 hover:text-emerald-400 transition-colors disabled:opacity-40"
         >
-          {playing ? "Playing..." : "▶ Play through"}
+          {playing ? "EXECUTING_FLOW..." : "RUN PIPELINE"}
         </button>
       </div>
 
-      {/* Step pipeline */}
-      <div className="flex items-center gap-0 px-5 py-4 border-b border-border overflow-x-auto">
+      {/* Horizontal Pipeline Steps */}
+      <div className="flex items-center gap-0 px-4 py-3 bg-black/60 border-b border-neutral-800 overflow-x-auto scrollbar-thin">
         {steps.map((step, i) => (
           <div key={step.id} className="flex items-center shrink-0">
             <button
               onClick={() => goTo(i)}
-              className={`flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg border transition-all ${
+              className={`px-3 py-1.5 border transition-all ${
                 i === activeStep
-                  ? "border-[--c] bg-[--c]/10 text-text"
+                  ? "border-emerald-500 bg-emerald-950/20 text-emerald-400 font-bold"
                   : i < activeStep
-                  ? "border-border bg-bg3 text-dim"
-                  : "border-border bg-transparent text-dim hover:border-border2"
+                  ? "border-neutral-900 bg-neutral-950/50 text-neutral-500"
+                  : "border-neutral-900/50 bg-transparent text-neutral-600 hover:border-neutral-800"
               }`}
-              style={{ "--c": step.color } as React.CSSProperties}
             >
-              <span className="text-lg leading-none">{step.icon}</span>
-              <span className="text-[10px] font-semibold">{step.label}</span>
+              {step.label.toUpperCase()}
             </button>
             {i < steps.length - 1 && (
-              <div
-                className="h-px w-6 mx-1 transition-all duration-500"
-                style={{ backgroundColor: i < activeStep ? steps[i].color : "var(--border2)" }}
-              />
+              <span className="mx-2 text-neutral-700">→</span>
             )}
           </div>
         ))}
       </div>
 
-      {/* Detail panel */}
+      {/* Detail Panel */}
       <AnimatePresence mode="wait">
         <motion.div
           key={current.id}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-          className="p-5 space-y-4"
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.15 }}
+          className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-neutral-800 bg-neutral-950"
         >
-          <div className="flex items-start gap-3">
-            <span
-              className="text-2xl leading-none p-2 rounded-lg border"
-              style={{
-                borderColor: `${current.color}30`,
-                backgroundColor: `${current.color}10`,
-              }}
-            >
-              {current.icon}
-            </span>
+          {/* Explanation Text */}
+          <div className="lg:col-span-5 p-4 space-y-3 flex flex-col justify-between">
             <div>
-              <div className="text-[10px] text-dim uppercase mb-1">
-                Step {activeStep + 1} of {steps.length}
+              <div className="text-[9px] text-neutral-500 uppercase">
+                STAGE_ID_0{activeStep + 1} // TOTAL_STAGES_0{steps.length}
               </div>
-              <h3 className="text-sm font-bold text-text">{current.title}</h3>
-              <p className="text-xs text-muted mt-1 leading-relaxed max-w-xl">{current.detail}</p>
+              <h3 className="text-xs font-bold text-neutral-200 mt-1 uppercase tracking-wide">
+                {current.title}
+              </h3>
+              <p className="text-[11px] text-neutral-400 mt-2 leading-relaxed">
+                {current.detail}
+              </p>
             </div>
+
+            {current.cost && (
+              <div className="pt-3 border-t border-neutral-900 flex justify-between items-center text-[10px]">
+                <span className="text-neutral-500 uppercase">Stage cost:</span>
+                <span className="text-emerald-400 font-semibold">{current.cost}</span>
+              </div>
+            )}
           </div>
 
-          {/* Code view */}
-          <div className="rounded-lg bg-bg3 border border-border overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-bg2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-              <span className="ml-2 text-[10px] text-dim">{current.label.toLowerCase()}.ts</span>
-              {current.cost && (
-                <span
-                  className="ml-auto text-[10px] px-2 py-0.5 rounded border font-semibold"
-                  style={{ color: current.color, borderColor: `${current.color}30`, backgroundColor: `${current.color}10` }}
-                >
-                  {current.cost}
-                </span>
-              )}
+          {/* Code View */}
+          <div className="lg:col-span-7 bg-black p-4 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5 mb-2.5">
+                <span className="text-[10px] text-neutral-500 font-semibold uppercase">{current.label.toLowerCase()}_payload.json</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/80" />
+              </div>
+              <pre className="text-[10px] leading-relaxed text-neutral-400 overflow-x-auto max-h-56 scrollbar-thin">
+                <code>{current.code}</code>
+              </pre>
             </div>
-            <pre className="p-4 text-[11px] leading-relaxed text-text overflow-x-auto">
-              <code>{current.code}</code>
-            </pre>
-          </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between pt-2">
-            <button
-              onClick={() => goTo(Math.max(0, activeStep - 1))}
-              disabled={activeStep === 0}
-              className="text-[11px] border border-border rounded px-3 py-1.5 text-muted hover:text-text hover:border-border2 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              ← Previous
-            </button>
-            <div className="flex gap-1.5">
-              {steps.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => goTo(i)}
-                  className="h-1.5 rounded-full transition-all"
-                  style={{
-                    width: i === activeStep ? "20px" : "6px",
-                    backgroundColor: i === activeStep ? current.color : i < activeStep ? "var(--border3)" : "var(--border2)",
-                  }}
-                />
-              ))}
+            {/* Bottom Navigation */}
+            <div className="flex items-center justify-between pt-3 border-t border-neutral-900 mt-4">
+              <button
+                onClick={() => goTo(Math.max(0, activeStep - 1))}
+                disabled={activeStep === 0}
+                className="text-[9px] border border-neutral-800 hover:border-neutral-700 bg-neutral-950 px-2.5 py-1 text-neutral-400 hover:text-neutral-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                PREV_STAGE
+              </button>
+              <div className="flex gap-1.5">
+                {steps.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    className="h-1 rounded-full transition-all"
+                    style={{
+                      width: i === activeStep ? "16px" : "4px",
+                      backgroundColor: i === activeStep ? "rgb(16, 185, 129)" : i < activeStep ? "rgb(38, 38, 38)" : "rgb(23, 23, 23)",
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => goTo(Math.min(steps.length - 1, activeStep + 1))}
+                disabled={activeStep === steps.length - 1}
+                className="text-[9px] border border-neutral-800 hover:border-neutral-700 bg-neutral-950 px-2.5 py-1 text-neutral-400 hover:text-neutral-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                NEXT_STAGE
+              </button>
             </div>
-            <button
-              onClick={() => goTo(Math.min(steps.length - 1, activeStep + 1))}
-              disabled={activeStep === steps.length - 1}
-              className="text-[11px] border border-border rounded px-3 py-1.5 text-muted hover:text-text hover:border-border2 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Next →
-            </button>
           </div>
         </motion.div>
       </AnimatePresence>
