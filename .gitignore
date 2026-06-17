@@ -23,7 +23,6 @@
 # misc
 .DS_Store
 *.pem
-context
 chainvidya_seo_bible.md
 
 # debug
