@@ -187,54 +187,126 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
   }, [progress.completed]);
 
-  const markComplete = async (trackSlug: string, moduleSlug: string, lessonSlug: string) => {
-    if (isComplete(trackSlug, moduleSlug, lessonSlug)) return;
-    const newCompleted = [
-      ...progress.completed,
-      { trackSlug, moduleSlug, lessonSlug, completedAt: Date.now() },
-    ];
-    await saveProgress({ ...progress, completed: newCompleted }, user);
-  };
-
-  const markIncomplete = async (trackSlug: string, moduleSlug: string, lessonSlug: string) => {
-    const newCompleted = progress.completed.filter(
-      (item) =>
-        !(
+  const markComplete = useCallback(async (trackSlug: string, moduleSlug: string, lessonSlug: string) => {
+    setProgress((prev) => {
+      const alreadyComplete = prev.completed.some(
+        (item) =>
           item.trackSlug === trackSlug &&
           item.moduleSlug === moduleSlug &&
           item.lessonSlug === lessonSlug
-        )
-    );
-    await saveProgress({ ...progress, completed: newCompleted }, user);
-  };
+      );
+      if (alreadyComplete) return prev;
+      
+      const newCompleted = [
+        ...prev.completed,
+        { trackSlug, moduleSlug, lessonSlug, completedAt: Date.now() },
+      ];
+      const updated = { ...prev, completed: newCompleted };
+      
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      }
+      if (user && isFirebaseConfigured) {
+        saveUserProgress(user.uid, {
+          ...updated,
+          updatedAt: Date.now(),
+        }).catch(console.error);
+      }
+      return updated;
+    });
+  }, [user]);
 
-  const trackSimulatorUsage = async (simulatorId: string) => {
-    const currentCount = progress.simulatorUsage[simulatorId] || 0;
-    const newUsage = {
-      ...progress.simulatorUsage,
-      [simulatorId]: currentCount + 1,
-    };
-    await saveProgress({ ...progress, simulatorUsage: newUsage }, user);
-  };
+  const markIncomplete = useCallback(async (trackSlug: string, moduleSlug: string, lessonSlug: string) => {
+    setProgress((prev) => {
+      const newCompleted = prev.completed.filter(
+        (item) =>
+          !(
+            item.trackSlug === trackSlug &&
+            item.moduleSlug === moduleSlug &&
+            item.lessonSlug === lessonSlug
+          )
+      );
+      const updated = { ...prev, completed: newCompleted };
+      
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      }
+      if (user && isFirebaseConfigured) {
+        saveUserProgress(user.uid, {
+          ...updated,
+          updatedAt: Date.now(),
+        }).catch(console.error);
+      }
+      return updated;
+    });
+  }, [user]);
 
-  const trackMistakeView = async (mistakeId: string) => {
-    const currentCount = progress.mistakeViews[mistakeId] || 0;
-    const newViews = {
-      ...progress.mistakeViews,
-      [mistakeId]: currentCount + 1,
-    };
-    await saveProgress({ ...progress, mistakeViews: newViews }, user);
-  };
+  const trackSimulatorUsage = useCallback(async (simulatorId: string) => {
+    setProgress((prev) => {
+      const currentCount = prev.simulatorUsage[simulatorId] || 0;
+      const newUsage = {
+        ...prev.simulatorUsage,
+        [simulatorId]: currentCount + 1,
+      };
+      const updated = { ...prev, simulatorUsage: newUsage };
+      
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      }
+      if (user && isFirebaseConfigured) {
+        saveUserProgress(user.uid, {
+          ...updated,
+          updatedAt: Date.now(),
+        }).catch(console.error);
+      }
+      return updated;
+    });
+  }, [user]);
 
-  const trackLessonView = async (trackSlug: string, moduleSlug: string, lessonSlug: string) => {
+  const trackMistakeView = useCallback(async (mistakeId: string) => {
+    setProgress((prev) => {
+      const currentCount = prev.mistakeViews[mistakeId] || 0;
+      const newViews = {
+        ...prev.mistakeViews,
+        [mistakeId]: currentCount + 1,
+      };
+      const updated = { ...prev, mistakeViews: newViews };
+      
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      }
+      if (user && isFirebaseConfigured) {
+        saveUserProgress(user.uid, {
+          ...updated,
+          updatedAt: Date.now(),
+        }).catch(console.error);
+      }
+      return updated;
+    });
+  }, [user]);
+
+  const trackLessonView = useCallback(async (trackSlug: string, moduleSlug: string, lessonSlug: string) => {
     const key = `${trackSlug}/${moduleSlug}/${lessonSlug}`;
-    const currentCount = progress.lessonViews[key] || 0;
-    const newViews = {
-      ...progress.lessonViews,
-      [key]: currentCount + 1,
-    };
-    await saveProgress({ ...progress, lessonViews: newViews }, user);
-  };
+    setProgress((prev) => {
+      const currentCount = prev.lessonViews[key] || 0;
+      const newViews = {
+        ...prev.lessonViews,
+        [key]: currentCount + 1,
+      };
+      const updated = { ...prev, lessonViews: newViews };
+      
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      }
+      if (user && isFirebaseConfigured) {
+        saveUserProgress(user.uid, {
+          ...updated,
+          updatedAt: Date.now(),
+        }).catch(console.error);
+      }
+      return updated;
+    });
+  }, [user]);
 
   return (
     <ProgressContext.Provider
