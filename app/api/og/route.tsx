@@ -88,7 +88,7 @@ export async function GET(request: Request) {
                 color: "#71717a",
               }}
             >
-              roadtochain.com
+              roadtochain.tech
             </span>
             <span
               style={{

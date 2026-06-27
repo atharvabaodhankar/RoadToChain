@@ -230,7 +230,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Lesson Not Found" };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.tech";
   const canonicalUrl = `${siteUrl}/learn/${trackSlug}/${moduleSlug}/${lessonSlug}`;
 
   return {
@@ -330,7 +330,7 @@ export default async function LessonPage({ params }: Props) {
     }
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.tech";
   const canonicalUrl = `${siteUrl}/learn/${trackSlug}/${moduleSlug}/${lessonSlug}`;
 
   const schemas: unknown[] = [

@@ -34,11 +34,50 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.tech";
+  const canonicalUrl = `${siteUrl}/learn/${trackSlug}`;
+  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(track.name)}&track=${encodeURIComponent("Track " + track.number)}`;
+
   return {
-    title: `${track.number}: ${track.name} — RoadToChain`,
+    title: `${track.name} \u2014 RoadToChain`,
     description: track.description,
+    keywords: [
+      track.name,
+      ...track.modules.flatMap((m) => m.lessons.map((l) => l.title)),
+      "web3 course",
+      "blockchain tutorial",
+      "learn ethereum",
+      "roadtochain",
+    ],
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "website",
+      title: `${track.name} \u2014 RoadToChain`,
+      description: track.description,
+      url: canonicalUrl,
+      siteName: "RoadToChain",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${track.name} \u2014 RoadToChain Web3 Engineering`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${track.name} \u2014 RoadToChain`,
+      description: track.description,
+      images: [ogImage],
+      creator: "@atharvabaodhankar",
+      site: "@roadtochain",
+    },
   };
 }
+
 
 export default async function TrackPage({ params }: Props) {
   const { trackSlug } = await params;

@@ -1,0 +1,18 @@
+{
+  "name": "RoadToChain",
+  "short_name": "RoadToChain",
+  "description": "Learn Web3 & Blockchain Engineering. 8 tracks from fundamentals to ZK proofs. No hype, real systems.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f12",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["education", "developer tools"],
+  "lang": "en-US"
+}

@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.tech";
   return {
     rules: [
       {
@@ -10,8 +10,18 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/_next/", "/admin/"],
       },
       {
-        // Allow AI crawlers explicitly
-        userAgent: ["GPTBot", "ChatGPT-User", "Claude-Web", "PerplexityBot", "GoogleOther"],
+        // Allow major AI crawlers for better discoverability
+        userAgent: [
+          "GPTBot",
+          "ChatGPT-User",
+          "Claude-Web",
+          "PerplexityBot",
+          "GoogleOther",
+          "Applebot",
+          "DuckDuckBot",
+          "Bingbot",
+          "Slurp",
+        ],
         allow: "/",
       },
     ],
