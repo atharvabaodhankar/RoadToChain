@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Clock, Tag, Compass, AlertCircle, ChevronRight } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import remarkGfm from "remark-gfm";
 import fs from "fs";
 import path from "path";
 import JsonLd from "@/components/seo/JsonLd";
@@ -526,6 +527,7 @@ export default async function LessonPage({ params }: Props) {
                       components={mdxComponents}
                       options={{
                         mdxOptions: {
+                          remarkPlugins: [remarkGfm],
                           rehypePlugins: [
                             [
                               rehypePrettyCode,
