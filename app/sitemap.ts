@@ -3,7 +3,6 @@ import { tracks } from "@/lib/curriculum";
 import { getAllLessonPaths } from "@/lib/content";
 
 // Site launched date — used for content dating
-const SITE_LAUNCH = new Date("2026-06-04T00:00:00.000Z");
 const NOW = new Date();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
