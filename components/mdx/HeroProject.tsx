@@ -100,8 +100,20 @@ export default function HeroProject({ name, track = "0", children }: HeroProject
     }
   };
 
+  // Links to the specific lesson that contains the actual interactive simulator,
+  // not the generic track overview page.
   const getTrackLink = (t: string) => {
-    return `/learn/track-${t}`;
+    const simulatorLessonMap: Record<string, string> = {
+      "0": "/learn/track-0/module-2/what-is-a-block", // Visual Blockchain Simulator
+      "1": "/learn/track-1",
+      "2": "/learn/track-2",
+      "3": "/learn/track-3",
+      "4": "/learn/track-4",
+      "5": "/learn/track-5",
+      "6": "/learn/track-6",
+      "7": "/learn/track-7",
+    };
+    return simulatorLessonMap[t] ?? `/learn/track-${t}`;
   };
 
   const trackName = getTrackName(track);
