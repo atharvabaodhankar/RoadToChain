@@ -4,18 +4,30 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ArrowRight, LogIn, LogOut, Loader2, Sun, Moon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useProgress } from "@/app/context/ProgressContext";
+import SearchModal from "./SearchModal";
+import { Menu, X, ArrowRight, LogIn, LogOut, Loader2, Sun, Moon, Search } from "lucide-react";
 
 export default function Nav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const activeTheme = document.documentElement.getAttribute("data-theme") as "light" | "dark" || "light";
     setTheme(activeTheme);
+  }, []);
+
+  // Global Cmd/Ctrl + K shortcut to toggle search modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const toggleTheme = () => {
@@ -96,9 +108,21 @@ export default function Nav() {
             ))}
           </nav>
 
-          {/* Desktop controls (Walkaround toggle, login/logout, CTA) */}
+          {/* Desktop controls (Search, Theme toggle, Auth, CTA) */}
           <div className="hidden items-center gap-3 md:flex">
 
+            {/* Global Search Button Trigger */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="inline-flex items-center gap-2 rounded-md bg-bg3 border border-border text-muted hover:text-text hover:border-border2 px-2.5 py-1 text-xs font-mono transition-all cursor-pointer h-7"
+              title="Search curriculum (Cmd + K)"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span>Search</span>
+              <kbd className="hidden lg:inline-block px-1 py-0.2 text-[9px] text-dim border border-border/80 rounded bg-bg">
+                ⌘K
+              </kbd>
+            </button>
 
             {/* Theme Toggle Button */}
             <button
@@ -259,6 +283,11 @@ export default function Nav() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </>
   );
 }
