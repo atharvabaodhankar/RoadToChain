@@ -30,12 +30,7 @@ import TableOfContents from "@/components/layout/TableOfContents";
 import LessonSidebarLayout from "@/components/layout/LessonSidebarLayout";
 import LessonFeedback from "@/components/layout/LessonFeedback";
 
-// Import interactive simulator components
-import GasSimulator from "@/components/simulators/GasSimulator";
-import TransactionVisualizer from "@/components/simulators/TransactionVisualizer";
-import WalletSigningSimulator from "@/components/simulators/WalletSigningSimulator";
-import DeploymentSimulator from "@/components/simulators/DeploymentSimulator";
-import ArchitectureExplorer from "@/components/simulators/ArchitectureExplorer";
+// Interactive simulator components (only VisualBlockchainSimulator is currently used in MDX)
 import VisualBlockchainSimulator from "@/components/simulators/VisualBlockchainSimulator";
 // Track 0 interactive diagram system
 import TrustProblemDiagram from "@/components/diagrams/TrustProblemDiagram";
@@ -110,12 +105,6 @@ const mdxComponents = {
   h1: () => null,
   h2: Heading2,
   h3: Heading3,
-  // Interactive simulators
-  GasSimulator,
-  TransactionVisualizer,
-  WalletSigningSimulator,
-  DeploymentSimulator,
-  ArchitectureExplorer,
   VisualBlockchainSimulator,
   // Track 0 diagram system
   TrustProblemDiagram,
