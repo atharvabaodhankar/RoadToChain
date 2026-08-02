@@ -331,7 +331,7 @@ export const tracks: Track[] = [
     prerequisites: [0],
     estimatedHours: 13,
     moduleCount: 5,
-    lessonCount: 22,
+    lessonCount: 18,
     heroProject: {
       name: "Evolutionary Voting System",
       description: "Intentionally starts with a broken architecture (voter data stored on-chain), hits gas failures in practice, and evolves through optimization to a production-grade contract."
@@ -1420,6 +1420,7 @@ export const tracks: Track[] = [
       description: "Exam paper leak prevention system: PDF encrypted in-browser with AES-256-GCM, encryption key split using Shamir Secret Sharing, smart contract timelock."
     },
     isSignature: false,
+    isWIP: true,
     modules: [
       {
         id: "m6-1",
@@ -1535,6 +1536,7 @@ export const tracks: Track[] = [
       description: "ChainCure: pharmaceutical anti-counterfeiting with 5-actor supply chain, QR verification. CiviChain: civil material authentication."
     },
     isSignature: false,
+    isWIP: true,
     modules: [
       {
         id: "m7-1",
