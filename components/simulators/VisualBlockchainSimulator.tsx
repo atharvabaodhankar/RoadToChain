@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface Transaction {
   id: string;
@@ -58,7 +58,7 @@ export default function VisualBlockchainSimulator() {
     return "00" + hex.slice(0, 4);
   };
 
-  const createGenesis = () => {
+  const createGenesis = useCallback(() => {
     const genesis: Block = {
       id: 0,
       hash: '00a2f1',
@@ -73,13 +73,13 @@ export default function VisualBlockchainSimulator() {
       { timestamp: getFormattedTime(), level: 'info', text: 'INIT: genesis ready (hash: 00a2f1)' },
       { timestamp: getFormattedTime(), level: 'success', text: 'AUDIT: consensus layer online' }
     ]);
-  };
+  }, []);
 
   useEffect(() => {
     if (chain.length === 0) {
       createGenesis();
     }
-  }, []);
+  }, [chain.length, createGenesis]);
 
   // Auto-scroll terminal log to bottom locally when logs update
   useEffect(() => {

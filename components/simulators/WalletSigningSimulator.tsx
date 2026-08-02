@@ -73,9 +73,9 @@ export default function WalletSigningSimulator() {
     return now.toTimeString().split(' ')[0];
   };
 
-  const addLog = (text: string, level: 'info' | 'warn' | 'success' | 'debug' = 'info') => {
+  const addLog = useCallback((text: string, level: 'info' | 'warn' | 'success' | 'debug' = 'info') => {
     setLogs(prev => [...prev, { timestamp: getFormattedTime(), level, text }]);
-  };
+  }, []);
 
   useEffect(() => {
     trackSimulatorUsage("signing");
@@ -116,7 +116,7 @@ export default function WalletSigningSimulator() {
     setSignature(sig);
     setStep("signed");
     addLog(`SIGN_SUCCESS: signature parameters derived. v=${sig.v}`, 'success');
-  }, [message, privateKey, trackSimulatorUsage]);
+  }, [addLog, message, privateKey, trackSimulatorUsage]);
 
   const runVerify = useCallback(async () => {
     if (!signature) return;
@@ -129,7 +129,7 @@ export default function WalletSigningSimulator() {
     setStep("verified");
     addLog(`RECOVER_COMPLETE: public key address resolved -> ${signerAddress}`, 'success');
     addLog(`CONSENSUS_VERIFY: reconstructed address matches signer address. integrity validated`, 'success');
-  }, [signature, signerAddress, trackSimulatorUsage]);
+  }, [addLog, signature, signerAddress, trackSimulatorUsage]);
 
   const reset = () => {
     setStep("idle");
