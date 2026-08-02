@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import SearchModal from "./SearchModal";
 import { Menu, X, ArrowRight, LogIn, LogOut, Loader2, Sun, Moon, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useProgress } from "@/app/context/ProgressContext";
 
 export default function Nav() {
   const pathname = usePathname();
