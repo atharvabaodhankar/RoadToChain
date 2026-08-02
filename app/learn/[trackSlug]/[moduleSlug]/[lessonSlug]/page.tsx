@@ -48,6 +48,8 @@ import RPCPhoneLineDiagram from "@/components/diagrams/RPCPhoneLineDiagram";
 import GasCostVisualizer from "@/components/diagrams/GasCostVisualizer";
 import React from "react";
 
+import LessonNavigationShortcuts from "@/components/layout/LessonNavigationShortcuts";
+
 interface Props {
   params: Promise<{
     trackSlug: string;
@@ -389,10 +391,14 @@ export default async function LessonPage({ params }: Props) {
   const prevLesson = currentIndex > 0 ? allTrackLessons[currentIndex - 1] : null;
   const nextLesson = currentIndex < allTrackLessons.length - 1 ? allTrackLessons[currentIndex + 1] : null;
 
+  const prevUrl = prevLesson ? `/learn/${prevLesson.trackSlug}/${prevLesson.moduleSlug}/${prevLesson.lessonSlug}` : null;
+  const nextUrl = nextLesson ? `/learn/${nextLesson.trackSlug}/${nextLesson.moduleSlug}/${nextLesson.lessonSlug}` : null;
+
   return (
     <div className="min-h-screen bg-bg text-text selection:bg-accent/20">
       <JsonLd schema={schemas} />
       <ReadingProgressBar />
+      <LessonNavigationShortcuts prevUrl={prevUrl} nextUrl={nextUrl} />
       
       <LessonSidebarLayout
         sidebarContent={
