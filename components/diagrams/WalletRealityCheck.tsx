@@ -1,14 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Wallet, Key, Check, X, ShieldAlert, ShieldCheck } from "lucide-react";
 
 type Scene = "panic" | "restore" | "reveal";
-
-const SCENES: { id: Scene; label: string; icon: string }[] = [
-  { id: "panic", label: "MetaMask Deleted", icon: "✗" },
-  { id: "restore", label: "Seed Phrase Entered", icon: "⌨" },
-  { id: "reveal", label: "Funds Return", icon: "✓" },
-];
 
 export default function WalletRealityCheck() {
   const [scene, setScene] = useState<Scene>("panic");
@@ -24,20 +19,25 @@ export default function WalletRealityCheck() {
 
       {/* Scene tabs */}
       <div className="flex border-b" style={{ borderColor: "var(--dg-border)" }}>
-        {SCENES.map((s) => {
+        {[
+          { id: "panic" as Scene, label: "MetaMask Deleted", Icon: X },
+          { id: "restore" as Scene, label: "Seed Phrase Entered", Icon: Key },
+          { id: "reveal" as Scene, label: "Funds Return", Icon: Check },
+        ].map((s) => {
           const isActive = scene === s.id;
           const color = s.id === "panic" ? "var(--dg-danger)" : s.id === "restore" ? "var(--dg-warning)" : "var(--dg-success)";
+          const IconComp = s.Icon;
           return (
             <button
               key={s.id}
               onClick={() => setScene(s.id)}
-              className="flex-1 flex flex-col items-center gap-0.5 py-3 transition-all border-b-2 font-mono"
+              className="flex-1 flex flex-col items-center gap-1 py-3 transition-all border-b-2 font-mono"
               style={{
                 borderBottomColor: isActive ? color : "transparent",
                 background: isActive ? `color-mix(in srgb, ${color} 5%, transparent)` : "transparent",
               }}
             >
-              <span className="text-sm" style={{ color: isActive ? color : "var(--dg-text-faint)" }}>{s.icon}</span>
+              <IconComp className="h-4 w-4" style={{ color: isActive ? color : "var(--dg-text-faint)" }} />
               <span className="text-[9px] uppercase tracking-wider" style={{ color: isActive ? color : "var(--dg-text-faint)" }}>{s.label}</span>
             </button>
           );
@@ -49,13 +49,13 @@ export default function WalletRealityCheck() {
         {scene === "panic" && (
           <div className="flex flex-col items-center gap-4">
             <div className="rounded-xl border-2 border-dashed w-32 h-24 flex flex-col items-center justify-center" style={{ borderColor: "var(--dg-danger)", background: "rgba(220,38,38,0.04)" }}>
-              <span className="text-2xl opacity-30">⬛</span>
-              <span className="font-mono text-[9px] mt-1" style={{ color: "var(--dg-danger)" }}>MetaMask</span>
+              <Wallet className="h-7 w-7 opacity-40 text-red-500" />
+              <span className="font-mono text-[9px] mt-1.5" style={{ color: "var(--dg-danger)" }}>MetaMask</span>
               <span className="font-mono text-[8px]" style={{ color: "var(--dg-text-faint)" }}>deleted</span>
             </div>
             <div className="max-w-xs text-center">
-              <p className="font-mono text-[11px] leading-relaxed" style={{ color: "var(--dg-danger)" }}>
-                ❌ &ldquo;My ETH is gone!&rdquo;
+              <p className="font-mono text-[11px] leading-relaxed flex items-center justify-center gap-1.5" style={{ color: "var(--dg-danger)" }}>
+                <ShieldAlert className="h-3.5 w-3.5" /> &ldquo;My ETH is gone!&rdquo;
               </p>
               <p className="text-[11px] leading-relaxed mt-2" style={{ color: "var(--dg-text-dim)" }}>
                 Most beginners think deleting MetaMask deletes their funds. This is wrong. MetaMask is just a key manager. Your coins were never inside it.
@@ -85,12 +85,12 @@ export default function WalletRealityCheck() {
         {scene === "reveal" && (
           <div className="flex flex-col items-center gap-4">
             <div className="rounded-xl border-2 w-32 h-24 flex flex-col items-center justify-center" style={{ borderColor: "var(--dg-success)", background: "rgba(22,163,74,0.06)" }}>
-              <span className="text-2xl">⬛</span>
-              <span className="font-mono text-[9px] mt-1" style={{ color: "var(--dg-success)" }}>MetaMask</span>
-              <span className="font-mono text-[8px]" style={{ color: "var(--dg-success)" }}>restored ✓</span>
+              <Wallet className="h-7 w-7 text-emerald-500" />
+              <span className="font-mono text-[9px] mt-1.5" style={{ color: "var(--dg-success)" }}>MetaMask</span>
+              <span className="font-mono text-[8px]" style={{ color: "var(--dg-success)" }}>restored</span>
             </div>
-            <p className="font-mono text-[11px] text-center" style={{ color: "var(--dg-success)" }}>
-              ✓ Same balance. Nothing moved.
+            <p className="font-mono text-[11px] text-center flex items-center justify-center gap-1.5" style={{ color: "var(--dg-success)" }}>
+              <ShieldCheck className="h-3.5 w-3.5" /> Same balance. Nothing moved.
             </p>
           </div>
         )}
