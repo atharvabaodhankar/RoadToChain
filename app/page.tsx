@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Star, AlertTriangle } from "lucide-react";
+import { ArrowRight, Star, AlertTriangle, XCircle, CheckCircle } from "lucide-react";
 import { tracks } from "@/lib/curriculum";
 import HeroSection from "@/components/hero/HeroSection";
 import WhyExistsSection from "@/components/why-exists/WhyExistsSection";
@@ -132,10 +132,7 @@ export default function HomePage() {
             whileInView={fadeUp.animate}
             initial={fadeUp.initial}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-              {"// how every lesson works"}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
               We learn by breaking things, not reading definitions
             </h2>
             <p className="mt-2 text-sm text-muted max-w-lg">
@@ -179,10 +176,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={fadeUp.transition}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-              {"// curriculum"}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
               8 tracks. Built from real shipped projects. Zero hype.
             </h2>
           </motion.div>
@@ -201,7 +195,7 @@ export default function HomePage() {
                 >
                   {/* Accent Bar */}
                   <div
-                    className="absolute top-5 bottom-5 left-0 w-[3px] rounded-r"
+                    className="absolute top-5 bottom-5 left-0 w-[1px]"
                     style={{ backgroundColor: track.color }}
                   />
 
@@ -264,10 +258,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={fadeUp.transition}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-              {"// real code, real context"}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
               We don&apos;t teach syntax templates. We build systems.
             </h2>
           </motion.div>
@@ -296,7 +287,7 @@ export default function HomePage() {
               {/* BAD Pattern */}
               <div className="p-4">
                 <div className="mb-3 flex items-center gap-1.5">
-                  <span className="text-red-400 text-sm">❌</span>
+                  <XCircle className="h-4 w-4 text-red-400 shrink-0" />
                   <span className="font-mono text-xs text-red-400 font-semibold">Traditional MetaMask Pattern</span>
                 </div>
                 <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed text-[#d4d4d8]">
@@ -323,8 +314,8 @@ await contract
               {/* GOOD Pattern */}
               <div className="p-4">
                 <div className="mb-3 flex items-center gap-1.5">
-                  <span className="text-green-400 text-sm">✅</span>
-                  <span className="font-mono text-xs text-green-400 font-semibold">Modern ERC-4337 + Privy Pattern</span>
+                  <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="font-mono text-xs text-emerald-400 font-semibold">Modern ERC-4337 + Privy Pattern</span>
                 </div>
                 <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed text-[#d4d4d8]">
                   <code>{`// User logs in with Google — that's it.
@@ -362,10 +353,7 @@ const userOp = await smartAccount
             viewport={{ once: true }}
             transition={fadeUp.transition}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-              {"// mistakes i made"}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
               The things nobody tells you
             </h2>
             <p className="mt-2 text-sm text-muted">
@@ -381,8 +369,8 @@ const userOp = await smartAccount
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07 }}
-                className="relative rounded-xl border border-border bg-bg2 p-5 transition-colors hover:bg-bg3"
-                style={{ borderLeft: "3px solid #f97316" }}
+                className="relative rounded-xl border border-border bg-bg2 p-5 transition-colors hover:bg-bg3 border-l"
+                style={{ borderLeftColor: "#f97316" }}
               >
                 <div className="flex items-start gap-2 mb-2">
                   <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
@@ -420,10 +408,7 @@ const userOp = await smartAccount
             viewport={{ once: true }}
             transition={fadeUp.transition}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-              {"// the journey"}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
               Learn → Build → Deploy
             </h2>
           </motion.div>
@@ -462,10 +447,7 @@ const userOp = await smartAccount
             viewport={{ once: true }}
             transition={fadeUp.transition}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-dim">
-              {"// tech stack"}
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.02em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
               A realistic stack. No useless tech.
             </h2>
           </motion.div>
