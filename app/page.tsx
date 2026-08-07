@@ -122,24 +122,24 @@ export default function HomePage() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <HeroSection />
 
-      {/* ── Dynamic Text Ribbon ─────────────────────────────────── */}
-      <div className="relative py-0 overflow-hidden bg-transparent select-none">
+      {/* ── Dynamic Text Ribbon (Hidden on Mobile) ───────────────── */}
+      <div className="hidden md:block relative py-0 overflow-hidden bg-transparent select-none">
         <TextLoop
           text="SOLIDITY ✦ SMART CONTRACTS ✦ EVM MEMORY ✦ ACCOUNT ABSTRACTION ✦ ZERO KNOWLEDGE ✦ PROOF OF STAKE ✦ GAS OPTIMIZATION ✦ WEB3 ARCHITECTURE"
           shape="wave"
-          speed={85}
+          speed={80}
           direction="forward"
           separator="✦"
-          curviness={22}
-          fontSize={16}
+          curviness={28}
+          fontSize={18}
           fontWeight={800}
           letterSpacing={3}
           uppercase
           color="#ffffff"
           ribbon
           ribbonColor="var(--accent)"
-          ribbonWidth={42}
-          viewBoxHeight={80}
+          ribbonWidth={48}
+          viewBoxHeight={90}
           pauseOnHover
         />
       </div>

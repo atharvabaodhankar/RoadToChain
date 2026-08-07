@@ -8,10 +8,12 @@
   display: block;
   width: 100%;
   height: auto;
+  min-height: 55px;
 }
 
 .text-loop-text {
   user-select: none;
+  font-family: var(--font-geist-mono), monospace;
 }
 
 .text-loop-measure {

@@ -109,9 +109,9 @@ const TextLoop: React.FC<TextLoopProps> = ({
   }, [text, separator, uppercase]);
 
   const initialReps = useMemo(() => {
-    const approxCharWidth = fontSize * 0.7;
+    const approxCharWidth = fontSize * 0.6;
     const approxUnitWidth = unit.length * approxCharWidth;
-    return approxUnitWidth > 0 ? Math.max(1, Math.ceil(1600 / approxUnitWidth) + 1) : 2;
+    return approxUnitWidth > 0 ? Math.max(1, Math.round(1800 / approxUnitWidth)) : 2;
   }, [unit, fontSize]);
 
   const [metrics, setMetrics] = useState<{ length: number; reps: number }>({ length: 0, reps: initialReps });
@@ -140,7 +140,7 @@ const TextLoop: React.FC<TextLoopProps> = ({
       }
       if (!length) return;
 
-      const reps = unitWidth > 0 ? Math.max(1, Math.ceil(length / unitWidth) + 1) : initialReps;
+      const reps = unitWidth > 0 ? Math.max(1, Math.round(length / unitWidth)) : initialReps;
       setMetrics((prev) => (prev.length === length && prev.reps === reps ? prev : { length, reps }));
     };
 
@@ -200,6 +200,7 @@ const TextLoop: React.FC<TextLoopProps> = ({
   }, [metrics, speed, direction, pauseOnHover]);
 
   const loopText = unit.repeat(metrics.reps);
+  const fitLength = metrics.length || undefined;
 
   return (
     <div ref={rootRef} className={`text-loop ${className}`.trim()} style={style} suppressHydrationWarning>
@@ -226,13 +227,27 @@ const TextLoop: React.FC<TextLoopProps> = ({
         </text>
 
         <text className="text-loop-text" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
-          <textPath ref={headRef} href={`#${pathId}`} startOffset={0} suppressHydrationWarning>
+          <textPath
+            ref={headRef}
+            href={`#${pathId}`}
+            startOffset={0}
+            textLength={fitLength}
+            lengthAdjust="spacing"
+            suppressHydrationWarning
+          >
             {loopText}
           </textPath>
         </text>
 
         <text className="text-loop-text" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
-          <textPath ref={tailRef} href={`#${pathId}`} startOffset={0} suppressHydrationWarning>
+          <textPath
+            ref={tailRef}
+            href={`#${pathId}`}
+            startOffset={0}
+            textLength={fitLength}
+            lengthAdjust="spacing"
+            suppressHydrationWarning
+          >
             {loopText}
           </textPath>
         </text>

@@ -224,8 +224,8 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Column (Confusion Archive Board) */}
-        <div className="lg:col-span-6 relative w-full h-[320px] sm:h-[360px] flex justify-center lg:justify-end items-end hero-reveal hero-delay-3 overflow-visible">
+        {/* Right Column (Confusion Archive Board - Hidden on Mobile/Tablet) */}
+        <div className="hidden lg:flex lg:col-span-6 relative w-full h-[320px] sm:h-[360px] justify-end items-end hero-reveal hero-delay-3 overflow-visible">
           <CardSwap
             width={460}
             height={195}
