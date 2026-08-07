@@ -178,8 +178,8 @@ export default function Diagram({ type, caption }: DiagramProps) {
             <rect width="100%" height="100%" fill="#09090b" />
             
             {/* Headers */}
-            <text x="212" y="45" textAnchor="middle" fill="#ef4444" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">❌ TRADITIONAL EOA (METAMASK)</text>
-            <text x="637" y="45" textAnchor="middle" fill="#22c55e" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">✅ SMART ACCOUNT (ERC-4337)</text>
+            <text x="212" y="45" textAnchor="middle" fill="#ef4444" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">TRADITIONAL EOA (METAMASK)</text>
+            <text x="637" y="45" textAnchor="middle" fill="#22c55e" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">SMART ACCOUNT (ERC-4337)</text>
 
             <line x1="425" y1="20" x2="425" y2="330" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
@@ -217,8 +217,8 @@ export default function Diagram({ type, caption }: DiagramProps) {
             <rect width="100%" height="100%" fill="#09090b" />
             
             {/* Header Columns */}
-            <text x="212" y="45" textAnchor="middle" fill="#ef4444" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">❌ SHA-256 HASH CIRCUIT</text>
-            <text x="637" y="45" textAnchor="middle" fill="#ec4899" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">⚡ POSEIDON HASH CIRCUIT</text>
+            <text x="212" y="45" textAnchor="middle" fill="#ef4444" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">SHA-256 HASH CIRCUIT</text>
+            <text x="637" y="45" textAnchor="middle" fill="#ec4899" fontFamily="var(--font-geist-mono)" fontSize="12" fontWeight="bold">POSEIDON HASH CIRCUIT</text>
 
             <line x1="425" y1="20" x2="425" y2="330" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
@@ -315,7 +315,7 @@ export default function Diagram({ type, caption }: DiagramProps) {
             {/* Step 4: Signature output */}
             <g className="diagram-cascade-4">
               <rect x="605" y="55" width="130" height="110" rx="8" fill="#111113" stroke="#22c55e" strokeWidth="1" />
-              <text x="670" y="82" textAnchor="middle" fill="#22c55e" fontFamily="var(--font-geist-sans)" fontSize="12" fontWeight="bold">✅ Signature</text>
+              <text x="670" y="82" textAnchor="middle" fill="#22c55e" fontFamily="var(--font-geist-sans)" fontSize="12" fontWeight="bold">Signature</text>
               <text x="670" y="105" textAnchor="middle" fill="#fafafa" fontFamily="var(--font-geist-mono)" fontSize="10">{"{ r, s, v }"}</text>
               <line x1="625" y1="115" x2="715" y2="115" stroke="rgba(255,255,255,0.08)" />
               <text x="670" y="135" textAnchor="middle" fill="#a1a1aa" fontFamily="var(--font-geist-mono)" fontSize="9">65 bytes total</text>
