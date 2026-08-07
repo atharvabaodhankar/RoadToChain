@@ -217,9 +217,6 @@ export default function AutopsiesPage() {
           
           {/* Left Column Tabs */}
           <div className="lg:col-span-4 space-y-2">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-dim block mb-3 px-2">
-              {"// CASE STUDIES"}
-            </span>
             <div className="flex flex-row lg:flex-col overflow-x-auto gap-2 pb-2 lg:pb-0">
               {autopsies.map((a) => {
                 const isActive = activeTab === a.id;
