@@ -408,36 +408,12 @@ export default function CurriculumPage({ tracks }: CurriculumPageProps) {
               {/* Central Column: Labeled details, descriptions, Accordions */}
               <div className="max-w-3xl w-full space-y-6">
                 
-                {/* Track Eyebrow */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-dim">
-                    {"// TRACK " + track.number}
-                  </span>
-                  
-                  <span
-                    className="rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold uppercase border"
-                    style={{
-                      color: trackColor,
-                      backgroundColor: `${trackColor}10`,
-                      borderColor: `${trackColor}30`,
-                    }}
-                  >
-                    {track.difficulty}
-                  </span>
-                  
-                  {track.isSignature && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-accent/20 px-2 py-0.5 font-mono text-[9px] font-semibold text-accent border border-accent/30 animate-pulse-dot">
-                      <Star className="h-2.5 w-2.5 fill-accent text-accent" /> Signature
-                    </span>
-                  )}
-                </div>
-
                 {/* Track Name */}
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-text relative">
                   {track.name}
                   {/* Visual accent bar */}
                   <span 
-                    className="absolute -left-4 top-1 bottom-1 w-[3px] rounded-full transition-all duration-500"
+                    className="absolute -left-4 top-1 bottom-1 w-[1px] transition-all duration-500"
                     style={{ backgroundColor: trackColor }}
                   />
                 </h2>

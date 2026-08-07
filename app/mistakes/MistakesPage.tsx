@@ -293,10 +293,6 @@ export default function MistakesPage() {
       {/* Header */}
       <section className="relative overflow-hidden border-b border-border bg-bg2/40 px-4 py-16 sm:px-6 lg:px-8">
         <div className="relative mx-auto max-w-4xl">
-          <div className="font-mono text-[10px] text-dim uppercase tracking-wider mb-4">
-            {"// mistakes"}
-          </div>
-
           <h1 className="text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
             Mistakes Hub
           </h1>
