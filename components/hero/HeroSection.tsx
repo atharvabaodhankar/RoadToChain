@@ -217,15 +217,15 @@ export default function HeroSection() {
             pauseOnHover={true}
           >
             {CONFUSION_CARDS.map((card) => (
-              <Card key={card.id} className="p-5 text-left">
+              <Card key={card.id} className="p-5 text-left select-none">
                 {/* Card Header (Tab Area) */}
                 <div className="flex items-center justify-between h-5">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-[9px] font-bold text-accent/80 opacity-70 tracking-wider">
+                    <span className="font-mono text-[10px] font-bold text-accent/80 tracking-wider">
                       {card.id} {"//"} {card.shortLabel}
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1 font-mono text-[8px] font-bold tracking-wider text-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold tracking-wider text-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                     <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse-dot" />
                     SOLVED
                   </span>
@@ -233,24 +233,24 @@ export default function HeroSection() {
 
                 {/* Card Content Details */}
                 <div className="mt-3 border-t border-border/15 pt-3">
-                  <h4 className="font-semibold text-[13px] tracking-tight text-text leading-tight mb-2">
+                  <h4 className="font-semibold text-sm tracking-tight text-text leading-tight mb-2">
                     {card.question}
                   </h4>
 
                   <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-border/15">
                     <div>
-                      <div className="font-mono text-[8.5px] font-bold tracking-wider text-red-500/70 mb-1 uppercase">
+                      <div className="font-mono text-[10px] font-bold tracking-wider text-red-500/80 mb-1 uppercase">
                         Mistaken Assumption
                       </div>
-                      <p className="text-[11px] text-muted italic leading-normal">
+                      <p className="text-xs text-muted italic leading-normal">
                         &ldquo;{card.assumption}&rdquo;
                       </p>
                     </div>
                     <div>
-                      <div className="font-mono text-[8.5px] font-bold tracking-wider text-emerald-500/70 mb-1 uppercase">
+                      <div className="font-mono text-[10px] font-bold tracking-wider text-emerald-500/80 mb-1 uppercase">
                         Reality
                       </div>
-                      <p className="text-[11px] text-text leading-normal font-medium">
+                      <p className="text-xs text-text leading-normal font-medium">
                         {card.reality}
                       </p>
                     </div>
