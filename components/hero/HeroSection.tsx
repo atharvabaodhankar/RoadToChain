@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import PixelBlast from "./PixelBlast";
@@ -38,15 +39,15 @@ const CONFUSION_CARDS: ConfusionCard[] = [
     question: "Why does failed transaction cost money?",
     assumption: "It didn't work.",
     reality: "Validators still executed computation.",
-    concepts: ["Gas", "EVM Execution"],
+    concepts: ["Gas Limit", "EVM Exec"],
   },
   {
     id: "04",
-    shortLabel: "TESTNETS",
-    question: "Why fake ETH exists?",
-    assumption: "Real ETH should be enough.",
-    reality: "Testnets remove financial risk.",
-    concepts: ["Testnets", "Deployment"],
+    shortLabel: "UX FAIL",
+    question: "Why Web3 onboarding sucks?",
+    assumption: "12-word seed phrase is standard UX",
+    reality: "Embedded account abstraction.",
+    concepts: ["ERC-4337", "UX"],
   },
   {
     id: "05",
@@ -58,10 +59,28 @@ const CONFUSION_CARDS: ConfusionCard[] = [
   },
 ];
 
-
-
 // ─── Main HeroSection ─────────────────────────────────────────────────────────
 export default function HeroSection() {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    const updateTheme = () => {
+      const isDark = document.documentElement.classList.contains("dark") || 
+                     document.documentElement.getAttribute("data-theme") === "dark";
+      setTheme(isDark ? "dark" : "light");
+    };
+
+    updateTheme();
+
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ["class", "data-theme"] 
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       className="relative w-full flex items-center border-b px-6 sm:px-10 lg:px-16"
@@ -73,18 +92,18 @@ export default function HeroSection() {
       }}
     >
       {/* Interactive WebGL background */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-90 select-none">
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-95 select-none transition-opacity duration-300">
         <PixelBlast
           variant="circle"
-          pixelSize={4}
-          color="#8b5cf6"
+          pixelSize={5}
+          color={theme === "dark" ? "#a78bfa" : "#6d28d9"}
           patternScale={7}
-          patternDensity={0.95}
+          patternDensity={theme === "dark" ? 0.95 : 1.35}
           pixelSizeJitter={0.41}
           enableRipples={true}
           rippleSpeed={0.25}
           rippleThickness={0.1}
-          rippleIntensityScale={1.2}
+          rippleIntensityScale={theme === "dark" ? 1.2 : 1.8}
           liquid={true}
           liquidStrength={0.08}
           liquidRadius={1.0}
