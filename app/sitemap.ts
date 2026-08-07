@@ -5,7 +5,7 @@ import { getAllLessonPaths } from "@/lib/content";
 // Site launched date — used for content dating
 const NOW = new Date();
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://roadtochain.tech";
 
   const staticPages: MetadataRoute.Sitemap = [
