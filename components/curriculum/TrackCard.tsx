@@ -42,7 +42,7 @@ export default function TrackCard({ track, index }: TrackCardProps) {
     >
       {/* Accent Bar */}
       <div
-        className="absolute bottom-6 top-6 left-0 w-[3px] rounded-r"
+        className="absolute bottom-6 top-6 left-0 w-[1px]"
         style={{ backgroundColor: track.color }}
       />
 
