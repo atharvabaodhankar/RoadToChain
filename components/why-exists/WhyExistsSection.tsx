@@ -53,10 +53,6 @@ export default function WhyExistsSection() {
             variants={fadeUpVariant}
             className="space-y-6"
           >
-            <span className="font-mono text-[10px] tracking-wider text-accent uppercase font-semibold">
-              {"// Why this exists"}
-            </span>
-            
             <h2 className="font-serif font-light text-3xl sm:text-[38px] tracking-tight text-text leading-[1.15]">
               I built the resource I wish I had.
             </h2>
