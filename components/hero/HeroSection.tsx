@@ -83,12 +83,11 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative w-full flex items-center border-b px-6 sm:px-10 lg:px-16"
+      className="relative w-full flex items-center px-6 sm:px-10 lg:px-16"
       style={{
         minHeight: "88vh",
         paddingTop: "7rem",
-        paddingBottom: "5rem",
-        borderColor: "var(--border)",
+        paddingBottom: "4rem",
       }}
     >
       {/* Interactive WebGL background */}

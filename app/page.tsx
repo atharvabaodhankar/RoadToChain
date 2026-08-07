@@ -6,6 +6,7 @@ import { ArrowRight, Star, AlertTriangle, XCircle, CheckCircle } from "lucide-re
 import { tracks } from "@/lib/curriculum";
 import HeroSection from "@/components/hero/HeroSection";
 import WhyExistsSection from "@/components/why-exists/WhyExistsSection";
+import TextLoop from "@/components/ui/TextLoop";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -120,6 +121,28 @@ export default function HomePage() {
     <div className="min-h-screen bg-bg text-text">
       {/* ── Hero ────────────────────────────────────────────────── */}
       <HeroSection />
+
+      {/* ── Dynamic Text Ribbon ─────────────────────────────────── */}
+      <div className="relative py-0 overflow-hidden bg-transparent select-none">
+        <TextLoop
+          text="SOLIDITY ✦ SMART CONTRACTS ✦ EVM MEMORY ✦ ACCOUNT ABSTRACTION ✦ ZERO KNOWLEDGE ✦ PROOF OF STAKE ✦ GAS OPTIMIZATION ✦ WEB3 ARCHITECTURE"
+          shape="wave"
+          speed={85}
+          direction="forward"
+          separator="✦"
+          curviness={22}
+          fontSize={16}
+          fontWeight={800}
+          letterSpacing={3}
+          uppercase
+          color="#ffffff"
+          ribbon
+          ribbonColor="var(--accent)"
+          ribbonWidth={42}
+          viewBoxHeight={80}
+          pauseOnHover
+        />
+      </div>
 
       <WhyExistsSection />
 
