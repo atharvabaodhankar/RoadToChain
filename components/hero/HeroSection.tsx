@@ -178,7 +178,7 @@ export default function HeroSection() {
           >
             <Link
               href="/learn/track-0"
-              className="group relative overflow-hidden inline-flex items-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
+              className="group relative overflow-hidden inline-flex items-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
               style={{
                 backgroundColor: "var(--accent)",
                 boxShadow: "0 4px 20px color-mix(in srgb, var(--accent) 25%, transparent)",
@@ -189,13 +189,13 @@ export default function HeroSection() {
                 style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
               />
               <span className="relative flex items-center gap-2">
-                Begin Track 0 <ArrowRight className="h-4 w-4" />
+                Begin Track 0 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
 
             <Link
               href="/curriculum"
-              className="inline-flex items-center justify-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-bg3"
+              className="inline-flex items-center justify-center gap-2 rounded-lg px-7 py-3.5 font-mono text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-bg3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
               style={{
                 border: "1px solid var(--border2)",
                 color: "var(--text-secondary)",

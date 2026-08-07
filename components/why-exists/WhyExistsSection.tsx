@@ -89,7 +89,7 @@ export default function WhyExistsSection() {
             
             <Link
               href="/learn/track-0"
-              className="group inline-flex items-center gap-1 font-mono text-[13px] font-semibold text-accent hover:text-accent/80 transition-colors whitespace-nowrap"
+              className="group inline-flex items-center gap-1 font-mono text-[13px] font-semibold text-accent hover:text-accent/80 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg rounded"
             >
               Start Track 0
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />

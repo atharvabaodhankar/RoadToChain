@@ -498,9 +498,9 @@ const userOp = await smartAccount
           <div className="mt-8">
             <Link
               href="/learn/track-0"
-              className="inline-flex items-center gap-2 rounded-[8px] bg-accent px-6 py-3 font-mono text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent2 hover:shadow-accent/30"
+              className="inline-flex items-center gap-2 rounded-[8px] bg-accent px-6 py-3 font-mono text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent2 hover:shadow-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             >
-              Begin Track 0 <ArrowRight className="h-4 w-4" />
+              Begin Track 0 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </motion.div>
