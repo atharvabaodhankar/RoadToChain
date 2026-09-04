@@ -171,30 +171,68 @@ function MarkdownContent({
                       return (
                         <hr
                           key={lineIdx}
-                          className="my-2 border-zinc-200 dark:border-zinc-800"
+                          className="my-2.5 border-zinc-200 dark:border-zinc-800"
                         />
                       );
                     }
 
-                    const isH1 = /^#\s+/.test(trimmed);
-                    const isH2 = /^##\s+/.test(trimmed);
-                    const isH3 = /^###\s+/.test(trimmed);
-
-                    if (isH1 || isH2 || isH3) {
-                      const headingText = trimmed.replace(/^#+\s+/, "");
+                    // Blockquote: > text
+                    if (trimmed.startsWith(">")) {
+                      const quoteText = trimmed.replace(/^>\s*/, "");
                       return (
                         <div
                           key={lineIdx}
-                          className={`font-semibold text-zinc-900 dark:text-zinc-100 ${
-                            isH1
-                              ? "text-base pt-2.5 pb-1 font-bold"
-                              : isH2
-                              ? "text-sm pt-2 pb-0.5 font-bold"
-                              : "text-[13px] pt-1.5 font-semibold text-zinc-900 dark:text-zinc-200"
-                          }`}
+                          className="border-l-2 border-purple-500/60 pl-3 py-1 my-1 text-xs italic text-zinc-600 dark:text-zinc-400 bg-purple-500/5 rounded-r"
                         >
                           {renderInline(
-                            headingText,
+                            quoteText,
+                            onNavigate,
+                            `${secIdx}-${paraIdx}-${lineIdx}`
+                          )}
+                        </div>
+                      );
+                    }
+
+                    // Headings: # through ###### (including numbered headings like #### 1. Understand the Basics)
+                    const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+                    if (headingMatch) {
+                      const level = headingMatch[1].length;
+                      const rawHeadingText = headingMatch[2].trim();
+                      const numMatch = rawHeadingText.match(/^(\d+\.)\s*(.*)$/);
+
+                      const headingStyle =
+                        level === 1
+                          ? "text-base font-bold pt-3 pb-1 text-zinc-900 dark:text-zinc-100"
+                          : level === 2
+                          ? "text-sm font-bold pt-2.5 pb-1 text-zinc-900 dark:text-zinc-100"
+                          : level === 3
+                          ? "text-[13.5px] font-bold pt-2 pb-0.5 text-zinc-900 dark:text-zinc-100"
+                          : "text-[13px] font-bold pt-1.5 pb-0.5 text-zinc-800 dark:text-zinc-200";
+
+                      if (numMatch) {
+                        return (
+                          <div
+                            key={lineIdx}
+                            className={`flex items-baseline gap-1.5 ${headingStyle}`}
+                          >
+                            <span className="font-mono text-purple-600 dark:text-purple-400 font-bold shrink-0">
+                              {numMatch[1]}
+                            </span>
+                            <span className="flex-1">
+                              {renderInline(
+                                numMatch[2],
+                                onNavigate,
+                                `${secIdx}-${paraIdx}-${lineIdx}`
+                              )}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div key={lineIdx} className={headingStyle}>
+                          {renderInline(
+                            rawHeadingText,
                             onNavigate,
                             `${secIdx}-${paraIdx}-${lineIdx}`
                           )}
