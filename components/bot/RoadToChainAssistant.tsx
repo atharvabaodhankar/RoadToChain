@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
-  Sparkles,
   X,
   Loader2,
   BookOpen,
@@ -168,20 +167,87 @@ function MarkdownContent({
                 <div key={paraIdx} className="space-y-1.5">
                   {lines.map((line, lineIdx) => {
                     const trimmed = line.trim();
-                    if (!trimmed) return null;
+                    if (trimmed === "---" || trimmed === "***") {
+                      return (
+                        <hr
+                          key={lineIdx}
+                          className="my-2 border-zinc-200 dark:border-zinc-800"
+                        />
+                      );
+                    }
+
+                    const isH1 = /^#\s+/.test(trimmed);
+                    const isH2 = /^##\s+/.test(trimmed);
+                    const isH3 = /^###\s+/.test(trimmed);
+
+                    if (isH1 || isH2 || isH3) {
+                      const headingText = trimmed.replace(/^#+\s+/, "");
+                      return (
+                        <div
+                          key={lineIdx}
+                          className={`font-semibold text-zinc-900 dark:text-zinc-100 ${
+                            isH1
+                              ? "text-base pt-2.5 pb-1 font-bold"
+                              : isH2
+                              ? "text-sm pt-2 pb-0.5 font-bold"
+                              : "text-[13px] pt-1.5 font-semibold text-zinc-900 dark:text-zinc-200"
+                          }`}
+                        >
+                          {renderInline(
+                            headingText,
+                            onNavigate,
+                            `${secIdx}-${paraIdx}-${lineIdx}`
+                          )}
+                        </div>
+                      );
+                    }
 
                     const isBullet = /^[*-]\s+/.test(trimmed);
+                    if (isBullet) {
+                      const bulletText = trimmed.replace(/^[*-]\s+/, "");
+                      return (
+                        <div
+                          key={lineIdx}
+                          className="flex items-start gap-2 pl-1.5 py-0.5"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 mt-2 shrink-0" />
+                          <div className="flex-1 leading-relaxed">
+                            {renderInline(
+                              bulletText,
+                              onNavigate,
+                              `${secIdx}-${paraIdx}-${lineIdx}`
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+
                     const isNumbered = /^\d+\.\s+/.test(trimmed);
+                    if (isNumbered) {
+                      const match = trimmed.match(/^(\d+\.)\s+(.*)$/);
+                      if (match) {
+                        return (
+                          <div
+                            key={lineIdx}
+                            className="flex items-start gap-2 pl-1 py-0.5"
+                          >
+                            <span className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400 shrink-0 mt-0.5">
+                              {match[1]}
+                            </span>
+                            <div className="flex-1 leading-relaxed">
+                              {renderInline(
+                                match[2],
+                                onNavigate,
+                                `${secIdx}-${paraIdx}-${lineIdx}`
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
 
                     return (
-                      <div
-                        key={lineIdx}
-                        className={
-                          isBullet || isNumbered
-                            ? "pl-1 py-0.5"
-                            : ""
-                        }
-                      >
+                      <div key={lineIdx}>
                         {renderInline(
                           line,
                           onNavigate,
@@ -210,7 +276,6 @@ export default function RoadToChainAssistant() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const pathname = usePathname();
-  const router = useRouter();
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
