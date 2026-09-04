@@ -9,7 +9,7 @@ import WhyExistsSection from "@/components/why-exists/WhyExistsSection";
 import TextLoop from "@/components/ui/TextLoop";
 
 const fadeUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 1, y: 0 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.5, ease: "easeOut" as const },
 };
@@ -167,7 +167,7 @@ export default function HomePage() {
             {learningSteps.map((step, i) => (
               <motion.div
                 key={step.num}
-                initial={{ opacity: 0, x: -16 }}
+                initial={false}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07, ease: "easeOut" }}
@@ -209,7 +209,7 @@ export default function HomePage() {
               return (
                 <motion.div
                   key={track.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={false}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: i * 0.06, ease: "easeOut" }}
@@ -288,7 +288,7 @@ export default function HomePage() {
 
           <motion.div
             whileInView={{ opacity: 1, y: 0 }}
-            initial={{ opacity: 0, y: 24 }}
+            initial={false}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="dark mt-8 overflow-hidden rounded-xl border border-border bg-[#111113]"
@@ -388,7 +388,7 @@ const userOp = await smartAccount
             {topMistakes.map((m, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 16 }}
+                initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07 }}
@@ -440,7 +440,7 @@ const userOp = await smartAccount
             {pathNodes.map((node, i) => (
               <div key={node} className="flex items-center">
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={false}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.35, delay: i * 0.1 }}
@@ -479,7 +479,7 @@ const userOp = await smartAccount
             {stackItems.map((item, i) => (
               <motion.span
                 key={item.label}
-                initial={{ opacity: 0, y: 8 }}
+                initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: i * 0.04 }}
@@ -507,7 +507,7 @@ const userOp = await smartAccount
 
         <motion.div
           whileInView={{ opacity: 1, y: 0 }}
-          initial={{ opacity: 0, y: 24 }}
+          initial={false}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className="relative mx-auto max-w-2xl text-center"

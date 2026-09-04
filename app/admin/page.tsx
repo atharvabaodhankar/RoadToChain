@@ -14,9 +14,11 @@ import {
   Lock,
   Search,
   CheckCircle,
-  FileText
+  FileText,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
+import AiBotTelemetryView from "@/components/admin/AiBotTelemetryView";
 
 export default function AdminPage() {
   const { user, loading: authLoading, signInWithGoogle, logout } = useProgress();
@@ -27,7 +29,7 @@ export default function AdminPage() {
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [feedbackFilter, setFeedbackFilter] = useState<"all" | "up" | "down">("all");
-  const [activeTab, setActiveTab] = useState<"feedback" | "views" | "simulators">("feedback");
+  const [activeTab, setActiveTab] = useState<"feedback" | "views" | "simulators" | "ai">("feedback");
 
   const isAdmin = user?.email === "baodhankaratharva@gmail.com";
 
@@ -321,6 +323,17 @@ export default function AdminPage() {
           >
             Simulator Action Metrics ({sortedSimUsage.length})
           </button>
+          <button
+            onClick={() => setActiveTab("ai")}
+            className={`px-4 py-2 text-xs font-mono font-bold tracking-tight border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "ai"
+                ? "border-accent text-accent"
+                : "border-transparent text-dim hover:text-text"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>AI & Bedrock Costs</span>
+          </button>
         </div>
 
         {/* Dynamic Panels */}
@@ -494,6 +507,9 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+
+            {/* tab 4: AI Telemetry & Bedrock Costs */}
+            {activeTab === "ai" && <AiBotTelemetryView />}
           </div>
         )}
       </main>
