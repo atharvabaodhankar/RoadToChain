@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable */
 import { Effect, EffectComposer, EffectPass, RenderPass } from "postprocessing";
 import { useEffect, useRef } from "react";

@@ -13,10 +13,10 @@ export default function Nav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
-    const activeTheme = document.documentElement.getAttribute("data-theme") as "light" | "dark" || "light";
+    const activeTheme = (document.documentElement.getAttribute("data-theme") as "light" | "dark") || "dark";
     setTheme(activeTheme);
   }, []);
 
@@ -89,7 +89,6 @@ export default function Nav() {
                 fill
                 sizes="50px"
                 className="object-cover group-hover:scale-105 transition-transform duration-250 ease-out"
-                priority
               />
             </div>
             <span>RoadToChain</span>

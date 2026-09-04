@@ -225,13 +225,13 @@ export default function HeroSection() {
         </div>
 
         {/* Right Column (Confusion Archive Board - Hidden on Mobile/Tablet) */}
-        <div className="hidden lg:flex lg:col-span-6 relative w-full h-[320px] sm:h-[360px] justify-end items-end hero-reveal hero-delay-3 overflow-visible">
+        <div className="hidden lg:flex lg:col-span-6 relative w-full h-[360px] sm:h-[400px] justify-center lg:justify-end items-center hero-reveal hero-delay-3 overflow-visible">
           <CardSwap
             width={460}
             height={195}
             cardDistance={24}
             verticalDistance={30}
-            delay={5500}
+            delay={3500}
             pauseOnHover={true}
           >
             {CONFUSION_CARDS.map((card) => (
@@ -239,36 +239,36 @@ export default function HeroSection() {
                 {/* Card Header (Tab Area) */}
                 <div className="flex items-center justify-between h-5">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-[10px] font-bold text-accent/80 tracking-wider">
+                    <span className="font-mono text-[10px] font-bold text-accent dark:text-purple-400 tracking-wider">
                       {card.id} {"//"} {card.shortLabel}
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold tracking-wider text-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/20">
                     <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse-dot" />
                     SOLVED
                   </span>
                 </div>
 
                 {/* Card Content Details */}
-                <div className="mt-3 border-t border-border/15 pt-3">
-                  <h4 className="font-semibold text-sm tracking-tight text-text leading-tight mb-2">
+                <div className="mt-3 border-t border-zinc-200 dark:border-white/10 pt-3">
+                  <h4 className="font-semibold text-sm tracking-tight text-zinc-900 dark:text-zinc-100 leading-tight mb-2">
                     {card.question}
                   </h4>
 
-                  <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-border/15">
+                  <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-zinc-200 dark:border-white/10">
                     <div>
-                      <div className="font-mono text-[10px] font-bold tracking-wider text-red-500/80 mb-1 uppercase">
+                      <div className="font-mono text-[10px] font-bold tracking-wider text-rose-600 dark:text-rose-400 mb-1 uppercase">
                         Mistaken Assumption
                       </div>
-                      <p className="text-xs text-muted italic leading-normal">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 italic leading-normal">
                         &ldquo;{card.assumption}&rdquo;
                       </p>
                     </div>
                     <div>
-                      <div className="font-mono text-[10px] font-bold tracking-wider text-emerald-500/80 mb-1 uppercase">
+                      <div className="font-mono text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 mb-1 uppercase">
                         Reality
                       </div>
-                      <p className="text-xs text-text leading-normal font-medium">
+                      <p className="text-xs text-zinc-800 dark:text-zinc-200 leading-normal font-medium">
                         {card.reality}
                       </p>
                     </div>
