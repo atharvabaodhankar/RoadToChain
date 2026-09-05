@@ -118,12 +118,20 @@
   --code-text: #ededed;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
   font-size: 14.5px;
   line-height: 1.6;
   transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 /* Scrollbar styling */

@@ -1,14 +1,17 @@
 .text-loop {
   position: relative;
   width: 100%;
+  max-width: 100%;
   overflow: hidden;
 }
 
 .text-loop-svg {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
   min-height: 55px;
+  overflow: hidden;
 }
 
 .text-loop-text {

@@ -118,7 +118,7 @@ const pathNodes = ["Learn", "Build", "Break", "Debug", "Improve", "Deploy"];
 export default function HomePage() {
 
   return (
-    <div className="min-h-screen bg-bg text-text">
+    <div className="min-h-screen bg-bg text-text overflow-x-hidden">
       {/* ── Hero ────────────────────────────────────────────────── */}
       <HeroSection />
 
@@ -497,7 +497,7 @@ const userOp = await smartAccount
       </section>
 
       {/* ── CTA Footer Section ──────────────────────────────────────── */}
-      <section className="relative px-4 py-24 sm:px-6 lg:px-8">
+      <section className="relative px-4 py-24 sm:px-6 lg:px-8 overflow-hidden">
         {/* Glow line on top */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
 

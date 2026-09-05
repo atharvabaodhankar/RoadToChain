@@ -83,7 +83,7 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative w-full flex items-center px-6 sm:px-10 lg:px-16"
+      className="relative w-full flex items-center px-6 sm:px-10 lg:px-16 overflow-hidden"
       style={{
         minHeight: "88vh",
         paddingTop: "7rem",
@@ -225,12 +225,12 @@ export default function HeroSection() {
         </div>
 
         {/* Right Column (Confusion Archive Board - Hidden on Mobile/Tablet) */}
-        <div className="hidden lg:flex lg:col-span-6 relative w-full h-[360px] sm:h-[400px] justify-center lg:justify-end items-center hero-reveal hero-delay-3 overflow-visible">
+        <div className="hidden lg:flex lg:col-span-6 relative w-full h-[380px] justify-center lg:justify-end items-center hero-reveal hero-delay-3 pr-10 xl:pr-14">
           <CardSwap
-            width={460}
-            height={195}
-            cardDistance={24}
-            verticalDistance={30}
+            width={430}
+            height={190}
+            cardDistance={20}
+            verticalDistance={26}
             delay={3500}
             pauseOnHover={true}
           >
