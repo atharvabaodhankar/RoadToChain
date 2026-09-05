@@ -2,34 +2,30 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 
 /**
  * Cinematic Barba-style page transition.
  *
  * Flow:
- *  1. User clicks an internal link → we intercept, prevent default,
- *     and start the "enter" phase (curtain slides UP from bottom to center).
- *  2. Once curtain covers the viewport → we push the route and wait for
- *     the pathname to actually change. Screen is fully covered so user
- *     sees nothing.
- *  3. Pathname changes → "exit" phase (curtain slides UP out of viewport).
- *  4. Done → reset to idle.
- *
- * Key fixes over previous version:
- *  - Uses CSS transitions instead of spring for enter (spring onAnimationComplete is unreliable).
- *  - Explicit timing with setTimeout for the covered→exit transition.
- *  - Safety timeout to prevent permanent stuck state.
- *  - Proper Next.js Link interception (works with <Link> prefetching).
+ *  idle → mountEnter (curtain mounts off-screen at bottom)
+ *       → enter (curtain animates UP from bottom to cover viewport)
+ *       → covered (route changes under curtain)
+ *       → exit (curtain animates UP out through top)
+ *       → idle
  */
 
-type Phase = "idle" | "enter" | "covered" | "exit";
+type Phase =
+  | "idle"
+  | "mountEnter" // mounted at translateY(100%), waiting one frame
+  | "enter"      // animating to translateY(0%)
+  | "covered"    // holding at translateY(0%), route changing underneath
+  | "exit";      // animating to translateY(-100%)
 
-const ENTER_DURATION = 500; // ms for curtain to slide up to center
-const COVERED_DELAY = 200; // ms to wait while covered (let new page render)
-const EXIT_DURATION = 450; // ms for curtain to slide out
-const SAFETY_TIMEOUT = 4000; // ms max time before force-resetting
+const ENTER_MS = 550;    // curtain slides up to cover
+const HOLD_MS = 250;     // hold while new page renders
+const EXIT_MS = 450;     // curtain slides out through top
+const SAFETY_MS = 5000;  // hard reset if stuck
 
 export default function CinematicBarbaTransition() {
   const pathname = usePathname();
@@ -38,43 +34,29 @@ export default function CinematicBarbaTransition() {
   const [phase, setPhase] = useState<Phase>("idle");
   const targetHref = useRef<string | null>(null);
   const prevPathname = useRef(pathname);
-  const safetyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const safetyRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Clean up safety timer
   const clearSafety = useCallback(() => {
-    if (safetyTimer.current) {
-      clearTimeout(safetyTimer.current);
-      safetyTimer.current = null;
-    }
+    if (safetyRef.current) clearTimeout(safetyRef.current);
+    safetyRef.current = null;
   }, []);
 
-  // Force reset everything to idle
-  const forceReset = useCallback(() => {
+  const reset = useCallback(() => {
     clearSafety();
     setPhase("idle");
     targetHref.current = null;
   }, [clearSafety]);
 
-  // Start a safety timeout that force-resets if transition gets stuck
-  const startSafety = useCallback(() => {
-    clearSafety();
-    safetyTimer.current = setTimeout(() => {
-      console.warn("[Transition] Safety timeout – force resetting");
-      forceReset();
-    }, SAFETY_TIMEOUT);
-  }, [clearSafety, forceReset]);
-
-  // ─── Phase 1: Intercept clicks ──────────────────────────────────
+  // ─── 1. Click interceptor ──────────────────────────────────────
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      // Only left-click without modifiers
+    const handler = (e: MouseEvent) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
         return;
 
-      // Already transitioning – block
+      // Block clicks during transition
       if (phase !== "idle") {
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         return;
       }
 
@@ -84,110 +66,121 @@ export default function CinematicBarbaTransition() {
       const href = anchor.getAttribute("href");
       if (!href) return;
 
-      // Skip external, hash, download, blank-target links
       if (
         anchor.target === "_blank" ||
         anchor.hasAttribute("download") ||
         /^(https?:|mailto:|tel:|#)/.test(href)
-      ) {
+      )
         return;
-      }
 
-      // Build full URL to compare
       const target = new URL(href, window.location.origin);
       if (
         target.pathname === pathname &&
         target.search === window.location.search
-      ) {
-        return; // same page
-      }
+      )
+        return;
 
-      // ── Start transition ──
       e.preventDefault();
-      e.stopPropagation();
       e.stopImmediatePropagation();
 
       targetHref.current = target.pathname + target.search;
       prevPathname.current = pathname;
-      setPhase("enter");
-      startSafety();
+
+      // Mount curtain off-screen, then trigger animation next frame
+      setPhase("mountEnter");
+
+      // Safety: force-reset if anything goes wrong
+      clearSafety();
+      safetyRef.current = setTimeout(reset, SAFETY_MS);
     };
 
-    // Capture phase so we fire before Next.js Link handlers
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, [pathname, phase, startSafety]);
+    document.addEventListener("click", handler, true);
+    return () => document.removeEventListener("click", handler, true);
+  }, [pathname, phase, clearSafety, reset]);
 
-  // ─── Phase 2: Enter complete → push route ───────────────────────
+  // ─── 2. mountEnter → enter (one-frame delay for CSS to pick up initial position)
+  useEffect(() => {
+    if (phase !== "mountEnter") return;
+
+    // Double rAF guarantees the browser has painted the initial position
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setPhase("enter");
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [phase]);
+
+  // ─── 3. enter finishes → covered → push route ─────────────────
   useEffect(() => {
     if (phase !== "enter") return;
 
     const timer = setTimeout(() => {
       setPhase("covered");
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       if (targetHref.current) {
         router.push(targetHref.current);
       }
-    }, ENTER_DURATION);
+    }, ENTER_MS);
 
     return () => clearTimeout(timer);
   }, [phase, router]);
 
-  // ─── Phase 3: Wait for pathname change → exit ───────────────────
+  // ─── 4. covered → wait for pathname change → exit ──────────────
   useEffect(() => {
     if (phase !== "covered") return;
 
-    // Pathname actually changed – start exit
     if (pathname !== prevPathname.current) {
-      const timer = setTimeout(() => {
-        setPhase("exit");
-      }, COVERED_DELAY);
+      // New page is rendered – hold briefly then exit
+      const timer = setTimeout(() => setPhase("exit"), HOLD_MS);
       return () => clearTimeout(timer);
     }
-
-    // If pathname hasn't changed yet, we'll catch it on next render
-    // (this effect re-runs when pathname changes because it's a dependency)
+    // If pathname hasn't changed yet, this effect re-runs when it does
   }, [phase, pathname]);
 
-  // ─── Phase 4: Exit complete → idle ──────────────────────────────
+  // ─── 5. exit finishes → idle ───────────────────────────────────
   useEffect(() => {
     if (phase !== "exit") return;
 
     const timer = setTimeout(() => {
-      forceReset();
-    }, EXIT_DURATION);
+      reset();
+    }, EXIT_MS);
 
     return () => clearTimeout(timer);
-  }, [phase, forceReset]);
+  }, [phase, reset]);
 
-  // ─── Don't render anything when idle ────────────────────────────
+  // ─── Don't render when idle ────────────────────────────────────
   if (phase === "idle") return null;
 
-  // ─── Compute curtain position ───────────────────────────────────
-  const getTransform = (): string => {
-    switch (phase) {
-      case "enter":
-        return "translateY(0%)"; // slide to center
-      case "covered":
-        return "translateY(0%)"; // stay covering
-      case "exit":
-        return "translateY(-100%)"; // slide out through top
-      default:
-        return "translateY(100%)"; // off-screen below
-    }
-  };
+  // ─── Compute inline styles ─────────────────────────────────────
+  let transform: string;
+  let transition: string;
 
-  const getTransition = (): string => {
-    switch (phase) {
-      case "enter":
-        return `transform ${ENTER_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`;
-      case "exit":
-        return `transform ${EXIT_DURATION}ms cubic-bezier(0.76, 0, 0.24, 1)`;
-      default:
-        return "none";
-    }
-  };
+  switch (phase) {
+    case "mountEnter":
+      // Start position: fully below viewport, NO transition
+      transform = "translateY(100%)";
+      transition = "none";
+      break;
+    case "enter":
+      // Animate from 100% → 0% (bottom to center)
+      transform = "translateY(0%)";
+      transition = `transform ${ENTER_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+      break;
+    case "covered":
+      // Stay covering the screen
+      transform = "translateY(0%)";
+      transition = "none";
+      break;
+    case "exit":
+      // Animate from 0% → -100% (center to above viewport)
+      transform = "translateY(-100%)";
+      transition = `transform ${EXIT_MS}ms cubic-bezier(0.76, 0, 0.24, 1)`;
+      break;
+    default:
+      transform = "translateY(100%)";
+      transition = "none";
+  }
 
   return (
     <div
@@ -195,9 +188,10 @@ export default function CinematicBarbaTransition() {
         position: "fixed",
         inset: 0,
         zIndex: 99999,
-        pointerEvents: phase === "idle" ? "none" : "all",
-        transform: phase === "idle" ? "translateY(100%)" : getTransform(),
-        transition: getTransition(),
+        pointerEvents: "all",
+        transform,
+        transition,
+        willChange: "transform",
       }}
       className="flex flex-col items-center justify-center bg-[#fafafa] dark:bg-[#08080b] overflow-hidden"
     >
@@ -205,21 +199,32 @@ export default function CinematicBarbaTransition() {
       <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-purple-600 dark:via-purple-400 to-transparent shadow-[0_0_24px_rgba(124,58,237,0.6)] dark:shadow-[0_0_24px_#a855f7]" />
 
       {/* Ambient glow */}
-      <motion.div
-        key={`glow-${phase}`}
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 0.85, scale: 1.2 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+      <div
         className="absolute w-[360px] h-[360px] rounded-full bg-purple-500/15 dark:bg-purple-600/30 blur-[110px] pointer-events-none"
+        style={{
+          opacity: phase === "mountEnter" ? 0 : 0.85,
+          transform: phase === "mountEnter" ? "scale(0.6)" : "scale(1.2)",
+          transition:
+            phase !== "mountEnter"
+              ? "opacity 0.4s ease-out, transform 0.4s ease-out"
+              : "none",
+        }}
       />
 
       {/* Logo + brand */}
-      <motion.div
-        key={`logo-${phase}`}
-        initial={{ opacity: 0, scale: 0.7, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+      <div
         className="relative flex flex-col items-center gap-4 z-10 select-none"
+        style={{
+          opacity: phase === "mountEnter" ? 0 : 1,
+          transform:
+            phase === "mountEnter"
+              ? "scale(0.7) translateY(20px)"
+              : "scale(1) translateY(0px)",
+          transition:
+            phase !== "mountEnter"
+              ? "opacity 0.35s ease-out, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)"
+              : "none",
+        }}
       >
         <div className="relative w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_12px_28px_rgba(124,58,237,0.3)] dark:drop-shadow-[0_0_40px_rgba(168,85,247,0.7)]">
           <Image
@@ -237,7 +242,7 @@ export default function CinematicBarbaTransition() {
             ROADTOCHAIN
           </span>
         </div>
-      </motion.div>
+      </div>
 
       {/* Bottom energy line */}
       <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-purple-600 dark:via-purple-400 to-transparent shadow-[0_0_24px_rgba(124,58,237,0.6)] dark:shadow-[0_0_24px_#a855f7]" />
