@@ -62,6 +62,8 @@ const CONFUSION_CARDS: ConfusionCard[] = [
 // ─── Main HeroSection ─────────────────────────────────────────────────────────
 export default function HeroSection() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [isLg, setIsLg] = useState(false);
 
   useEffect(() => {
     const updateTheme = () => {
@@ -72,13 +74,23 @@ export default function HeroSection() {
 
     updateTheme();
 
+    const checkScreen = () => {
+      setIsDesktop(window.innerWidth >= 768);
+      setIsLg(window.innerWidth >= 1024);
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+
     const observer = new MutationObserver(updateTheme);
     observer.observe(document.documentElement, { 
       attributes: true, 
       attributeFilter: ["class", "data-theme"] 
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", checkScreen);
+    };
   }, []);
 
   return (
@@ -90,26 +102,39 @@ export default function HeroSection() {
         paddingBottom: "4rem",
       }}
     >
-      {/* Interactive WebGL background */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-95 select-none transition-opacity duration-300">
-        <PixelBlast
-          variant="circle"
-          pixelSize={5}
-          color={theme === "dark" ? "#a78bfa" : "#6d28d9"}
-          patternScale={7}
-          patternDensity={theme === "dark" ? 0.95 : 1.35}
-          pixelSizeJitter={0.41}
-          enableRipples={true}
-          rippleSpeed={0.25}
-          rippleThickness={0.1}
-          rippleIntensityScale={theme === "dark" ? 1.2 : 1.8}
-          liquid={true}
-          liquidStrength={0.08}
-          liquidRadius={1.0}
-          speed={0.9}
-          edgeFade={0.65}
+      {/* WebGL background on desktop; lightweight pure CSS radial glow on mobile */}
+      {isDesktop ? (
+        <div className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-95 select-none transition-opacity duration-300">
+          <PixelBlast
+            variant="circle"
+            pixelSize={5}
+            color={theme === "dark" ? "#a78bfa" : "#6d28d9"}
+            patternScale={7}
+            patternDensity={theme === "dark" ? 0.95 : 1.35}
+            pixelSizeJitter={0.41}
+            enableRipples={true}
+            rippleSpeed={0.25}
+            rippleThickness={0.1}
+            rippleIntensityScale={theme === "dark" ? 1.2 : 1.8}
+            liquid={true}
+            liquidStrength={0.08}
+            liquidRadius={1.0}
+            speed={0.9}
+            edgeFade={0.65}
+          />
+        </div>
+      ) : (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full pointer-events-none z-0 select-none opacity-80"
+          style={{
+            background:
+              theme === "dark"
+                ? "radial-gradient(circle at 50% 28%, rgba(167, 139, 250, 0.14) 0%, transparent 65%)"
+                : "radial-gradient(circle at 50% 28%, rgba(109, 40, 217, 0.08) 0%, transparent 65%)",
+          }}
         />
-      </div>
+      )}
 
       {/* Soft accent glow */}
       <div
@@ -224,60 +249,62 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Column (Confusion Archive Board - Hidden on Mobile/Tablet) */}
-        <div className="hidden lg:flex lg:col-span-6 relative w-full h-[380px] justify-center lg:justify-end items-center hero-reveal hero-delay-3 pr-10 xl:pr-14">
-          <CardSwap
-            width={430}
-            height={190}
-            cardDistance={20}
-            verticalDistance={26}
-            delay={3500}
-            pauseOnHover={true}
-          >
-            {CONFUSION_CARDS.map((card) => (
-              <Card key={card.id} className="p-5 text-left select-none">
-                {/* Card Header (Tab Area) */}
-                <div className="flex items-center justify-between h-5">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-[10px] font-bold text-accent dark:text-purple-400 tracking-wider">
-                      {card.id} {"//"} {card.shortLabel}
+        {/* Right Column (Confusion Archive Board - Only mounted on desktop >=1024px) */}
+        {isLg && (
+          <div className="hidden lg:flex lg:col-span-6 relative w-full h-[380px] justify-center lg:justify-end items-center hero-reveal hero-delay-3 pr-10 xl:pr-14">
+            <CardSwap
+              width={430}
+              height={190}
+              cardDistance={20}
+              verticalDistance={26}
+              delay={3500}
+              pauseOnHover={true}
+            >
+              {CONFUSION_CARDS.map((card) => (
+                <Card key={card.id} className="p-5 text-left select-none">
+                  {/* Card Header (Tab Area) */}
+                  <div className="flex items-center justify-between h-5">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-[10px] font-bold text-accent dark:text-purple-400 tracking-wider">
+                        {card.id} {"//"} {card.shortLabel}
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                      <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse-dot" />
+                      SOLVED
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse-dot" />
-                    SOLVED
-                  </span>
-                </div>
 
-                {/* Card Content Details */}
-                <div className="mt-3 border-t border-zinc-200 dark:border-white/10 pt-3">
-                  <h4 className="font-semibold text-sm tracking-tight text-zinc-900 dark:text-zinc-100 leading-tight mb-2">
-                    {card.question}
-                  </h4>
+                  {/* Card Content Details */}
+                  <div className="mt-3 border-t border-zinc-200 dark:border-white/10 pt-3">
+                    <h4 className="font-semibold text-sm tracking-tight text-zinc-900 dark:text-zinc-100 leading-tight mb-2">
+                      {card.question}
+                    </h4>
 
-                  <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-zinc-200 dark:border-white/10">
-                    <div>
-                      <div className="font-mono text-[10px] font-bold tracking-wider text-rose-600 dark:text-rose-400 mb-1 uppercase">
-                        Mistaken Assumption
+                    <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-zinc-200 dark:border-white/10">
+                      <div>
+                        <div className="font-mono text-[10px] font-bold tracking-wider text-rose-600 dark:text-rose-400 mb-1 uppercase">
+                          Mistaken Assumption
+                        </div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 italic leading-normal">
+                          &ldquo;{card.assumption}&rdquo;
+                        </p>
                       </div>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 italic leading-normal">
-                        &ldquo;{card.assumption}&rdquo;
-                      </p>
-                    </div>
-                    <div>
-                      <div className="font-mono text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 mb-1 uppercase">
-                        Reality
+                      <div>
+                        <div className="font-mono text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 mb-1 uppercase">
+                          Reality
+                        </div>
+                        <p className="text-xs text-zinc-800 dark:text-zinc-200 leading-normal font-medium">
+                          {card.reality}
+                        </p>
                       </div>
-                      <p className="text-xs text-zinc-800 dark:text-zinc-200 leading-normal font-medium">
-                        {card.reality}
-                      </p>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </CardSwap>
-        </div>
+                </Card>
+              ))}
+            </CardSwap>
+          </div>
+        )}
       </div>
     </section>
   );

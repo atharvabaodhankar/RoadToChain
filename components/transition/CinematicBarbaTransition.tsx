@@ -22,10 +22,10 @@ type Phase =
   | "covered"    // holding at translateY(0%), route changing underneath
   | "exit";      // animating to translateY(-100%)
 
-const ENTER_MS = 550;    // curtain slides up to cover
-const HOLD_MS = 250;     // hold while new page renders
-const EXIT_MS = 450;     // curtain slides out through top
-const SAFETY_MS = 5000;  // hard reset if stuck
+const ENTER_MS = 380;    // curtain slides up to cover (snappy & responsive)
+const HOLD_MS = 140;     // hold while new page renders
+const EXIT_MS = 300;     // curtain slides out through top
+const SAFETY_MS = 3500;  // hard reset if stuck
 
 export default function CinematicBarbaTransition() {
   const pathname = usePathname();
@@ -198,15 +198,15 @@ export default function CinematicBarbaTransition() {
       {/* Top energy line */}
       <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-purple-600 dark:via-purple-400 to-transparent shadow-[0_0_24px_rgba(124,58,237,0.6)] dark:shadow-[0_0_24px_#a855f7]" />
 
-      {/* Ambient glow */}
+      {/* Ambient glow - lightweight blur on mobile */}
       <div
-        className="absolute w-[360px] h-[360px] rounded-full bg-purple-500/15 dark:bg-purple-600/30 blur-[110px] pointer-events-none"
+        className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] rounded-full bg-purple-500/15 dark:bg-purple-600/25 blur-[36px] sm:blur-[80px] pointer-events-none"
         style={{
           opacity: phase === "mountEnter" ? 0 : 0.85,
-          transform: phase === "mountEnter" ? "scale(0.6)" : "scale(1.2)",
+          transform: phase === "mountEnter" ? "scale(0.6)" : "scale(1.1)",
           transition:
             phase !== "mountEnter"
-              ? "opacity 0.4s ease-out, transform 0.4s ease-out"
+              ? "opacity 0.3s ease-out, transform 0.3s ease-out"
               : "none",
         }}
       />
