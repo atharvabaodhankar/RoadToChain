@@ -213,7 +213,7 @@ export default function CinematicBarbaTransition() {
 
       {/* Logo + brand */}
       <div
-        className="relative flex flex-col items-center gap-4 z-10 select-none"
+        className="relative flex flex-col items-center gap-5 z-10 select-none"
         style={{
           opacity: phase === "mountEnter" ? 0 : 1,
           transform:
@@ -237,10 +237,27 @@ export default function CinematicBarbaTransition() {
           />
         </div>
 
-        <div className="flex flex-col items-center gap-1.5 text-center">
-          <span className="font-mono text-xs font-bold tracking-[0.3em] text-zinc-900 dark:text-white uppercase drop-shadow-sm dark:drop-shadow">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span className="font-mono text-sm sm:text-base font-bold tracking-[0.3em] text-zinc-900 dark:text-white uppercase drop-shadow-sm dark:drop-shadow">
             ROADTOCHAIN
           </span>
+          <span className="font-sans text-[11px] sm:text-xs font-medium tracking-[0.15em] text-zinc-500 dark:text-zinc-400 uppercase">
+            Learn Web3 Engineering
+          </span>
+        </div>
+
+        {/* Animated progress bar */}
+        <div className="w-32 sm:w-40 h-[2px] rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden mt-1">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-purple-500 via-purple-400 to-purple-600"
+            style={{
+              width: phase === "mountEnter" ? "0%" : phase === "enter" ? "60%" : phase === "covered" ? "85%" : "100%",
+              transition: phase === "mountEnter" ? "none" : 
+                phase === "enter" ? `width ${ENTER_MS}ms ease-out` :
+                phase === "covered" ? `width ${HOLD_MS}ms ease-out` :
+                `width ${EXIT_MS * 0.6}ms ease-out`,
+            }}
+          />
         </div>
       </div>
 
