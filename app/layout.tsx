@@ -8,6 +8,7 @@ import { ProgressProvider } from "@/app/context/ProgressContext";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema, educationalOrganizationSchema } from "@/lib/seo";
 import RoadToChainAssistant from "@/components/bot/RoadToChainAssistant";
+import CinematicBarbaTransition from "@/components/transition/CinematicBarbaTransition";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -177,6 +178,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased bg-bg text-text min-h-screen flex flex-col font-sans`}
       >
         <ProgressProvider>
+          <CinematicBarbaTransition />
           <Nav />
           <main className="flex-1">
             {children}
