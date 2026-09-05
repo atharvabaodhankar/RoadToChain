@@ -11,42 +11,56 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    // Reset scroll to top cleanly on route change
-    window.scrollTo({ top: 0, left: 0 });
+    // Reset scroll position cleanly while curtain is covering center (380ms)
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0 });
+    }, 380);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   return (
     <div className="relative w-full flex-1">
-      {/* ─── Peak Cinematic Barba Shutter Curtain (Client-Only Animation) ─── */}
+      {/* ─── Peak Cinematic Barba Bottom-to-Top Shutter Sweep ─── */}
       <AnimatePresence mode="wait">
         {mounted && (
           <motion.div
             key={`cinematic-curtain-${pathname}`}
-            initial={{ y: "0%" }}
-            animate={{ y: "-100%" }}
-            exit={{ y: "-100%" }}
+            initial={{ y: "100%" }}
+            animate={{ y: ["100%", "0%", "0%", "-100%"] }}
             transition={{
-              duration: 0.82,
-              delay: 0.22,
-              ease: [0.76, 0, 0.24, 1],
+              duration: 0.96,
+              times: [0, 0.38, 0.6, 1],
+              ease: [
+                [0.22, 1, 0.36, 1], // Smooth decelerating sweep from bottom to center
+                "linear",           // Momentary center crest
+                [0.76, 0, 0.24, 1], // Powerful accelerating sweep out of top
+              ],
             }}
-            className="fixed inset-0 z-[99999] pointer-events-none flex flex-col items-center justify-center bg-[#fafafa] dark:bg-[#08080b] border-b border-zinc-200/80 dark:border-white/10 overflow-hidden"
+            className="fixed inset-0 z-[99999] pointer-events-none flex flex-col items-center justify-center bg-[#fafafa] dark:bg-[#08080b] border-y border-zinc-200/80 dark:border-white/10 overflow-hidden"
           >
+            {/* Top Leading Luminous Energy Blade */}
+            <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-purple-600 dark:via-purple-400 to-transparent shadow-[0_0_24px_rgba(124,58,237,0.6)] dark:shadow-[0_0_24px_#a855f7]" />
+
             {/* Holographic Ambient Glow Core */}
             <motion.div
               initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: [0, 0.8, 0.25], scale: [0.7, 1.25, 1] }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
+              animate={{ opacity: [0, 0.85, 0.85, 0], scale: [0.7, 1.2, 1.2, 0.8] }}
+              transition={{
+                duration: 0.96,
+                times: [0, 0.38, 0.6, 1],
+                ease: "easeInOut",
+              }}
               className="absolute w-[340px] h-[340px] rounded-full bg-purple-500/15 dark:bg-purple-600/30 blur-[100px] pointer-events-none"
             />
 
             {/* Cinematic Logo & HUD Centerpiece */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.82, y: 14 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: [0, 1, 1, 0], scale: [0.85, 1, 1, 0.9] }}
               transition={{
-                duration: 0.4,
-                ease: [0.16, 1, 0.3, 1],
+                duration: 0.96,
+                times: [0, 0.38, 0.6, 1],
+                ease: "easeInOut",
               }}
               className="relative flex flex-col items-center gap-4 z-10 select-none"
             >
@@ -74,19 +88,20 @@ export default function Template({ children }: { children: React.ReactNode }) {
               </div>
             </motion.div>
 
-            {/* Trailing Luminous Energy Line at the bottom edge of the curtain */}
-            <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-purple-600 dark:via-purple-400 to-transparent shadow-[0_0_20px_rgba(124,58,237,0.5)] dark:shadow-[0_0_24px_#a855f7]" />
+            {/* Bottom Trailing Luminous Energy Blade */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-purple-600 dark:via-purple-400 to-transparent shadow-[0_0_24px_rgba(124,58,237,0.6)] dark:shadow-[0_0_24px_#a855f7]" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ─── Page Content Cinematic Rise ─── */}
+      {/* ─── Page Content Smooth Reveal ─── */}
       <motion.div
         key={`cinematic-content-${pathname}`}
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
-          duration: 0.42,
+          duration: 0.45,
+          delay: 0.48, // Reveals smoothly as curtain lifts out through top
           ease: [0.22, 1, 0.36, 1],
         }}
         className="w-full flex-1"
